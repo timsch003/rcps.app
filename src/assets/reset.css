@@ -1,0 +1,56 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img,
+picture,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+}
+
+p {
+    text-wrap: pretty;
+    margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    text-wrap: balance;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+a,
+a:hover,
+a:visited,
+a:active,
+a:focus {
+    color: var(--accent);
+    text-decoration: none;
+}

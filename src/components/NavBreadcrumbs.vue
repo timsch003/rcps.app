@@ -1,0 +1,44 @@
+<script setup lang="ts">
+import InlineIcon from './InlineIcon.vue'
+import type { Tag, Recipe } from '../types'
+
+const { origin, recipe, isSingleRecipe } = defineProps<{
+  origin: Tag
+  recipe: Recipe['name']
+  isSingleRecipe: boolean
+}>()
+</script>
+
+<template>
+  <nav>
+    <a href="/">
+      <InlineIcon icon="tag" inBreadcrumbs>{{ $t('Tags') }}</InlineIcon>
+    </a>
+    <span aria-hidden="true">→</span>
+    <span v-if="!isSingleRecipe" class="shown-tag">{{ origin.name }}</span>
+    <a v-else href=""><span>{{ origin.name }}</span>
+    </a>
+    <span v-if="recipe" aria-hidden="true">→</span>
+    <span v-if="recipe">{{ recipe }}</span>
+  </nav>
+</template>
+
+<style scoped>
+nav {
+  display: flex;
+  align-items: center;
+  gap: 0.75ch;
+  padding-bottom: var(--inner-spacing);
+  font-size: 0.9rem;
+
+  a:hover,
+  a:active,
+  a:focus {
+    text-decoration: underline;
+  }
+
+  .shown-tag {
+    font-weight: 600;
+  }
+}
+</style>
