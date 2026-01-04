@@ -6,6 +6,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
 import router from './routes'
+import { useAuthStore } from './stores/auth'
 
 const i18n = createI18n({
   legacy: false,
@@ -27,8 +28,13 @@ const i18n = createI18n({
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
 app.use(i18n)
 
 app.mount('#app')
+
+// Initialize auth after mounting
+const authStore = useAuthStore()
+authStore.initializeAuth()
