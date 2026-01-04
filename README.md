@@ -2,9 +2,9 @@
 
 ## Stack
 
-- [PocketBase](https://pocketbase.io)
-- [Dexie.js](https://dexie.org/)
-- [Vue.js](https://vuejs.org)
+- [Vue.js](https://vuejs.org) (Progressive web app frontend)
+- [Dexie.js](https://dexie.org/) (Local-first database)
+- [PocketBase](https://pocketbase.io) (Sync server and user authentication)
 
 ## Setup
 
@@ -73,6 +73,12 @@ npm run test:e2e
 
 ```sh
 npm run lint
+```
+
+#### Start the PocketBase server
+
+```sh
+./pocketbase serve
 ```
 
 ## Features
