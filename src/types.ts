@@ -1,35 +1,31 @@
-type UUID = `${string}-${string}-${string}-${string}-${string}`
-// PocketBase validation pattern for UUIDs: ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$
+export type UUID = `${string}-${string}-${string}-${string}-${string}`
 
-export interface User {
+export type IdName = {
   id: UUID
   name: string
 }
 
-export type Tag = {
+export type User = {
   id: UUID
-  name: string
+  email: string
+  verified: boolean
 }
 
-export type Ingredient = {
-  id: UUID
-  name: string
+export type RecipeIngredient = {
+  recipeId: UUID
+  ingredientId: UUID
   quantity?: number
-  unit?: string
+  unit?: IdName
   notes?: string
+  sortOrder?: number
 }
 
-export type Unit = {
-  id: UUID
-  name: string
-}
-
-export interface Recipe {
+export type Recipe = {
   id: UUID
   userId: UUID
   name: string
-  tags?: Tag[]
-  ingredients?: string
+  tags?: IdName[]
+  recipeIngredients?: RecipeIngredient[]
   instructions?: string
   notes?: string
 }

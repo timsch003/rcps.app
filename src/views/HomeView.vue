@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import CardsGrid from '../components/CardsGrid.vue'
 
-import type { Tag } from '../types'
+import type { IdName } from '../types'
 
-withDefaults(defineProps<{ tags: Tag[] }>(), {
-  tags: () => [
-    { id: 1, name: 'Dessert' },
-    { id: 2, name: 'Vegetarian' },
-    { id: 3, name: 'Quick & Easy' },
-  ],
-})
+defineProps<{ tags: IdName[] }>()
 </script>
 
 <template>
-  <CardsGrid :tags />
+  <CardsGrid :tags="tags" />
 </template>

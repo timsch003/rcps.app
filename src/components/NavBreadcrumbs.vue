@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import InlineIcon from './InlineIcon.vue'
-import type { Tag, Recipe } from '../types'
+import type { IdName, Recipe } from '../types'
 
 const { origin, recipe, isSingleRecipe } = defineProps<{
-  origin: Tag
+  origin: IdName
   recipe: Recipe['name']
   isSingleRecipe: boolean
 }>()
