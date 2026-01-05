@@ -4,13 +4,17 @@
     "Settings": "Settings",
     "Favorites": "Favorites",
     "Login": "Login",
-    "Register": "Register"
+    "Register": "Register",
+    "Email": "Email",
+    "Password": "Password"
   },
   "de": {
     "Home": "Home",
     "Settings": "Einstellungen",
     "Favorites": "Favoriten",
     "Login": "Anmelden",
-    "Register": "Registrieren"
+    "Register": "Registrieren",
+    "Email": "E-Mail",
+    "Password": "Passwort"
   }
 }

@@ -20,6 +20,12 @@ const { t } = useI18n()
   </main>
 </template>
 
+<style>
+h1 {
+  margin-bottom: 20px;
+}
+</style>
+
 <style scoped>
 main {
   --nav-border-width: 2px;

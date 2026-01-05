@@ -20,15 +20,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }, true) // fireImmediately = true to sync initial state
 
-  async function register(email: string, password: string) {
-    const userId = getOrCreateDeviceId()
+  async function register(email: string, password: string, passwordConfirm: string) {
+    const newUserId = getOrCreateDeviceId()
 
     try {
       await pb.collection('users').create({
-        email,
-        password,
-        passwordConfirm: password,
-        userId,
+        id: newUserId,
+        email: email,
+        password: password,
+        passwordConfirm: passwordConfirm,
       })
       return { success: true }
     } catch (e: unknown) {

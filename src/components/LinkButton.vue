@@ -54,12 +54,15 @@ a {
   }
 }
 
-a:hover,
+a:hover {
+  background-color: var(--bg-lighter);
+}
+
 a:active,
 a:focus {
   background-color: var(--bg-lighter);
   box-shadow: 0px 0px var(--bg-lighter);
-  transform: translate(0px, 0px);
+  transform: translate(1px, 1px);
   transition:
     box-shadow var(--ui-transition-duration) ease-in-out,
     transform var(--ui-transition-duration) ease-in-out;
