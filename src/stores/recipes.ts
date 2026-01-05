@@ -9,7 +9,7 @@ export const useRecipesStore = defineStore('recipes', () => {
   const syncing = ref(false)
   const lastError = ref<string | null>(null)
   const validationErrors = ref<Map<string, ValidationError[]>>(new Map())
-  const dbStats = ref<any>(null)
+  const dbStats = ref<unknown>(null)
   const deviceId = getOrCreateDeviceId()
 
   const localRecipes = computed(() => Array.from(recipes.value.values()))
@@ -44,10 +44,10 @@ export const useRecipesStore = defineStore('recipes', () => {
     }
 
     // Validate
-    const result = await saveToDbValidated(updated)
+    const result: { id: string; errors: ValidationError[] } = await saveToDbValidated(updated)
     if (result.errors.length > 0) {
       validationErrors.value.set(id, result.errors)
-      lastError.value = `Validation failed: ${result.errors[0].message}`
+      lastError.value = `Validation failed: ${result.errors[0]?.message}`
       return
     }
 
@@ -82,10 +82,10 @@ export const useRecipesStore = defineStore('recipes', () => {
     }
 
     // Validate
-    const result = await saveToDbValidated(newRecipe)
+    const result: { id: string; errors: ValidationError[] } = await saveToDbValidated(newRecipe)
     if (result.errors.length > 0) {
       validationErrors.value.set(id, result.errors)
-      lastError.value = `Validation failed: ${result.errors[0].message}`
+      lastError.value = `Validation failed: ${result.errors[0]?.message}`
       return null
     }
 

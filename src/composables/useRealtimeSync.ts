@@ -6,6 +6,7 @@ import { pb } from '@/services/pocketbase'
 import { getOrCreateDeviceId } from '@/utils/uuid'
 import { db, saveToDb, deleteFromDb } from '@/services/dexie'
 import type { RecipeLocal } from '@/types'
+import type { RecordSubscription } from 'pocketbase'
 
 /**
  * Realtime sync composable
@@ -34,7 +35,7 @@ export function useRealtimeSync() {
       // '*' means subscribe to all records in the collection
       unsubscribe = await pb.collection('recipes').subscribe<RecipeLocal>(
         '*',
-        async (data: any) => {
+        async (data: RecordSubscription<RecipeLocal>) => {
           // Handle realtime changes from server
           const { action, record } = data
 

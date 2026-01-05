@@ -1,6 +1,6 @@
 import { useRecipesStore } from '@/stores/recipes'
 import { useAuthStore } from '@/stores/auth'
-import { useSyncManager } from './useSyncManager'
+import useSyncManager from './useSyncManager'
 import { useOnlineStatus } from './useOnlineStatus'
 import { fetchUserRecipes } from '@/services/pocketbase'
 import { saveToDb } from '@/services/dexie'
@@ -41,8 +41,9 @@ export function useRecipes() {
           }
         }
       }
-    } catch (e: any) {
-      recipesStore.lastError = `Failed to initialize recipes: ${e.message}`
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      recipesStore.lastError = `Failed to initialize recipes: ${msg}`
     }
   }
 

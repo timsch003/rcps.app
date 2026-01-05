@@ -16,6 +16,8 @@ coverage
 
 *.env
 
+pb_data
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

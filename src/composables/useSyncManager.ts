@@ -9,8 +9,8 @@ import {
   syncRecipe as pbSyncRecipe,
   deleteRecipe as pbDeleteRecipe,
   syncRecipesBatch,
-  ClientResponseError,
 } from '@/services/pocketbase'
+import { ClientResponseError } from 'pocketbase'
 import { saveToDb, deleteFromDb } from '@/services/dexie'
 import type { RecipeLocal } from '@/types'
 
@@ -18,7 +18,7 @@ import type { RecipeLocal } from '@/types'
  * Sync manager orchestrator
  * Coordinates recipe syncing, conflict resolution, and realtime updates
  */
-export function useSyncManager() {
+export default function useSyncManager() {
   const recipesStore = useRecipesStore()
   const syncStore = useSyncStore()
   const authStore = useAuthStore()
@@ -84,9 +84,13 @@ export function useSyncManager() {
       }
 
       await syncStore.recordSyncTime()
-    } catch (e: any) {
+    } catch (e: unknown) {
       const errorMsg =
-        e instanceof ClientResponseError ? `${e.status}: ${e.message}` : e.message || 'Sync failed'
+        e instanceof ClientResponseError
+          ? `${e.status}: ${e.message}`
+          : e instanceof Error
+            ? e.message
+            : 'Sync failed'
       syncStore.addSyncError(recipeId, errorMsg)
       syncStore.setSyncProgress(1, 1, recipeId, 'failed')
 
@@ -175,11 +179,13 @@ export function useSyncManager() {
       await deleteFromDb(recipeId)
       await recipesStore.loadRecipesFromDB(authStore.user!.id)
       syncStore.clearSyncError(recipeId)
-    } catch (e: any) {
+    } catch (e: unknown) {
       const errorMsg =
         e instanceof ClientResponseError
           ? `${e.status}: ${e.message}`
-          : e.message || 'Delete failed'
+          : e instanceof Error
+            ? e.message
+            : 'Delete failed'
       syncStore.addSyncError(recipeId, errorMsg)
       console.error(`Failed to delete ${recipeId}:`, e)
     }
@@ -212,8 +218,9 @@ export function useSyncManager() {
 
       await syncStore.recordSyncTime()
       syncStore.state = 'idle'
-    } catch (e: any) {
-      syncStore.lastError = `Reconciliation failed: ${e.message}`
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Reconciliation failed'
+      syncStore.lastError = `Reconciliation failed: ${msg}`
       syncStore.state = 'error'
       console.error('Reconciliation failed:', e)
     }

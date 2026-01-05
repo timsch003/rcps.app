@@ -12,8 +12,6 @@ export function useOnlineStatus() {
 
     if (wasOffline.value) {
       wasOffline.value = false
-      // Trigger reconciliation
-      window.dispatchEvent(new CustomEvent('came-back-online'))
     }
   }
 

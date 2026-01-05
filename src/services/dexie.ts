@@ -1,6 +1,13 @@
 import Dexie from 'dexie'
-import type { RecipeLocal, SyncMetadata, PendingChange, ConflictLog, DeviceRegistry } from '@/types'
 import { validators } from './validators'
+import type {
+  RecipeLocal,
+  SyncMetadata,
+  PendingChange,
+  ConflictLog,
+  DeviceRegistry,
+  ValidationError,
+} from '@/types'
 
 export class RecipesDB extends Dexie {
   recipes!: Dexie.Table<RecipeLocal>
@@ -26,7 +33,7 @@ export const db = new RecipesDB()
 // CRUD with validation
 export async function saveToDbValidated(
   recipe: RecipeLocal,
-): Promise<{ id: string; errors: any[] }> {
+): Promise<{ id: string; errors: ValidationError[] }> {
   const errors = validators.validateRecipe(recipe as unknown as Record<string, unknown>)
   if (errors.length > 0) {
     return { id: '', errors }

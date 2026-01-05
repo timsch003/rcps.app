@@ -48,6 +48,14 @@ export interface RecipeLocal extends Recipe {
   original?: RecipeLocal // Original version before edits
 }
 
+export function setRecipeLocalField<K extends keyof RecipeLocal>(
+  obj: RecipeLocal,
+  key: K,
+  value: RecipeLocal[K],
+) {
+  obj[key] = value
+}
+
 export interface SyncMetadata {
   id: string
   lastSynced: number
@@ -84,7 +92,7 @@ export interface ConflictLog {
 export interface ValidationError {
   field: string
   message: string
-  value: any
+  value: unknown
 }
 
 export interface DeviceRegistry {

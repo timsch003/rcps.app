@@ -1,6 +1,6 @@
-import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
-import type { RecipeLocal } from '@/types'
+import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
 import { validators } from './validators'
+import type { RecipeLocal } from '@/types'
 
 // Use PocketBase's built-in LocalAuthStore for automatic auth persistence
 const pb = new PocketBase(
@@ -22,7 +22,7 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
 
     return records
       .filter((r) => validators.isRecipeValid(r))
-      .map((r: any) => ({
+      .map((r: RecordModel) => ({
         id: r.id,
         userId: r.userId,
         name: r.name,
@@ -38,7 +38,7 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
         conflictDetected: false,
         retryCount: 0,
       }))
-  } catch (e: any) {
+  } catch (e: unknown) {
     if (e instanceof ClientResponseError) {
       console.error('Failed to fetch recipes:', {
         status: e.status,
@@ -48,7 +48,8 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
       throw new Error(`Fetch failed (${e.status}): ${e.message}`)
     }
     console.error('Failed to fetch recipes:', e)
-    throw new Error(`Fetch failed: ${e.message}`)
+    const msg = e instanceof Error ? e.message : String(e)
+    throw new Error(`Fetch failed: ${msg}`)
   }
 }
 
@@ -114,8 +115,12 @@ export async function syncRecipe(
         },
       }
     }
-  } catch (e: any) {
-    return { success: false, error: e.message || 'Sync failed' }
+  } catch (e: unknown) {
+    if (e instanceof ClientResponseError) {
+      return { success: false, error: `${e.status}: ${e.message}` }
+    }
+    const msg = e instanceof Error ? e.message : 'Sync failed'
+    return { success: false, error: msg }
   }
 }
 
@@ -123,8 +128,12 @@ export async function deleteRecipe(id: string): Promise<{ success: boolean; erro
   try {
     await pb.collection('recipes').delete(id)
     return { success: true }
-  } catch (e: any) {
-    return { success: false, error: e.message || 'Delete failed' }
+  } catch (e: unknown) {
+    if (e instanceof ClientResponseError) {
+      return { success: false, error: `${e.status}: ${e.message}` }
+    }
+    const msg = e instanceof Error ? e.message : 'Delete failed'
+    return { success: false, error: msg }
   }
 }
 

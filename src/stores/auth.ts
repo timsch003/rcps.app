@@ -2,6 +2,8 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { pb } from '@/services/pocketbase'
 import { getOrCreateDeviceId } from '@/utils/uuid'
+import { ClientResponseError } from 'pocketbase'
+import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<{ id: string; email: string } | null>(null)
@@ -9,10 +11,10 @@ export const useAuthStore = defineStore('auth', () => {
   const deviceId = getOrCreateDeviceId()
 
   // Listen to PocketBase auth changes
-  pb.authStore.onChange((token, model) => {
+  pb.authStore.onChange((token, model: AuthRecord) => {
     if (model) {
-      const userId = (model as any).userId || model.id
-      user.value = { id: userId, email: (model as any).email }
+      const userId = model.userId || model.id
+      user.value = { id: userId, email: model.email }
     } else {
       user.value = null
     }
@@ -29,8 +31,8 @@ export const useAuthStore = defineStore('auth', () => {
         userId,
       })
       return { success: true }
-    } catch (e: any) {
-      return { success: false, error: e.message }
+    } catch (e: unknown) {
+      return { success: false, error: (e as Error).message }
     }
   }
 
@@ -39,8 +41,11 @@ export const useAuthStore = defineStore('auth', () => {
       await pb.collection('users').authWithPassword(email, password)
       // PocketBase automatically saves to authStore
       return { success: true }
-    } catch (e: any) {
-      return { success: false, error: e.message }
+    } catch (e: unknown) {
+      if (e instanceof ClientResponseError) {
+        return { success: false, error: `${e.status}: ${e.message}` }
+      }
+      return { success: false, error: (e as Error).message }
     }
   }
 

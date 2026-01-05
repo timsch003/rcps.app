@@ -1,11 +1,12 @@
+import { setRecipeLocalField } from '@/types'
+import { db } from './dexie'
+import { getOrCreateDeviceId, generateUuid } from '@/utils/uuid'
 import type {
   RecipeLocal,
   ConflictLog,
   ConflictResolutionStrategy,
   ConflictResolution,
 } from '@/types'
-import { db } from './dexie'
-import { getOrCreateDeviceId, generateUuid } from '@/utils/uuid'
 
 export class ConflictResolver {
   /**
@@ -27,29 +28,29 @@ export class ConflictResolver {
       }
     }
 
-    const merged: any = { ...local }
+    const merged = { ...local }
 
     // Check each field
-    const fieldsToCheck = ['name', 'instructions', 'notes']
+    const fieldsToCheck: Array<keyof RecipeLocal> = ['name', 'instructions', 'notes']
 
     for (const field of fieldsToCheck) {
-      const originalValue = (original as any)[field]
-      const localValue = (local as any)[field]
-      const remoteValue = (remote as any)[field]
+      const originalValue = original[field]
+      const localValue = local[field]
+      const remoteValue = remote[field]
 
       // No conflict: one side didn't change
       if (localValue === originalValue) {
-        merged[field] = remoteValue
+        setRecipeLocalField(merged, field, remoteValue)
       } else if (remoteValue === originalValue) {
-        merged[field] = localValue
+        setRecipeLocalField(merged, field, localValue)
       } else if (localValue === remoteValue) {
         // Both changed to same value
-        merged[field] = localValue
+        setRecipeLocalField(merged, field, localValue)
       } else {
         // Both changed differently → conflict
         conflicts.push(field)
         // For now, prefer local, but mark for review
-        merged[field] = localValue
+        setRecipeLocalField(merged, field, localValue)
       }
     }
 
