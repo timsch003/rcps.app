@@ -1,32 +1,16 @@
-import './assets/main.css'
-
 import App from './App.vue'
-
+import './assets/css/main.css'
+import router from './routes'
+import locales from './locales.json'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n'
-import router from './routes'
 
 const i18n = createI18n({
   legacy: false,
   locale: 'en',
   fallbackLocale: 'en',
-  messages: {
-    en: {
-      Home: 'Home',
-      Settings: 'Settings',
-      Favorites: 'Favorites',
-      Login: 'Login',
-      Register: 'Register',
-    },
-    de: {
-      Home: 'Home',
-      Settings: 'Einstellungen',
-      Favorites: 'Favoriten',
-      Login: 'Anmelden',
-      Register: 'Registrieren',
-    },
-  },
+  messages: locales,
 })
 
 const app = createApp(App)
@@ -37,5 +21,3 @@ app.use(router)
 app.use(i18n)
 
 app.mount('#app')
-
-// PocketBase's LocalAuthStore handles auth initialization automatically
