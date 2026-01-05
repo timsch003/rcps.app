@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import CardsGrid from '../components/CardsGrid.vue'
 
-import type { IdName } from '../types'
+import type { IdAndName } from '../types'
 
-defineProps<{ tags: IdName[] }>()
+defineProps<{ tags: IdAndName[] }>()
 </script>
 
 <template>

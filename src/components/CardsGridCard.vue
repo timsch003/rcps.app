@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import InlineIcon from './InlineIcon.vue'
-import type { IdName, Recipe } from '../types'
+import type { IdAndName, Recipe } from '../types'
 
 defineProps<{
   recipe?: Recipe
-  tag?: IdName
+  tag?: IdAndName
 }>()
 </script>
 

@@ -48,10 +48,10 @@ export const useSyncStore = defineStore('sync', () => {
   async function recordSyncTime() {
     const metadata: SyncMetadata = {
       id: 'recipes',
-      last_synced: Date.now(),
-      last_conflict_resolved: Date.now(),
-      pending_count: 0,
-      failed_count: 0,
+      lastSynced: Date.now(),
+      lastConflictResolved: Date.now(),
+      pendingCount: 0,
+      failedCount: 0,
     }
     await updateSyncMetadata(metadata)
     lastSyncTime.value = Date.now()
@@ -63,7 +63,7 @@ export const useSyncStore = defineStore('sync', () => {
     recipeId: string,
     status: 'processing' | 'completed' | 'failed',
   ) {
-    progress.value = { current, total, recipe_id: recipeId, status }
+    progress.value = { current, total, recipeId: recipeId, status }
   }
 
   function clearSyncProgress() {

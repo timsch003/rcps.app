@@ -74,7 +74,7 @@ export class ConflictResolver {
         resolved = {
           ...local,
           updated: Math.max(local.updated, remote.updated),
-          device_id: deviceId,
+          deviceId: deviceId,
         }
         if (local.updated < remote.updated) {
           conflicts.push('timestamp_overridden')
@@ -85,7 +85,7 @@ export class ConflictResolver {
       case 'remote-preferred': {
         resolved = {
           ...remote,
-          device_id: deviceId,
+          deviceId: deviceId,
         }
         break
       }
@@ -98,7 +98,7 @@ export class ConflictResolver {
           resolved = local
         } else {
           // Same timestamp: prefer local or by device (consistent)
-          resolved = local.device_id <= remote.device_id ? local : remote
+          resolved = local.deviceId <= remote.deviceId ? local : remote
         }
         break
       }
@@ -119,13 +119,13 @@ export class ConflictResolver {
   ): Promise<void> {
     const log: ConflictLog = {
       id: generateUuid(),
-      recipe_id: recipeId,
+      recipeId: recipeId,
       timestamp: Date.now(),
-      local_version: local,
-      remote_version: remote,
-      resolution_strategy: resolution.strategy as 'local_wins' | 'remote_wins' | 'manual',
-      resolved_version: resolution.resolved,
-      device_id: getOrCreateDeviceId(),
+      localVersion: local,
+      remoteVersion: remote,
+      resolutionStrategy: resolution.strategy as 'localWins' | 'remoteWins' | 'manual',
+      resolvedVersion: resolution.resolved,
+      deviceId: getOrCreateDeviceId(),
     }
 
     await db.conflict_logs.add(log)

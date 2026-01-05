@@ -1,11 +1,5 @@
 import Dexie from 'dexie'
-import type {
-  RecipeLocal,
-  SyncMetadata,
-  PendingChange,
-  ConflictLog,
-  DeviceRegistry,
-} from '@/types'
+import type { RecipeLocal, SyncMetadata, PendingChange, ConflictLog, DeviceRegistry } from '@/types'
 import { validators } from './validators'
 
 export class RecipesDB extends Dexie {
@@ -18,11 +12,11 @@ export class RecipesDB extends Dexie {
   constructor() {
     super('RecipesDB')
     this.version(1).stores({
-      recipes: '++id, userId, synced, updated, pending_sync, conflict_detected',
+      recipes: '++id, userId, synced, updated, pendingSync, conflictDetected',
       sync_metadata: 'id',
-      pending_changes: '++id, recipe_id, timestamp, retry_count',
-      conflict_logs: '++id, recipe_id, timestamp',
-      device_registry: '++id, user_id, device_id',
+      pending_changes: '++id, recipeId, timestamp, retryCount',
+      conflict_logs: '++id, recipeId, timestamp',
+      device_registry: '++id, userId, deviceId',
     })
   }
 }
@@ -65,7 +59,7 @@ export async function getPendingRecipesByUser(userId: string): Promise<RecipeLoc
   return db.recipes
     .where('userId')
     .equals(userId)
-    .filter((r) => r.pending_sync)
+    .filter((r) => r.pendingSync)
     .toArray()
 }
 
@@ -73,7 +67,7 @@ export async function getConflictedRecipes(userId: string): Promise<RecipeLocal[
   return db.recipes
     .where('userId')
     .equals(userId)
-    .filter((r) => r.conflict_detected)
+    .filter((r) => r.conflictDetected)
     .toArray()
 }
 
@@ -91,10 +85,10 @@ export async function updateSyncMetadata(metadata: Partial<SyncMetadata>): Promi
     (await getSyncMetadata()) ||
     ({
       id: 'recipes',
-      last_synced: 0,
-      last_conflict_resolved: 0,
-      pending_count: 0,
-      failed_count: 0,
+      lastSynced: 0,
+      lastConflictResolved: 0,
+      pendingCount: 0,
+      failedCount: 0,
     } as SyncMetadata)
 
   await db.sync_metadata.put({ ...current, ...metadata })
@@ -110,7 +104,7 @@ export async function getPendingChanges(): Promise<PendingChange[]> {
 }
 
 export async function getPendingChangesByRecipe(recipeId: string): Promise<PendingChange[]> {
-  return db.pending_changes.where('recipe_id').equals(recipeId).toArray()
+  return db.pending_changes.where('recipeId').equals(recipeId).toArray()
 }
 
 export async function removePendingChange(id: string): Promise<void> {
@@ -130,7 +124,7 @@ export async function logConflict(conflict: ConflictLog): Promise<string> {
 }
 
 export async function getConflictLogsForRecipe(recipeId: string): Promise<ConflictLog[]> {
-  return db.conflict_logs.where('recipe_id').equals(recipeId).toArray()
+  return db.conflict_logs.where('recipeId').equals(recipeId).toArray()
 }
 
 // Device Registry
@@ -139,7 +133,7 @@ export async function registerDevice(device: DeviceRegistry): Promise<string> {
 }
 
 export async function getDevicesForUser(userId: string): Promise<DeviceRegistry[]> {
-  return db.device_registry.where('user_id').equals(userId).toArray()
+  return db.device_registry.where('userId').equals(userId).toArray()
 }
 
 // Data Pruning (manage storage)
@@ -169,7 +163,7 @@ export async function getDbStats(): Promise<{
   const [recipes, pending, conflicts] = await Promise.all([
     db.recipes.toArray(),
     db.pending_changes.toArray(),
-    db.recipes.filter((r) => r.conflict_detected).toArray(),
+    db.recipes.filter((r) => r.conflictDetected).toArray(),
   ])
 
   return {

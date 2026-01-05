@@ -17,11 +17,11 @@ const { isOnline } = useOnlineStatus()
 const sortedRecipes = computed(() => {
   return [...recipesStore.recipes].sort((a: RecipeLocal, b: RecipeLocal) => {
     // Pending and conflicted recipes first
-    if (a.pending_sync !== b.pending_sync) {
-      return a.pending_sync ? -1 : 1
+    if (a.pendingSync !== b.pendingSync) {
+      return a.pendingSync ? -1 : 1
     }
-    if (a.conflict_detected !== b.conflict_detected) {
-      return a.conflict_detected ? -1 : 1
+    if (a.conflictDetected !== b.conflictDetected) {
+      return a.conflictDetected ? -1 : 1
     }
     return b.updated - a.updated
   })
@@ -40,7 +40,7 @@ function getRecipeStatus(recipe: RecipeLocal): {
   color: string
   message: string
 } {
-  if (recipe.conflict_detected) {
+  if (recipe.conflictDetected) {
     return {
       state: 'conflict',
       icon: '⚠️',
@@ -49,21 +49,21 @@ function getRecipeStatus(recipe: RecipeLocal): {
     }
   }
 
-  if (recipe.sync_error) {
+  if (recipe.syncError) {
     return {
       state: 'error',
       icon: '❌',
       color: 'red',
-      message: `Sync failed: ${recipe.sync_error}`,
+      message: `Sync failed: ${recipe.syncError}`,
     }
   }
 
-  if (recipe.pending_sync) {
+  if (recipe.pendingSync) {
     return {
       state: 'pending',
       icon: '⏳',
       color: 'yellow',
-      message: `Pending sync (attempt ${recipe.retry_count + 1})`,
+      message: `Pending sync (attempt ${recipe.retryCount + 1})`,
     }
   }
 
@@ -145,12 +145,9 @@ async function handleAddRecipe() {
     <!-- Sync Progress -->
     <div v-if="syncStore.progress" class="sync-progress">
       <div class="progress-bar">
-        <div
-          class="progress-fill"
-          :style="{
-            width: ((syncStore.progress.current / syncStore.progress.total) * 100).toString() + '%',
-          }"
-        ></div>
+        <div class="progress-fill" :style="{
+          width: ((syncStore.progress.current / syncStore.progress.total) * 100).toString() + '%',
+        }"></div>
       </div>
       <p>Syncing {{ syncStore.progress.current }}/{{ syncStore.progress.total }}</p>
     </div>
@@ -162,12 +159,8 @@ async function handleAddRecipe() {
 
     <!-- Recipes Grid -->
     <div class="recipes-grid">
-      <div
-        v-for="recipe in sortedRecipes"
-        :key="recipe.id"
-        class="recipe-card"
-        :class="[getRecipeStatus(recipe).state]"
-      >
+      <div v-for="recipe in sortedRecipes" :key="recipe.id" class="recipe-card"
+        :class="[getRecipeStatus(recipe).state]">
         <div class="recipe-header">
           <h3>{{ recipe.name }}</h3>
           <span class="status-icon" :title="getRecipeStatus(recipe).message">
@@ -178,12 +171,12 @@ async function handleAddRecipe() {
         <p class="recipe-content">{{ recipe.instructions || 'No instructions yet' }}</p>
 
         <div class="recipe-meta">
-          <small v-if="recipe.pending_sync" class="meta-item pending"> ⏳ Pending sync </small>
-          <small v-if="recipe.conflict_detected" class="meta-item conflict">
+          <small v-if="recipe.pendingSync" class="meta-item pending"> ⏳ Pending sync </small>
+          <small v-if="recipe.conflictDetected" class="meta-item conflict">
             ⚠️ Conflict detected
           </small>
-          <small v-if="recipe.sync_error" class="meta-item error">
-            {{ recipe.sync_error }}
+          <small v-if="recipe.syncError" class="meta-item error">
+            {{ recipe.syncError }}
           </small>
           <small class="meta-item"> Updated: {{ formatTime(recipe.updated) }} </small>
         </div>
@@ -475,4 +468,3 @@ async function handleAddRecipe() {
   color: #999;
 }
 </style>
-

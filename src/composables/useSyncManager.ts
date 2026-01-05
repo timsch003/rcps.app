@@ -63,16 +63,16 @@ export function useSyncManager() {
       // Sync to remote
       const result = await pbSyncRecipe({
         ...recipe,
-        device_id: deviceId,
+        deviceId: deviceId,
       })
 
       if (result.success && result.data) {
         const synced: RecipeLocal = {
           ...result.data,
           synced: true,
-          pending_sync: false,
-          conflict_detected: false,
-          retry_count: 0,
+          pendingSync: false,
+          conflictDetected: false,
+          retryCount: 0,
         }
 
         await saveToDb(synced)
@@ -85,17 +85,16 @@ export function useSyncManager() {
 
       await syncStore.recordSyncTime()
     } catch (e: any) {
-      const errorMsg = e instanceof ClientResponseError 
-        ? `${e.status}: ${e.message}` 
-        : (e.message || 'Sync failed')
+      const errorMsg =
+        e instanceof ClientResponseError ? `${e.status}: ${e.message}` : e.message || 'Sync failed'
       syncStore.addSyncError(recipeId, errorMsg)
       syncStore.setSyncProgress(1, 1, recipeId, 'failed')
 
       const recipesList = recipesStore.recipes as RecipeLocal[]
       const recipe = recipesList.find((r) => r.id === recipeId)
       if (recipe) {
-        recipe.sync_error = errorMsg
-        recipe.retry_count = (recipe.retry_count || 0) + 1
+        recipe.syncError = errorMsg
+        recipe.retryCount = (recipe.retryCount || 0) + 1
       }
 
       console.error(`Failed to sync ${recipeId}:`, e)
@@ -125,19 +124,19 @@ export function useSyncManager() {
         for (let i = 0; i < result.results.length; i++) {
           const batchResult = result.results[i]!
           const recipe = recipesToSync[i]!
-          
+
           if (batchResult.success && batchResult.data) {
             await saveToDb({
               ...batchResult.data,
               synced: true,
-              pending_sync: false,
-              local_only: false,
-              retry_count: 0,
+              pendingSync: false,
+              localOnly: false,
+              retryCount: 0,
             })
             syncStore.clearSyncError(recipe.id)
           } else {
             syncStore.addSyncError(recipe.id, batchResult.error || 'Sync failed')
-            recipe.retry_count = (recipe.retry_count || 0) + 1
+            recipe.retryCount = (recipe.retryCount || 0) + 1
           }
           syncStore.setSyncProgress(i + 1, recipesToSync.length, recipe.id, 'completed')
         }
@@ -145,13 +144,16 @@ export function useSyncManager() {
       }
     } catch (e) {
       // Network or other errors - mark all as failed
-      const errorMsg = e instanceof ClientResponseError 
-        ? `${e.status}: ${e.message}` 
-        : (e instanceof Error ? e.message : 'Sync failed')
+      const errorMsg =
+        e instanceof ClientResponseError
+          ? `${e.status}: ${e.message}`
+          : e instanceof Error
+            ? e.message
+            : 'Sync failed'
 
       for (const recipe of recipesToSync) {
         syncStore.addSyncError(recipe.id, errorMsg)
-        recipe.retry_count = (recipe.retry_count || 0) + 1
+        recipe.retryCount = (recipe.retryCount || 0) + 1
       }
       console.error('Batch sync failed:', e)
     } finally {
@@ -174,9 +176,10 @@ export function useSyncManager() {
       await recipesStore.loadRecipesFromDB(authStore.user!.id)
       syncStore.clearSyncError(recipeId)
     } catch (e: any) {
-      const errorMsg = e instanceof ClientResponseError 
-        ? `${e.status}: ${e.message}` 
-        : (e.message || 'Delete failed')
+      const errorMsg =
+        e instanceof ClientResponseError
+          ? `${e.status}: ${e.message}`
+          : e.message || 'Delete failed'
       syncStore.addSyncError(recipeId, errorMsg)
       console.error(`Failed to delete ${recipeId}:`, e)
     }

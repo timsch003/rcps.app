@@ -89,19 +89,19 @@ export const validators = {
       })
     }
 
-    if (!recipe.device_id || typeof recipe.device_id !== 'string') {
+    if (!recipe.deviceId || typeof recipe.deviceId !== 'string') {
       errors.push({
-        field: 'device_id',
+        field: 'deviceId',
         message: 'Device ID is required',
-        value: recipe.device_id,
+        value: recipe.deviceId,
       })
     }
 
-    if (recipe.retry_count !== undefined && typeof recipe.retry_count !== 'number') {
+    if (recipe.retryCount !== undefined && typeof recipe.retryCount !== 'number') {
       errors.push({
-        field: 'retry_count',
+        field: 'retryCount',
         message: 'Retry count must be a number',
-        value: recipe.retry_count,
+        value: recipe.retryCount,
       })
     }
 

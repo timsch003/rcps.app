@@ -14,10 +14,10 @@ export const useRecipesStore = defineStore('recipes', () => {
 
   const localRecipes = computed(() => Array.from(recipes.value.values()))
   const unsyncedRecipes = computed(() =>
-    localRecipes.value.filter((r) => r.pending_sync || r.sync_error),
+    localRecipes.value.filter((r) => r.pendingSync || r.syncError),
   )
-  const conflictedRecipes = computed(() => localRecipes.value.filter((r) => r.conflict_detected))
-  const errorRecipes = computed(() => localRecipes.value.filter((r) => r.sync_error))
+  const conflictedRecipes = computed(() => localRecipes.value.filter((r) => r.conflictDetected))
+  const errorRecipes = computed(() => localRecipes.value.filter((r) => r.syncError))
 
   async function loadRecipesFromDB(userId: string) {
     const stored = await db.recipes.where('userId').equals(userId).toArray()
@@ -37,10 +37,10 @@ export const useRecipesStore = defineStore('recipes', () => {
       ...recipe,
       ...updates,
       updated: Date.now(),
-      pending_sync: true,
+      pendingSync: true,
       synced: false,
-      retry_count: 0,
-      device_id: deviceId,
+      retryCount: 0,
+      deviceId: deviceId,
     }
 
     // Validate
@@ -60,12 +60,12 @@ export const useRecipesStore = defineStore('recipes', () => {
       RecipeLocal,
       | 'id'
       | 'updated'
-      | 'device_id'
+      | 'deviceId'
       | 'synced'
-      | 'pending_sync'
-      | 'local_only'
-      | 'conflict_detected'
-      | 'retry_count'
+      | 'pendingSync'
+      | 'localOnly'
+      | 'conflictDetected'
+      | 'retryCount'
     >,
   ) {
     const id = generateUuid()
@@ -73,12 +73,12 @@ export const useRecipesStore = defineStore('recipes', () => {
       ...recipe,
       id,
       updated: Date.now(),
-      pending_sync: true,
+      pendingSync: true,
       synced: false,
-      local_only: true,
-      conflict_detected: false,
-      retry_count: 0,
-      device_id: deviceId,
+      localOnly: true,
+      conflictDetected: false,
+      retryCount: 0,
+      deviceId: deviceId,
     }
 
     // Validate

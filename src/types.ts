@@ -1,28 +1,28 @@
-export type IdName = {
+export interface IdAndName {
   id: string
   name: string
 }
 
-export type User = {
+export interface User {
   id: string
   email: string
   verified: boolean
 }
 
-export type RecipeIngredient = {
+export interface RecipeIngredient {
   recipeId: string
   ingredientId: string
   quantity?: number
-  unit?: IdName
+  unit?: IdAndName
   notes?: string
   sortOrder?: number
 }
 
-export type Recipe = {
+export interface Recipe {
   id: string
   userId: string
   name: string
-  tags?: IdName[]
+  tags?: IdAndName[]
   recipeIngredients?: RecipeIngredient[]
   instructions?: string
   notes?: string
@@ -32,53 +32,53 @@ export type Recipe = {
 export interface RecipeLocal extends Recipe {
   // Sync Status Tracking
   updated: number // Unix timestamp (ms)
-  device_id: string // Your device identifier
+  deviceId: string // Your device identifier
   synced: boolean // Last known sync status
-  pending_sync: boolean // Awaiting sync attempt
-  local_only: boolean // New record not yet on server
-  sync_error?: string // Last sync error message
-  retry_count: number // Number of failed attempts
-  last_retry?: number // Last retry timestamp
+  pendingSync: boolean // Awaiting sync attempt
+  localOnly: boolean // New record not yet on server
+  syncError?: string // Last sync error message
+  retryCount: number // Number of failed attempts
+  lastRetry?: number // Last retry timestamp
 
   // Conflict Detection
-  conflict_detected: boolean // User awareness flag
-  server_version?: RecipeLocal // Store server version on conflict
+  conflictDetected: boolean // User awareness flag
+  serverVersion?: RecipeLocal // Store server version on conflict
 
   // Field-level Tracking (for 3-way merge)
-  _original?: RecipeLocal // Original version before edits
+  original?: RecipeLocal // Original version before edits
 }
 
 export interface SyncMetadata {
   id: string
-  last_synced: number
-  last_conflict_resolved: number
-  pending_count: number
-  failed_count: number
+  lastSynced: number
+  lastConflictResolved: number
+  pendingCount: number
+  failedCount: number
 }
 
 export interface PendingChange {
   id: string
-  recipe_id: string
+  recipeId: string
   operation: 'create' | 'update' | 'delete'
   timestamp: number
   data: Partial<RecipeLocal>
-  device_id: string
-  retry_count: number
-  max_retries: number
-  last_error?: string
-  last_retry?: number
-  backoff_ms?: number
+  deviceId: string
+  retryCount: number
+  maxRetries: number
+  lastError?: string
+  lastRetry?: number
+  backoffMs?: number
 }
 
 export interface ConflictLog {
   id: string
-  recipe_id: string
+  recipeId: string
   timestamp: number
-  local_version: RecipeLocal
-  remote_version: RecipeLocal
-  resolution_strategy: 'local_wins' | 'remote_wins' | 'manual'
-  resolved_version: RecipeLocal
-  device_id: string
+  localVersion: RecipeLocal
+  remoteVersion: RecipeLocal
+  resolutionStrategy: 'localWins' | 'remoteWins' | 'manual'
+  resolvedVersion: RecipeLocal
+  deviceId: string
 }
 
 export interface ValidationError {
@@ -89,10 +89,10 @@ export interface ValidationError {
 
 export interface DeviceRegistry {
   id: string
-  user_id: string
-  device_id: string
-  device_name?: string
-  last_sync: number
+  userId: string
+  deviceId: string
+  deviceName?: string
+  lastSync: number
   created: number
 }
 
@@ -115,6 +115,6 @@ export type RecipeSyncState = 'synced' | 'pending' | 'error' | 'conflict' | 'syn
 export interface SyncProgress {
   current: number
   total: number
-  recipe_id: string
+  recipeId: string
   status: 'processing' | 'completed' | 'failed'
 }

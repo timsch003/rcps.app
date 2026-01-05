@@ -5,10 +5,10 @@ export function generateUuid(): string {
 }
 
 export function getOrCreateDeviceId(): string {
-  let deviceId = localStorage.getItem('device_id')
+  let deviceId = localStorage.getItem('deviceId')
   if (!deviceId) {
     deviceId = generateUuid()
-    localStorage.setItem('device_id', deviceId)
+    localStorage.setItem('deviceId', deviceId)
   }
   return deviceId
 }

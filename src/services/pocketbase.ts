@@ -4,7 +4,7 @@ import { validators } from './validators'
 
 // Use PocketBase's built-in LocalAuthStore for automatic auth persistence
 const pb = new PocketBase(
-  import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090',
+  import.meta.env.PB_URL || 'http://127.0.0.1:8090',
   new LocalAuthStore('pb_auth'),
 )
 
@@ -31,12 +31,12 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
         instructions: r.instructions,
         notes: r.notes,
         updated: new Date(r.updated).getTime(),
-        device_id: r.device_id,
+        deviceId: r.deviceId,
         synced: true,
-        pending_sync: false,
-        local_only: false,
-        conflict_detected: false,
-        retry_count: 0,
+        pendingSync: false,
+        localOnly: false,
+        conflictDetected: false,
+        retryCount: 0,
       }))
   } catch (e: any) {
     if (e instanceof ClientResponseError) {
@@ -64,7 +64,7 @@ export async function syncRecipe(
   }
 
   try {
-    if (recipe.local_only) {
+    if (recipe.localOnly) {
       // Create new
       const created = await pb.collection('recipes').create({
         id: recipe.id,
@@ -75,7 +75,7 @@ export async function syncRecipe(
         instructions: recipe.instructions,
         notes: recipe.notes,
         updated: new Date().toISOString(),
-        device_id: recipe.device_id,
+        deviceId: recipe.deviceId,
       })
       return {
         success: true,
@@ -84,10 +84,10 @@ export async function syncRecipe(
           id: created.id,
           updated: new Date(created.updated).getTime(),
           synced: true,
-          pending_sync: false,
-          local_only: false,
-          conflict_detected: false,
-          retry_count: 0,
+          pendingSync: false,
+          localOnly: false,
+          conflictDetected: false,
+          retryCount: 0,
         },
       }
     } else {
@@ -100,7 +100,7 @@ export async function syncRecipe(
         instructions: recipe.instructions,
         notes: recipe.notes,
         updated: new Date().toISOString(),
-        device_id: recipe.device_id,
+        deviceId: recipe.deviceId,
       })
       return {
         success: true,
@@ -108,9 +108,9 @@ export async function syncRecipe(
           ...recipe,
           updated: new Date(updated.updated).getTime(),
           synced: true,
-          pending_sync: false,
-          conflict_detected: false,
-          retry_count: 0,
+          pendingSync: false,
+          conflictDetected: false,
+          retryCount: 0,
         },
       }
     }
@@ -131,9 +131,10 @@ export async function deleteRecipe(id: string): Promise<{ success: boolean; erro
 /**
  * Sync multiple recipes in a single batch request
  */
-export async function syncRecipesBatch(
-  recipes: RecipeLocal[],
-): Promise<{ success: boolean; results: Array<{ success: boolean; data?: RecipeLocal; error?: string }> }> {
+export async function syncRecipesBatch(recipes: RecipeLocal[]): Promise<{
+  success: boolean
+  results: Array<{ success: boolean; data?: RecipeLocal; error?: string }>
+}> {
   if (recipes.length === 0) {
     return { success: true, results: [] }
   }
@@ -143,7 +144,7 @@ export async function syncRecipesBatch(
 
     // Add all recipes to batch
     recipes.forEach((recipe) => {
-      if (recipe.local_only) {
+      if (recipe.localOnly) {
         batch.collection('recipes').create({
           id: recipe.id,
           userId: recipe.userId,
@@ -153,7 +154,7 @@ export async function syncRecipesBatch(
           instructions: recipe.instructions,
           notes: recipe.notes,
           updated: new Date().toISOString(),
-          device_id: recipe.device_id,
+          deviceId: recipe.deviceId,
         })
       } else {
         batch.collection('recipes').update(recipe.id, {
@@ -164,7 +165,7 @@ export async function syncRecipesBatch(
           instructions: recipe.instructions,
           notes: recipe.notes,
           updated: new Date().toISOString(),
-          device_id: recipe.device_id,
+          deviceId: recipe.deviceId,
         })
       }
     })
@@ -173,30 +174,31 @@ export async function syncRecipesBatch(
     const batchResults = await batch.send({ autoRefreshThreshold: 1800 })
 
     // Process results
-    const results: Array<{ success: boolean; data?: RecipeLocal; error?: string }> = batchResults.map((result, index) => {
-      if (result.status >= 200 && result.status < 300) {
-        const recipe = recipes[index]!
-        const updatedAt = new Date(result.body.updated).getTime()
-        return {
-          success: true,
-          data: {
-            ...recipe,
-            updated: updatedAt,
-            device_id: recipe.device_id || '',
-            synced: true,
-            pending_sync: false,
-            local_only: false,
-            conflict_detected: false,
-            retry_count: 0,
-          } as RecipeLocal,
+    const results: Array<{ success: boolean; data?: RecipeLocal; error?: string }> =
+      batchResults.map((result, index) => {
+        if (result.status >= 200 && result.status < 300) {
+          const recipe = recipes[index]!
+          const updatedAt = new Date(result.body.updated).getTime()
+          return {
+            success: true,
+            data: {
+              ...recipe,
+              updated: updatedAt,
+              deviceId: recipe.deviceId || '',
+              synced: true,
+              pendingSync: false,
+              localOnly: false,
+              conflictDetected: false,
+              retryCount: 0,
+            } as RecipeLocal,
+          }
+        } else {
+          return {
+            success: false,
+            error: result.body?.message || `Batch sync failed with status ${result.status}`,
+          }
         }
-      } else {
-        return {
-          success: false,
-          error: result.body?.message || `Batch sync failed with status ${result.status}`,
-        }
-      }
-    })
+      })
 
     return { success: true, results }
   } catch (e) {
@@ -211,7 +213,10 @@ export async function syncRecipesBatch(
     }
     return {
       success: false,
-      results: recipes.map(() => ({ success: false, error: e instanceof Error ? e.message : 'Batch sync failed' })),
+      results: recipes.map(() => ({
+        success: false,
+        error: e instanceof Error ? e.message : 'Batch sync failed',
+      })),
     }
   }
 }

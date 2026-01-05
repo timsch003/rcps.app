@@ -50,7 +50,7 @@ export function useRealtimeSync() {
 
               if (local) {
                 // Conflict detection
-                if (local.pending_sync && local.updated > new Date(record.updated).getTime()) {
+                if (local.pendingSync && local.updated > new Date(record.updated).getTime()) {
                   // Local changes are newer and pending - skip remote update
                   console.log(`Skipping remote update for ${recipeId} - local changes pending`)
                   return
@@ -61,31 +61,28 @@ export function useRealtimeSync() {
                   ...record,
                   updated: new Date(record.updated).getTime(),
                   synced: true,
-                  pending_sync: false,
-                  local_only: false,
-                  conflict_detected: false,
-                  retry_count: 0,
+                  pendingSync: false,
+                  localOnly: false,
+                  conflictDetected: false,
+                  retryCount: 0,
                 }
 
-                if (local.updated > remoteRecipe.updated && local.device_id === deviceId) {
+                if (local.updated > remoteRecipe.updated && local.deviceId === deviceId) {
                   // Local is newer and from this device - conflict detected
-                  syncStore.addSyncError(
-                    recipeId,
-                    'Local changes conflict with remote update',
-                  )
+                  syncStore.addSyncError(recipeId, 'Local changes conflict with remote update')
                 } else {
                   // Remote is newer or from different device - use remote
                   const resolution = await syncStore.resolveConflict(
                     recipeId,
                     local,
                     remoteRecipe,
-                    local._original,
+                    local.original,
                   )
 
                   await saveToDb({
                     ...resolution.resolved,
                     synced: true,
-                    pending_sync: false,
+                    pendingSync: false,
                   })
                   await recipesStore.loadRecipesFromDB(authStore.user!.id)
                 }
@@ -95,10 +92,10 @@ export function useRealtimeSync() {
                   ...record,
                   updated: new Date(record.updated).getTime(),
                   synced: true,
-                  pending_sync: false,
-                  local_only: false,
-                  conflict_detected: false,
-                  retry_count: 0,
+                  pendingSync: false,
+                  localOnly: false,
+                  conflictDetected: false,
+                  retryCount: 0,
                 }
                 await saveToDb(remoteRecipe)
                 await recipesStore.loadRecipesFromDB(authStore.user!.id)

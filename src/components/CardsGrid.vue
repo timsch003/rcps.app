@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import CardsGridCard from './CardsGridCard.vue'
-import type { IdName, Recipe } from '../types'
+import type { IdAndName, Recipe } from '../types'
 
 const { recipes, tags } = defineProps<{
   recipes?: Recipe[]
-  tags?: IdName[]
+  tags?: IdAndName[]
 }>()
 </script>
 

@@ -59,12 +59,12 @@ export function useRecipes() {
       RecipeLocal,
       | 'id'
       | 'updated'
-      | 'device_id'
+      | 'deviceId'
       | 'synced'
-      | 'pending_sync'
-      | 'local_only'
-      | 'conflict_detected'
-      | 'retry_count'
+      | 'pendingSync'
+      | 'localOnly'
+      | 'conflictDetected'
+      | 'retryCount'
     >,
   ) {
     const newRecipe = await recipesStore.createRecipe(recipe)

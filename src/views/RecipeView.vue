@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Recipe, IdName } from '../types'
+import type { Recipe, IdAndName } from '../types'
 
 const { recipe } = defineProps<{
   recipe: Recipe
-  tags: IdName[]
+  tags: IdAndName[]
 }>()
 </script>
 
