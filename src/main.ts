@@ -16,11 +16,15 @@ const i18n = createI18n({
       Home: 'Home',
       Settings: 'Settings',
       Favorites: 'Favorites',
+      Login: 'Login',
+      Register: 'Register',
     },
     de: {
       Home: 'Home',
       Settings: 'Einstellungen',
       Favorites: 'Favoriten',
+      Login: 'Anmelden',
+      Register: 'Registrieren',
     },
   },
 })

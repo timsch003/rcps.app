@@ -10,14 +10,18 @@ defineProps({
 </script>
 
 <template>
-  <div class="link-button">
+  <div v-if="icon" class="link-button">
     <RouterLink :to="href" :aria-label="desc">
       <component v-if="icon" :is="icon" />
-      <slot v-if="!icon" />
     </RouterLink>
     <span class="link-button__desc" v-if="showDesc">
       {{ desc }}
     </span>
+  </div>
+  <div v-else class="link-button">
+    <RouterLink :to="href" :aria-label="desc">
+      {{ desc }}
+    </RouterLink>
   </div>
 </template>
 
