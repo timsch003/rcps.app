@@ -4,7 +4,7 @@ import type {
   ConflictResolutionStrategy,
   ConflictResolution,
 } from '@/types'
-import { logConflict } from './dexie'
+import { db } from './dexie'
 import { getOrCreateDeviceId, generateUuid } from '@/utils/uuid'
 
 export class ConflictResolver {
@@ -128,6 +128,6 @@ export class ConflictResolver {
       device_id: getOrCreateDeviceId(),
     }
 
-    await logConflict(log)
+    await db.conflict_logs.add(log)
   }
 }

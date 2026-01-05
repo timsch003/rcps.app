@@ -5,8 +5,11 @@ import { useOnlineStatus } from './useOnlineStatus'
 import { fetchUserRecipes } from '@/services/pocketbase'
 import { saveToDb } from '@/services/dexie'
 import type { RecipeLocal } from '@/types'
-import { onMounted, watch } from 'vue'
 
+/**
+ * Recipe operations composable
+ * Provides CRUD operations for recipes with automatic sync
+ */
 export function useRecipes() {
   const recipesStore = useRecipesStore()
   const authStore = useAuthStore()
@@ -80,15 +83,6 @@ export function useRecipes() {
       await syncManager.deleteRecipe(id)
     }
   }
-
-  // Listen for coming back online
-  onMounted(() => {
-    window.addEventListener('came-back-online', async () => {
-      await syncManager.reconcileAfterOffline()
-    })
-
-    syncManager.setupAutoSyncListener()
-  })
 
   return {
     initializeRecipes,

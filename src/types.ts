@@ -1,19 +1,17 @@
-export type UUID = `${string}-${string}-${string}-${string}-${string}`
-
 export type IdName = {
-  id: UUID
+  id: string
   name: string
 }
 
 export type User = {
-  id: UUID
+  id: string
   email: string
   verified: boolean
 }
 
 export type RecipeIngredient = {
-  recipeId: UUID
-  ingredientId: UUID
+  recipeId: string
+  ingredientId: string
   quantity?: number
   unit?: IdName
   notes?: string
@@ -21,8 +19,8 @@ export type RecipeIngredient = {
 }
 
 export type Recipe = {
-  id: UUID
-  userId: UUID
+  id: string
+  userId: string
   name: string
   tags?: IdName[]
   recipeIngredients?: RecipeIngredient[]

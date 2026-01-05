@@ -1,47 +1,48 @@
-import { watch } from 'vue'
+import { watch, onUnmounted } from 'vue'
 import { useRecipesStore } from '@/stores/recipes'
 import { useSyncStore } from '@/stores/sync'
 import { useAuthStore } from '@/stores/auth'
 import { useOnlineStatus } from './useOnlineStatus'
+import { useRealtimeSync } from './useRealtimeSync'
 import { getOrCreateDeviceId } from '@/utils/uuid'
 import {
   syncRecipe as pbSyncRecipe,
   deleteRecipe as pbDeleteRecipe,
-  fetchUserRecipes,
+  syncRecipesBatch,
+  ClientResponseError,
 } from '@/services/pocketbase'
-import { db, saveToDb, deleteFromDb } from '@/services/dexie'
-import { executeWithRetry, DEFAULT_RETRY_CONFIG } from '@/services/retryStrategy'
+import { saveToDb, deleteFromDb } from '@/services/dexie'
 import type { RecipeLocal } from '@/types'
 
+/**
+ * Sync manager orchestrator
+ * Coordinates recipe syncing, conflict resolution, and realtime updates
+ */
 export function useSyncManager() {
   const recipesStore = useRecipesStore()
   const syncStore = useSyncStore()
   const authStore = useAuthStore()
   const { isOnline } = useOnlineStatus()
+  const { setupRealtimeSync, cleanupRealtimeSync } = useRealtimeSync()
   const deviceId = getOrCreateDeviceId()
 
   // Watch for online status changes
   watch(
     () => isOnline.value,
-    async (online) => {
+    async (online: boolean) => {
       if (online) {
         await reconcileAfterOffline()
+        // Resubscribe to realtime when coming back online
+        await setupRealtimeSync()
+      } else {
+        // Unsubscribe when going offline
+        await cleanupRealtimeSync()
       }
     },
   )
 
-  // Watch for auto-sync trigger
-  function setupAutoSyncListener() {
-    window.addEventListener('auto-sync-trigger', async () => {
-      const unsynced = recipesStore.unsyncedRecipes
-      if (unsynced.length > 0) {
-        await syncBatch(unsynced.map((r) => r.id))
-      }
-    })
-  }
-
   /**
-   * Sync a single recipe with retry logic
+   * Sync a single recipe
    */
   async function syncRecipe(recipeId: string) {
     const recipesList = recipesStore.recipes as RecipeLocal[]
@@ -59,77 +60,34 @@ export function useSyncManager() {
     syncStore.setSyncProgress(1, 1, recipeId, 'processing')
 
     try {
-      await executeWithRetry(
-        async () => {
-          // Fetch latest from remote
-          const remoteRecipes = await fetchUserRecipes(authStore.user!.id)
-          const remoteVersion = remoteRecipes.find((r) => r.id === recipeId)
+      // Sync to remote
+      const result = await pbSyncRecipe({
+        ...recipe,
+        device_id: deviceId,
+      })
 
-          if (remoteVersion && remoteVersion.updated > recipe.updated) {
-            // Conflict detected
-            syncStore.state = 'conflict'
-            const resolution = await syncStore.resolveConflict(
-              recipeId,
-              recipe,
-              remoteVersion,
-              recipe._original,
-            )
+      if (result.success && result.data) {
+        const synced: RecipeLocal = {
+          ...result.data,
+          synced: true,
+          pending_sync: false,
+          conflict_detected: false,
+          retry_count: 0,
+        }
 
-            // Update local with resolved version
-            const updated: RecipeLocal = {
-              ...resolution.resolved,
-              synced: true,
-              pending_sync: false,
-              conflict_detected: resolution.conflicts.length > 0,
-              retry_count: 0,
-            }
-
-            await saveToDb(updated)
-            await recipesStore.loadRecipesFromDB(authStore.user!.id)
-
-            syncStore.setSyncProgress(1, 1, recipeId, 'completed')
-            return
-          }
-
-          // No conflict, sync to remote
-          const result = await pbSyncRecipe({
-            ...recipe,
-            device_id: deviceId,
-          })
-
-          if (result.success && result.data) {
-            const synced: RecipeLocal = {
-              ...result.data,
-              synced: true,
-              pending_sync: false,
-              conflict_detected: false,
-              retry_count: 0,
-            }
-
-            await saveToDb(synced)
-            await recipesStore.loadRecipesFromDB(authStore.user!.id)
-            syncStore.clearSyncError(recipeId)
-          } else {
-            throw new Error(result.error || 'Sync failed')
-          }
-        },
-        DEFAULT_RETRY_CONFIG,
-        (attempt, delay, error) => {
-          const recipesList = recipesStore.recipes as RecipeLocal[]
-          const recipe = recipesList.find((r) => r.id === recipeId)
-          if (recipe) {
-            recipe.retry_count = attempt
-            recipe.last_retry = Date.now()
-            recipe.sync_error = error.message
-          }
-          console.log(`Retry ${attempt} for ${recipeId} in ${delay}ms:`, error.message)
-        },
-      )
+        await saveToDb(synced)
+        await recipesStore.loadRecipesFromDB(authStore.user!.id)
+        syncStore.clearSyncError(recipeId)
+        syncStore.setSyncProgress(1, 1, recipeId, 'completed')
+      } else {
+        throw new Error(result.error || 'Sync failed')
+      }
 
       await syncStore.recordSyncTime()
-      syncStore.setSyncProgress(1, 1, recipeId, 'completed')
     } catch (e: any) {
-      const errorMsg = e.message || 'Sync failed'
+      const errorMsg = e instanceof ClientResponseError 
+        ? `${e.status}: ${e.message}` 
+        : (e.message || 'Sync failed')
       syncStore.addSyncError(recipeId, errorMsg)
       syncStore.setSyncProgress(1, 1, recipeId, 'failed')
 
@@ -137,6 +95,7 @@ export function useSyncManager() {
       const recipe = recipesList.find((r) => r.id === recipeId)
       if (recipe) {
         recipe.sync_error = errorMsg
+        recipe.retry_count = (recipe.retry_count || 0) + 1
       }
 
       console.error(`Failed to sync ${recipeId}:`, e)
@@ -146,7 +105,7 @@ export function useSyncManager() {
   }
 
   /**
-   * Batch sync multiple recipes
+   * Batch sync multiple recipes using PocketBase batch API
    */
   async function syncBatch(recipeIds: string[]) {
     if (recipeIds.length === 0) return
@@ -154,37 +113,71 @@ export function useSyncManager() {
     syncStore.state = 'syncing_batch'
     syncStore.setSyncProgress(0, recipeIds.length, '', 'processing')
 
-    for (let i = 0; i < recipeIds.length; i++) {
-      await syncRecipe(recipeIds[i])
-      syncStore.setSyncProgress(i + 1, recipeIds.length, recipeIds[i], 'processing')
+    const recipesList = recipesStore.recipes as RecipeLocal[]
+    const recipesToSync = recipesList.filter((r) => recipeIds.includes(r.id))
 
-      // Small delay between syncs to avoid overwhelming server
-      if (i < recipeIds.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 100))
+    try {
+      // Use batch API for better performance
+      const result = await syncRecipesBatch(recipesToSync)
+
+      if (result.success) {
+        // Update local records with sync status
+        for (let i = 0; i < result.results.length; i++) {
+          const batchResult = result.results[i]!
+          const recipe = recipesToSync[i]!
+          
+          if (batchResult.success && batchResult.data) {
+            await saveToDb({
+              ...batchResult.data,
+              synced: true,
+              pending_sync: false,
+              local_only: false,
+              retry_count: 0,
+            })
+            syncStore.clearSyncError(recipe.id)
+          } else {
+            syncStore.addSyncError(recipe.id, batchResult.error || 'Sync failed')
+            recipe.retry_count = (recipe.retry_count || 0) + 1
+          }
+          syncStore.setSyncProgress(i + 1, recipesToSync.length, recipe.id, 'completed')
+        }
+        await recipesStore.loadRecipesFromDB(authStore.user!.id)
       }
-    }
+    } catch (e) {
+      // Network or other errors - mark all as failed
+      const errorMsg = e instanceof ClientResponseError 
+        ? `${e.status}: ${e.message}` 
+        : (e instanceof Error ? e.message : 'Sync failed')
 
-    syncStore.state = 'idle'
-    syncStore.clearSyncProgress()
+      for (const recipe of recipesToSync) {
+        syncStore.addSyncError(recipe.id, errorMsg)
+        recipe.retry_count = (recipe.retry_count || 0) + 1
+      }
+      console.error('Batch sync failed:', e)
+    } finally {
+      syncStore.state = 'idle'
+      syncStore.clearSyncProgress()
+    }
   }
 
   /**
-   * Delete recipe with retry
+   * Delete recipe with sync
    */
   async function deleteRecipe(recipeId: string) {
     try {
-      await executeWithRetry(async () => {
-        const result = await pbDeleteRecipe(recipeId)
-        if (!result.success) {
-          throw new Error(result.error || 'Delete failed')
-        }
-      }, DEFAULT_RETRY_CONFIG)
+      const result = await pbDeleteRecipe(recipeId)
+      if (!result.success) {
+        throw new Error(result.error || 'Delete failed')
+      }
 
       await deleteFromDb(recipeId)
       await recipesStore.loadRecipesFromDB(authStore.user!.id)
       syncStore.clearSyncError(recipeId)
     } catch (e: any) {
-      syncStore.addSyncError(recipeId, e.message)
+      const errorMsg = e instanceof ClientResponseError 
+        ? `${e.status}: ${e.message}` 
+        : (e.message || 'Delete failed')
+      syncStore.addSyncError(recipeId, errorMsg)
       console.error(`Failed to delete ${recipeId}:`, e)
     }
   }
@@ -203,48 +196,17 @@ export function useSyncManager() {
    * Full reconciliation after coming back online
    */
   async function reconcileAfterOffline() {
-    if (!isOnline.value) return
+    if (!isOnline.value || !authStore.user?.id) return
 
     syncStore.state = 'reconciling'
 
     try {
-      const userId = authStore.user!.id
-      const local = await db.recipes.where('userId').equals(userId).toArray()
-      const remote = await fetchUserRecipes(userId)
-
-      // Process all local recipes
-      for (const localRecipe of local) {
-        const remoteVersion = remote.find((r) => r.id === localRecipe.id)
-
-        if (remoteVersion) {
-          // Recipe exists on both sides
-          if (remoteVersion.updated > localRecipe.updated && !localRecipe.pending_sync) {
-            // Remote is newer and we didn't change it → use remote
-            await saveToDb({ ...remoteVersion, synced: true, pending_sync: false })
-          } else if (localRecipe.pending_sync) {
-            // We have pending changes → sync them
-            await syncRecipe(localRecipe.id)
-          }
-        } else if (localRecipe.pending_sync) {
-          // Local recipe not on server → sync it
-          await syncRecipe(localRecipe.id)
-        }
+      // Sync any pending local changes first
+      const unsynced = recipesStore.unsyncedRecipes
+      if (unsynced.length > 0) {
+        await syncBatch(unsynced.map((r) => r.id))
       }
 
-      // Check for remote recipes we don't have locally
-      for (const remoteRecipe of remote) {
-        if (!local.find((r) => r.id === remoteRecipe.id)) {
-          await saveToDb({
-            ...remoteRecipe,
-            synced: true,
-            pending_sync: false,
-            conflict_detected: false,
-            retry_count: 0,
-          })
-        }
-      }
-
-      await recipesStore.loadRecipesFromDB(userId)
       await syncStore.recordSyncTime()
       syncStore.state = 'idle'
     } catch (e: any) {
@@ -254,12 +216,17 @@ export function useSyncManager() {
     }
   }
 
+  onUnmounted(() => {
+    cleanupRealtimeSync()
+  })
+
   return {
     syncRecipe,
     syncBatch,
     deleteRecipe,
     syncAll,
     reconcileAfterOffline,
-    setupAutoSyncListener,
+    setupRealtimeSync,
+    cleanupRealtimeSync,
   }
 }

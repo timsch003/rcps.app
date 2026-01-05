@@ -1,64 +1,52 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import {
-  loginUser,
-  logoutUser,
-  registerUser,
-  getCurrentUser,
-  isAuthenticated,
-} from '@/services/pocketbase'
-import { generateUuid, getOrCreateDeviceId } from '@/utils/uuid'
+import { pb } from '@/services/pocketbase'
+import { getOrCreateDeviceId } from '@/utils/uuid'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<{ id: string; email: string } | null>(null)
-  const isAuth = computed(() => !!user.value)
+  const isAuth = computed(() => pb.authStore.isValid && !!user.value)
   const deviceId = getOrCreateDeviceId()
 
-  async function register(email: string, password: string) {
-    const userId = generateUuid()
-    const result = await registerUser(email, password, userId)
-
-    if (result.success) {
-      localStorage.setItem('user_id', userId)
-      return { success: true }
+  // Listen to PocketBase auth changes
+  pb.authStore.onChange((token, model) => {
+    if (model) {
+      const userId = (model as any).userId || model.id
+      user.value = { id: userId, email: (model as any).email }
+    } else {
+      user.value = null
     }
+  }, true) // fireImmediately = true to sync initial state
 
-    return { success: false, errors: result.errors }
+  async function register(email: string, password: string) {
+    const userId = getOrCreateDeviceId()
+
+    try {
+      await pb.collection('users').create({
+        email,
+        password,
+        passwordConfirm: password,
+        userId,
+      })
+      return { success: true }
+    } catch (e: any) {
+      return { success: false, error: e.message }
+    }
   }
 
   async function login(email: string, password: string) {
-    const result = await loginUser(email, password)
-
-    if (result.success && result.user) {
-      const userId = result.user.userId || result.user.id
-      localStorage.setItem('user_id', userId)
-      user.value = { id: userId, email: result.user.email }
+    try {
+      await pb.collection('users').authWithPassword(email, password)
+      // PocketBase automatically saves to authStore
       return { success: true }
+    } catch (e: any) {
+      return { success: false, error: e.message }
     }
-
-    return { success: false, error: result.error }
   }
 
   async function logout() {
-    await logoutUser()
-    user.value = null
-  }
-
-  function initializeAuth() {
-    if (isAuthenticated()) {
-      const currentUser = getCurrentUser()
-      if (currentUser) {
-        const userId = currentUser.userId || currentUser.id
-        user.value = { id: userId, email: currentUser.email }
-        localStorage.setItem('user_id', userId)
-      }
-    } else {
-      const userId = localStorage.getItem('user_id')
-      if (userId) {
-        // User ID exists but not authenticated - may need to log in again
-        user.value = null
-      }
-    }
+    pb.authStore.clear()
+    // PocketBase automatically triggers onChange
   }
 
   return {
@@ -68,6 +56,5 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     login,
     logout,
-    initializeAuth,
   }
 })

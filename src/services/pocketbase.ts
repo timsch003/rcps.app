@@ -1,119 +1,27 @@
-import PocketBase from 'pocketbase'
-import type { RecipeLocal, ValidationError } from '@/types'
-import { recipeValidator } from './dexie'
+import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
+import type { RecipeLocal } from '@/types'
+import { validators } from './validators'
 
-const pb = new PocketBase(import.meta.env.PB_URL || 'http://127.0.0.1:8090')
+// Use PocketBase's built-in LocalAuthStore for automatic auth persistence
+const pb = new PocketBase(
+  import.meta.env.VITE_PB_URL || 'http://127.0.0.1:8090',
+  new LocalAuthStore('pb_auth'),
+)
 
-// Input validation
-export const pbValidator = {
-  validateEmail(email: string): ValidationError[] {
-    const errors: ValidationError[] = []
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-    if (!email || !emailRegex.test(email)) {
-      errors.push({ field: 'email', message: 'Valid email is required', value: email })
-    }
-
-    return errors
-  },
-
-  validatePassword(password: string): ValidationError[] {
-    const errors: ValidationError[] = []
-
-    if (!password || password.length < 8) {
-      errors.push({
-        field: 'password',
-        message: 'Password must be at least 8 characters',
-        value: '',
-      })
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      errors.push({
-        field: 'password',
-        message: 'Password must contain an uppercase letter',
-        value: '',
-      })
-    }
-
-    if (!/[a-z]/.test(password)) {
-      errors.push({
-        field: 'password',
-        message: 'Password must contain a lowercase letter',
-        value: '',
-      })
-    }
-
-    if (!/[0-9]/.test(password)) {
-      errors.push({ field: 'password', message: 'Password must contain a number', value: '' })
-    }
-
-    return errors
-  },
-}
-
-export async function registerUser(
-  email: string,
-  password: string,
-  userId: string,
-): Promise<{ success: boolean; errors: ValidationError[] }> {
-  const emailErrors = pbValidator.validateEmail(email)
-  const passwordErrors = pbValidator.validatePassword(password)
-  const allErrors = [...emailErrors, ...passwordErrors]
-
-  if (allErrors.length > 0) {
-    return { success: false, errors: allErrors }
-  }
-
-  try {
-    await pb.collection('users').create({
-      email,
-      password,
-      passwordConfirm: password,
-      userId,
-      confirmed_email: false,
-    })
-    return { success: true, errors: [] }
-  } catch (e: any) {
-    return {
-      success: false,
-      errors: [{ field: 'registration', message: e.message || 'Registration failed', value: null }],
-    }
-  }
-}
-
-export async function loginUser(
-  email: string,
-  password: string,
-): Promise<{ success: boolean; error?: string; user?: any }> {
-  try {
-    const authData = await pb.collection('users').authWithPassword(email, password)
-    return { success: true, user: authData.record }
-  } catch (e: any) {
-    return { success: false, error: e.message || 'Login failed' }
-  }
-}
-
-export async function logoutUser(): Promise<void> {
-  pb.authStore.clear()
-}
-
-export function getCurrentUser(): any {
-  return pb.authStore.model
-}
-
-export function isAuthenticated(): boolean {
-  return pb.authStore.isValid
-}
+// Enable auto-cancellation of duplicate requests
+pb.autoCancellation(true)
 
 export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
   try {
+    // Use pb.filter() for safe query construction with parameter escaping
     const records = await pb.collection('recipes').getFullList({
-      filter: `userId = "${userId}"`,
+      filter: pb.filter('userId = {:userId}', { userId }),
+      // Auto-refresh auth token if needed (30 min threshold)
+      autoRefreshThreshold: 1800,
     })
 
     return records
-      .filter((r) => recipeValidator.isValid(r))
+      .filter((r) => validators.isRecipeValid(r))
       .map((r: any) => ({
         id: r.id,
         userId: r.userId,
@@ -131,6 +39,14 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
         retry_count: 0,
       }))
   } catch (e: any) {
+    if (e instanceof ClientResponseError) {
+      console.error('Failed to fetch recipes:', {
+        status: e.status,
+        message: e.message,
+        data: e.response,
+      })
+      throw new Error(`Fetch failed (${e.status}): ${e.message}`)
+    }
     console.error('Failed to fetch recipes:', e)
     throw new Error(`Fetch failed: ${e.message}`)
   }
@@ -139,7 +55,7 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
 export async function syncRecipe(
   recipe: RecipeLocal,
 ): Promise<{ success: boolean; data?: RecipeLocal; error?: string }> {
-  const errors = recipeValidator.validate(recipe)
+  const errors = validators.validateRecipe(recipe as unknown as Record<string, unknown>)
   if (errors.length > 0) {
     return {
       success: false,
@@ -212,8 +128,92 @@ export async function deleteRecipe(id: string): Promise<{ success: boolean; erro
   }
 }
 
-export function isOnline(): boolean {
-  return navigator.onLine
+/**
+ * Sync multiple recipes in a single batch request
+ */
+export async function syncRecipesBatch(
+  recipes: RecipeLocal[],
+): Promise<{ success: boolean; results: Array<{ success: boolean; data?: RecipeLocal; error?: string }> }> {
+  if (recipes.length === 0) {
+    return { success: true, results: [] }
+  }
+
+  try {
+    const batch = pb.createBatch()
+
+    // Add all recipes to batch
+    recipes.forEach((recipe) => {
+      if (recipe.local_only) {
+        batch.collection('recipes').create({
+          id: recipe.id,
+          userId: recipe.userId,
+          name: recipe.name,
+          tags: recipe.tags,
+          recipeIngredients: recipe.recipeIngredients,
+          instructions: recipe.instructions,
+          notes: recipe.notes,
+          updated: new Date().toISOString(),
+          device_id: recipe.device_id,
+        })
+      } else {
+        batch.collection('recipes').update(recipe.id, {
+          userId: recipe.userId,
+          name: recipe.name,
+          tags: recipe.tags,
+          recipeIngredients: recipe.recipeIngredients,
+          instructions: recipe.instructions,
+          notes: recipe.notes,
+          updated: new Date().toISOString(),
+          device_id: recipe.device_id,
+        })
+      }
+    })
+
+    // Send batch request
+    const batchResults = await batch.send({ autoRefreshThreshold: 1800 })
+
+    // Process results
+    const results: Array<{ success: boolean; data?: RecipeLocal; error?: string }> = batchResults.map((result, index) => {
+      if (result.status >= 200 && result.status < 300) {
+        const recipe = recipes[index]!
+        const updatedAt = new Date(result.body.updated).getTime()
+        return {
+          success: true,
+          data: {
+            ...recipe,
+            updated: updatedAt,
+            device_id: recipe.device_id || '',
+            synced: true,
+            pending_sync: false,
+            local_only: false,
+            conflict_detected: false,
+            retry_count: 0,
+          } as RecipeLocal,
+        }
+      } else {
+        return {
+          success: false,
+          error: result.body?.message || `Batch sync failed with status ${result.status}`,
+        }
+      }
+    })
+
+    return { success: true, results }
+  } catch (e) {
+    if (e instanceof ClientResponseError) {
+      return {
+        success: false,
+        results: recipes.map(() => ({
+          success: false,
+          error: `Batch failed (${e.status}): ${e.message}`,
+        })),
+      }
+    }
+    return {
+      success: false,
+      results: recipes.map(() => ({ success: false, error: e instanceof Error ? e.message : 'Batch sync failed' })),
+    }
+  }
 }
 
-export { pb }
+export { pb, ClientResponseError }

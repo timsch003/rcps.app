@@ -19,9 +19,6 @@ export const useSyncStore = defineStore('sync', () => {
   const activeConflicts = ref<Map<string, ConflictResolution>>(new Map())
   const syncErrors = ref<Map<string, string>>(new Map())
   const lastError = ref<string | null>(null)
-  const autoSyncEnabled = ref(true)
-  const autoSyncIntervalMs = ref(30000) // 30 seconds
-  let autoSyncTimer: NodeJS.Timeout | null = null
 
   const deviceId = getOrCreateDeviceId()
   const syncStateReady = computed(
@@ -82,26 +79,6 @@ export const useSyncStore = defineStore('sync', () => {
     syncErrors.value.delete(recipeId)
   }
 
-  function startAutoSync() {
-    if (autoSyncTimer) return
-
-    if (!autoSyncEnabled.value || !isOnline.value) return
-
-    autoSyncTimer = setInterval(() => {
-      if (isOnline.value && syncStateReady.value) {
-        // Trigger sync check (handled by composable)
-        window.dispatchEvent(new CustomEvent('auto-sync-trigger'))
-      }
-    }, autoSyncIntervalMs.value)
-  }
-
-  function stopAutoSync() {
-    if (autoSyncTimer) {
-      clearInterval(autoSyncTimer)
-      autoSyncTimer = null
-    }
-  }
-
   function resetSyncState() {
     state.value = 'idle'
     progress.value = null
@@ -117,8 +94,6 @@ export const useSyncStore = defineStore('sync', () => {
     activeConflicts,
     syncErrors,
     lastError,
-    autoSyncEnabled,
-    autoSyncIntervalMs,
     deviceId,
     syncStateReady,
     hasConflicts,
@@ -129,8 +104,6 @@ export const useSyncStore = defineStore('sync', () => {
     clearSyncProgress,
     addSyncError,
     clearSyncError,
-    startAutoSync,
-    stopAutoSync,
     resetSyncState,
   }
 })

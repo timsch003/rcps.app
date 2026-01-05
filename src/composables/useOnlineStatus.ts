@@ -26,16 +26,11 @@ export function useOnlineStatus() {
   onMounted(() => {
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-
-    if (syncStore.autoSyncEnabled) {
-      syncStore.startAutoSync()
-    }
   })
 
   onUnmounted(() => {
     window.removeEventListener('online', handleOnline)
     window.removeEventListener('offline', handleOffline)
-    syncStore.stopAutoSync()
   })
 
   return { isOnline, wasOffline }

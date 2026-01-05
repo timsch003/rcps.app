@@ -83,7 +83,6 @@ onMounted(async () => {
   if (authStore.isAuth) {
     await initializeRecipes()
   }
-  syncStore.startAutoSync()
 })
 
 async function handleEdit(recipeId: string, updates: Partial<RecipeLocal>) {

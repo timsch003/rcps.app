@@ -5,8 +5,8 @@ import type {
   PendingChange,
   ConflictLog,
   DeviceRegistry,
-  ValidationError,
 } from '@/types'
+import { validators } from './validators'
 
 export class RecipesDB extends Dexie {
   recipes!: Dexie.Table<RecipeLocal>
@@ -29,64 +29,11 @@ export class RecipesDB extends Dexie {
 
 export const db = new RecipesDB()
 
-// Validation
-export const recipeValidator = {
-  validate(recipe: any): ValidationError[] {
-    const errors: ValidationError[] = []
-
-    if (!recipe.id || typeof recipe.id !== 'string') {
-      errors.push({ field: 'id', message: 'ID must be a string', value: recipe.id })
-    }
-
-    if (!recipe.name || typeof recipe.name !== 'string' || recipe.name.trim().length === 0) {
-      errors.push({
-        field: 'name',
-        message: 'Name is required and must be non-empty',
-        value: recipe.name,
-      })
-    }
-
-    if (recipe.name && recipe.name.length > 255) {
-      errors.push({
-        field: 'name',
-        message: 'Name must not exceed 255 characters',
-        value: recipe.name,
-      })
-    }
-
-    if (typeof recipe.updated !== 'number' || recipe.updated < 0) {
-      errors.push({
-        field: 'updated',
-        message: 'Updated timestamp must be a positive number',
-        value: recipe.updated,
-      })
-    }
-
-    if (!recipe.device_id || typeof recipe.device_id !== 'string') {
-      errors.push({ field: 'device_id', message: 'Device ID is required', value: recipe.device_id })
-    }
-
-    if (recipe.retry_count !== undefined && typeof recipe.retry_count !== 'number') {
-      errors.push({
-        field: 'retry_count',
-        message: 'Retry count must be a number',
-        value: recipe.retry_count,
-      })
-    }
-
-    return errors
-  },
-
-  isValid(recipe: any): boolean {
-    return this.validate(recipe).length === 0
-  },
-}
-
 // CRUD with validation
 export async function saveToDbValidated(
   recipe: RecipeLocal,
-): Promise<{ id: string; errors: ValidationError[] }> {
-  const errors = recipeValidator.validate(recipe)
+): Promise<{ id: string; errors: any[] }> {
+  const errors = validators.validateRecipe(recipe as unknown as Record<string, unknown>)
   if (errors.length > 0) {
     return { id: '', errors }
   }
