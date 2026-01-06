@@ -187,14 +187,6 @@ async function handleAddRecipe() {
         </div>
       </div>
     </div>
-
-    <!-- DB Stats -->
-    <div v-if="recipesStore.dbStats" class="db-stats">
-      <small>
-        Local DB: {{ recipesStore.dbStats.totalRecipes }} recipes,
-        {{ (recipesStore.dbStats.totalSize / 1024).toFixed(2) }} KB
-      </small>
-    </div>
   </div>
 </template>
 

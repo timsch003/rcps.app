@@ -6,8 +6,7 @@ import HomeIcon from '../components/icons/IconHome.vue'
 import SettingsIcon from '../components/icons/IconSettings.vue'
 import SearchIcon from '../components/icons/IconSearch.vue'
 import MenuIcon from '../components/icons/IconMenu.vue'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+import { t } from '@/lang/i18n'
 </script>
 
 <template>

@@ -4,7 +4,6 @@ import { pb, registerUser, loginUser, logoutUser  } from '@/services/pocketbase'
 import { getOrCreateDeviceId } from '@/utils/uuid'
 import errorTranslator from '@/utils/errorTranslator'
 import type { AuthRecord } from 'pocketbase'
-import type { ComposerTranslation } from 'vue-i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<{ id: string; email: string } | null>(null)
@@ -21,24 +20,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }, true) // fireImmediately = true to sync initial state
 
-  async function register(email: string, password: string, passwordConfirm: string, t: ComposerTranslation) {
+  async function register(email: string, password: string, passwordConfirm: string) {
     const newUserId = getOrCreateDeviceId()
 
     try {
       await registerUser(newUserId, email, password, passwordConfirm)
       return { success: true }
     } catch (e: unknown) {
-      return { success: false, error: errorTranslator(e, t) }
+      return { success: false, error: errorTranslator(e) }
     }
   }
 
-  async function login(email: string, password: string, t: ComposerTranslation) {
+  async function login(email: string, password: string) {
     try {
       await loginUser(email, password)
       // PocketBase automatically saves to authStore
       return { success: true }
     } catch (e: unknown) {
-      return { success: false, error: errorTranslator(e, t) }
+      return { success: false, error: errorTranslator(e) }
     }
   }
 

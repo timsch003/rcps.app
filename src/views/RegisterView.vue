@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { t } from '@/lang/i18n'
 import { useAuthStore } from '@/stores/auth'
 
-const { t } = useI18n()
 const auth = useAuthStore()
-
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
@@ -13,7 +11,7 @@ const responseError = ref('')
 const isEmailValidationSent = ref(false)
 
 async function onSubmit() {
-  const register = await auth.register(email.value, password.value, passwordConfirm.value, t)
+  const register = await auth.register(email.value, password.value, passwordConfirm.value)
 
   if (register.success) {
     isEmailValidationSent.value = true

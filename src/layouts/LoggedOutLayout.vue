@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import AppLogo from '../components/AppLogo.vue'
 import LinkButton from '../components/LinkButton.vue'
-import { useI18n } from 'vue-i18n'
-const { t } = useI18n()
+import { t } from '@/lang/i18n'
 </script>
 
 <template>

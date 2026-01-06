@@ -1,7 +1,7 @@
 import { ClientResponseError } from 'pocketbase'
-import type { ComposerTranslation } from 'vue-i18n'
+import { t } from '@/lang/i18n'
 
-export default function errorFormatter(e: unknown, t: ComposerTranslation) {
+export default function errorTranslator(e: unknown) {
   if (e instanceof ClientResponseError && e.response && e.response.data) {
     const keyName = Object.keys(e.response.data)[0]!
     const d = e.response.data

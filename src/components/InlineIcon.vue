@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import TagsIcon from './icons/IconTags.vue'
+import { t } from '@/lang/i18n';
 
 defineProps({
   icon: {
@@ -15,7 +16,7 @@ defineProps({
 
 <template>
   <span :class="inBreadcrumbs ? 'breadcrumb-icon' : ''">
-    <TagsIcon aria-label="{{ $t('Tags') }}" />
+    <TagsIcon :aria-label="t('Tags')" />
     <slot />
   </span>
 </template>

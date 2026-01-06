@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import InlineIcon from './InlineIcon.vue'
+import { t } from '../../lang/i18n';
 import type { IdAndName, Recipe } from '../types'
 
 const { origin, recipe, isSingleRecipe } = defineProps<{
@@ -12,7 +13,7 @@ const { origin, recipe, isSingleRecipe } = defineProps<{
 <template>
   <nav>
     <a href="/">
-      <InlineIcon icon="tag" inBreadcrumbs>{{ $t('Tags') }}</InlineIcon>
+      <InlineIcon icon="tag" inBreadcrumbs>{{ t('Tags') }}</InlineIcon>
     </a>
     <span aria-hidden="true">→</span>
     <span v-if="!isSingleRecipe" class="shown-tag">{{ origin.name }}</span>
