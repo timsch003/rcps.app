@@ -8,8 +8,37 @@ const pb = new PocketBase(
   new LocalAuthStore('pb_auth'),
 )
 
-// Enable auto-cancellation of duplicate requests
 pb.autoCancellation(true)
+
+export async function registerUser(
+  id: string,
+  email: string,
+  password: string,
+  passwordConfirm: string,
+): Promise<void> {
+  await pb.collection('users').create({
+    id: id,
+    email: email,
+    password: password,
+    passwordConfirm: passwordConfirm,
+  })
+}
+
+export async function loginUser(email: string, password: string): Promise<void> {
+  await pb.collection('users').authWithPassword(email, password)
+}
+
+export async function logoutUser(): Promise<void> {
+  pb.authStore.clear()
+}
+
+export function getCurrentUser(): unknown {
+  return pb.authStore.record
+}
+
+export function isAuthenticated(): boolean {
+  return pb.authStore.isValid
+}
 
 export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
   try {

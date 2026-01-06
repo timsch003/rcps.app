@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { isAuthenticated } from './services/auth'
+import { isAuthenticated } from './services/pocketbase'
 import AppLayout from './layouts/AppLayout.vue'
 import LoggedOutLayout from './layouts/LoggedOutLayout.vue'
 import HomeView from './views/HomeView.vue'

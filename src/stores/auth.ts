@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { pb } from '@/services/pocketbase'
+import { pb, registerUser, loginUser, logoutUser  } from '@/services/pocketbase'
 import { getOrCreateDeviceId } from '@/utils/uuid'
 import errorTranslator from '@/utils/errorTranslator'
 import type { AuthRecord } from 'pocketbase'
@@ -25,12 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
     const newUserId = getOrCreateDeviceId()
 
     try {
-      await pb.collection('users').create({
-        id: newUserId,
-        email: email,
-        password: password,
-        passwordConfirm: passwordConfirm,
-      })
+      await registerUser(newUserId, email, password, passwordConfirm)
       return { success: true }
     } catch (e: unknown) {
       return { success: false, error: errorTranslator(e, t) }
@@ -39,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function login(email: string, password: string, t: ComposerTranslation) {
     try {
-      await pb.collection('users').authWithPassword(email, password)
+      await loginUser(email, password)
       // PocketBase automatically saves to authStore
       return { success: true }
     } catch (e: unknown) {
@@ -48,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   async function logout() {
-    pb.authStore.clear()
+    await logoutUser()
     // PocketBase automatically triggers onChange
   }
 
