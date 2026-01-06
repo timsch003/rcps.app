@@ -5,12 +5,13 @@ button {
   color: var(--text);
   border: none;
   padding: 4px 8px;
-  margin-bottom: var(--gap);
+  margin-bottom: 18px;
 }
 
 label {
   display: block;
   padding-bottom: 2px;
+  opacity: var(--secondary-text-opacity);
 }
 
 input[type='text'],
@@ -38,5 +39,22 @@ button:active {
 }
 
 button[type='submit'] {
-  margin-top: var(--gap);
+  margin-top: 8px;
+}
+
+.error,
+.success {
+  margin-top: 26px;
+  padding: 12px 8px;
+  max-width: fit-content;
+}
+
+.error {
+  border-top: 2px solid red;
+  border-bottom: 2px solid red;
+}
+
+.success {
+  border-top: 2px solid green;
+  border-bottom: 2px solid green;
 }

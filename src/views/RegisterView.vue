@@ -9,14 +9,16 @@ const auth = useAuthStore()
 const email = ref('')
 const password = ref('')
 const passwordConfirm = ref('')
+const responseError = ref('')
 const isEmailValidationSent = ref(false)
 
 async function onSubmit() {
-  const res = await auth.register(email.value, password.value, passwordConfirm.value)
-  if (res.success) {
+  const register = await auth.register(email.value, password.value, passwordConfirm.value, t)
+
+  if (register.success) {
     isEmailValidationSent.value = true
   } else {
-    console.error(res.error)
+    responseError.value = register.error || ''
   }
 }
 </script>
@@ -25,16 +27,17 @@ async function onSubmit() {
   <div>
     <h1>{{ t('Register') }}</h1>
     <form v-if="!isEmailValidationSent" @submit.prevent="onSubmit" autocomplete="on">
-      <label for="email">{{ t('Email') }}</label>
-      <input v-model="email" type="email" id="email" />
-      <label for="password">{{ t('Password') }}</label>
-      <input v-model="password" type="password" id="password" />
-      <label for="password_confirm">{{ t('Confirm password') }}</label>
-      <input v-model="passwordConfirm" type="password" id="password_confirm" />
+      <label for="email" aria-required="true">{{ t('Email') }}</label>
+      <input v-model="email" type="email" id="email" required="true" />
+      <label for="password" aria-required="true">{{ t('Password') }}</label>
+      <input v-model="password" type="password" id="password" required="true" />
+      <label for="password_confirm" aria-required="true">{{ t('Confirm password') }}</label>
+      <input v-model="passwordConfirm" type="password" id="password_confirm" required="true" />
       <button type="submit">{{ t('Register') }}</button>
+      <p class="error" v-if="!isEmailValidationSent && responseError != ''">
+        {{ responseError }}
+      </p>
     </form>
-    <p v-else>{{ t('Email validation sent. Please check your inbox.') }}</p>
+    <p class="success" v-else>{{ t('Email validation sent. Please check your inbox.') }}</p>
   </div>
 </template>
-
-<style scoped></style>
