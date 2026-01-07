@@ -4,7 +4,7 @@ import type { RecipeLocal } from '@/types'
 
 // Use PocketBase's built-in LocalAuthStore for automatic auth persistence
 const pb = new PocketBase(
-  import.meta.env.PB_URL || 'http://127.0.0.1:8090',
+  import.meta.env.VITE_PB_URL,
   new LocalAuthStore('pb_auth'),
 )
 
