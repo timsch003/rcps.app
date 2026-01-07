@@ -1,7 +1,7 @@
 import { ClientResponseError } from 'pocketbase'
 import { t } from '@/lang/i18n'
 
-export default function errorTranslator(e: unknown) {
+export default function errorTranslationHandler(e: unknown) {
   if (e instanceof ClientResponseError && e.response && e.response.data) {
     const keyName = Object.keys(e.response.data)[0]!
     const d = e.response.data
@@ -9,18 +9,18 @@ export default function errorTranslator(e: unknown) {
     switch (keyName) {
       case 'email':
         if (d.email.code === 'validation_not_unique') {
-          return t('This email is already being used.')
+          return t('registration.email_in_use')
         }
       case 'password':
         if (d.password.code === 'validation_min_text_constraint') {
-          return t('The password has to be at least 8 characters long.')
+          return t('registration.password_too_short')
         }
       case 'passwordConfirm':
         if (d.passwordConfirm.code === 'validation_values_mismatch') {
-          return t('The passwords do not match.')
+          return t('registration.passwords_do_not_match')
         }
     }
   }
 
-  return t('An error occurred during registration.')
+  return t('registration.error')
 }

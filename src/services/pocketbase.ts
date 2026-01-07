@@ -15,12 +15,14 @@ export async function registerUser(
   email: string,
   password: string,
   passwordConfirm: string,
+  locale: string,
 ): Promise<void> {
   await pb.collection('users').create({
     id: id,
     email: email,
     password: password,
     passwordConfirm: passwordConfirm,
+    locale: locale,
   })
 }
 

@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { pb, registerUser, loginUser, logoutUser  } from '@/services/pocketbase'
+import { pb, registerUser, loginUser, logoutUser } from '@/services/pocketbase'
 import { getOrCreateDeviceId } from '@/utils/uuid'
-import errorTranslator from '@/utils/errorTranslator'
+import errorTranslationHandler from '@/utils/errorTranslationHandler'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -20,14 +20,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }, true) // fireImmediately = true to sync initial state
 
-  async function register(email: string, password: string, passwordConfirm: string) {
+  async function register(
+    email: string,
+    password: string,
+    passwordConfirm: string,
+    locale: string,
+  ) {
     const newUserId = getOrCreateDeviceId()
 
     try {
-      await registerUser(newUserId, email, password, passwordConfirm)
+      await registerUser(newUserId, email, password, passwordConfirm, locale)
       return { success: true }
     } catch (e: unknown) {
-      return { success: false, error: errorTranslator(e) }
+      return { success: false, error: errorTranslationHandler(e) }
     }
   }
 
@@ -37,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
       // PocketBase automatically saves to authStore
       return { success: true }
     } catch (e: unknown) {
-      return { success: false, error: errorTranslator(e) }
+      return { success: false, error: errorTranslationHandler(e) }
     }
   }
 

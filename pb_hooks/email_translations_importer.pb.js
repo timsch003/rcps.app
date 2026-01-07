@@ -15,7 +15,6 @@ curl -X POST "[URL]/api/import-locales" \
 
 routerAdd('POST', '/api/import-locales', (e) => {
   try {
-    // Get parsed request body (already JSON parsed by PocketBase)
     const info = e.requestInfo()
     const payload = info.body
 
@@ -23,7 +22,6 @@ routerAdd('POST', '/api/import-locales', (e) => {
       return e.json(400, { error: 'Invalid request body' })
     }
 
-    // Ensure locales collection exists
     let collection
     try {
       collection = $app.findCollectionByNameOrId('email_translations')
@@ -36,23 +34,21 @@ routerAdd('POST', '/api/import-locales', (e) => {
     let created = 0
     let updated = 0
 
-    // Iterate locales
     for (const locale in payload) {
       const entries = payload[locale]
       if (!entries || typeof entries !== 'object') continue
 
-      for (const key in entries) {
+      for (let key in entries) {
         const value = entries[key]
         if (typeof value !== 'string') continue
 
-        // Only import keys with "email." prefix
         if (!key.startsWith('email.')) continue
+        key = key.substring(6)
 
-        // Try to find existing record
         let rec = null
         try {
           rec = $app.findFirstRecordByFilter(
-            'locales',
+            'email_translations',
             `locale = "${locale}" && key = "${key}"`
           )
         } catch (err) {

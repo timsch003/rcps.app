@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { t } from '@/lang/i18n'
 import { useAuthStore } from '@/stores/auth'
+import { t } from '@/lang/i18n'
 
 const auth = useAuthStore()
 const email = ref('')
@@ -10,8 +10,11 @@ const passwordConfirm = ref('')
 const responseError = ref('')
 const isEmailValidationSent = ref(false)
 
+const rawLocale = window.navigator.language || 'en-US'
+const locale = rawLocale.split('-')[0]?.toLowerCase() || 'en'
+
 async function onSubmit() {
-  const register = await auth.register(email.value, password.value, passwordConfirm.value)
+  const register = await auth.register(email.value, password.value, passwordConfirm.value, locale)
 
   if (register.success) {
     isEmailValidationSent.value = true
@@ -36,6 +39,6 @@ async function onSubmit() {
         {{ responseError }}
       </p>
     </form>
-    <p class="success" v-else>{{ t('Email validation sent. Please check your inbox.') }}</p>
+    <p class="success" v-else>{{ t('registration.email_verification_sent') }}</p>
   </div>
 </template>
