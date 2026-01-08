@@ -1,45 +1,54 @@
 import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
+import { generateUuid } from '@/utils/uuid'
+import errorTranslationHandler from '@/utils/errorTranslationHandler'
 import { validators } from './validators'
 import type { RecipeLocal } from '@/types'
 
 // Use PocketBase's built-in LocalAuthStore for automatic auth persistence
-const pb = new PocketBase(
-  import.meta.env.VITE_PB_URL,
-  new LocalAuthStore('pb_auth'),
-)
+const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('pb_auth'))
 
 pb.autoCancellation(true)
 
 export async function registerUser(
-  id: string,
   email: string,
   password: string,
   passwordConfirm: string,
   locale: string,
-): Promise<void> {
-  await pb.collection('users').create({
-    id: id,
-    email: email,
-    password: password,
-    passwordConfirm: passwordConfirm,
-    locale: locale,
-  })
+) {
+  try {
+    await pb.collection('users').create({
+      id: generateUuid(),
+      email: email,
+      password: password,
+      passwordConfirm: passwordConfirm,
+      locale: locale,
+    })
+    return { success: true }
+  } catch (e: unknown) {
+    return { success: false, error: errorTranslationHandler(e) }
+  }
 }
 
-export async function loginUser(email: string, password: string): Promise<void> {
-  await pb.collection('users').authWithPassword(email, password)
+export async function verifyEmail(token: string) {
+  try {
+    await pb.collection('users').confirmVerification(token)
+    return { success: true }
+  } catch (e: unknown) {
+    return { success: false, error: errorTranslationHandler(e) }
+  }
+}
+
+export async function loginUser(email: string, password: string) {
+  try {
+    await pb.collection('users').authWithPassword(email, password)
+    return { success: true }
+  } catch (e: unknown) {
+    return { success: false, error: errorTranslationHandler(e) }
+  }
 }
 
 export async function logoutUser(): Promise<void> {
   pb.authStore.clear()
-}
-
-export function getCurrentUser(): unknown {
-  return pb.authStore.record
-}
-
-export function isAuthenticated(): boolean {
-  return pb.authStore.isValid
 }
 
 export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {

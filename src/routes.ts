@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { isAuthenticated } from './services/pocketbase'
-import AppLayout from './layouts/AppLayout.vue'
-import AuthLayout from './layouts/AuthLayout.vue'
+import { useAuthStore } from '@/stores/auth'
+import AppLayout from '@/views/layouts/AppLayout.vue'
+import AuthLayout from '@/views/layouts/AuthLayout.vue'
 import HomeView from './views/HomeView.vue'
 import RecipesView from './views/RecipesView.vue'
 import RecipeView from './views/RecipeView.vue'
@@ -66,7 +66,7 @@ const router = createRouter({
 })
 
 router.beforeEach(async (to) => {
-  if ((await !isAuthenticated()) && !to.path.startsWith('/a')) {
+  if ((await !useAuthStore().isAuth) && !to.path.startsWith('/a')) {
     return { name: 'login' }
   }
 })

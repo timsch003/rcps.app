@@ -1,62 +1,22 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { pb, registerUser, loginUser, logoutUser } from '@/services/pocketbase'
-import { getOrCreateDeviceId } from '@/utils/uuid'
-import errorTranslationHandler from '@/utils/errorTranslationHandler'
+import { pb } from '@/services/pocketbase'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<{ id: string; email: string } | null>(null)
   const isAuth = computed(() => pb.authStore.isValid && !!user.value)
-  const deviceId = getOrCreateDeviceId()
 
-  // Listen to PocketBase auth changes
   pb.authStore.onChange((token, model: AuthRecord) => {
     if (model) {
-      const userId = model.userId || model.id
-      user.value = { id: userId, email: model.email }
+      user.value = { id: model.id, email: model.email }
     } else {
       user.value = null
     }
-  }, true) // fireImmediately = true to sync initial state
-
-  async function register(
-    email: string,
-    password: string,
-    passwordConfirm: string,
-    locale: string,
-  ) {
-    const newUserId = getOrCreateDeviceId()
-
-    try {
-      await registerUser(newUserId, email, password, passwordConfirm, locale)
-      return { success: true }
-    } catch (e: unknown) {
-      return { success: false, error: errorTranslationHandler(e) }
-    }
-  }
-
-  async function login(email: string, password: string) {
-    try {
-      await loginUser(email, password)
-      // PocketBase automatically saves to authStore
-      return { success: true }
-    } catch (e: unknown) {
-      return { success: false, error: errorTranslationHandler(e) }
-    }
-  }
-
-  async function logout() {
-    await logoutUser()
-    // PocketBase automatically triggers onChange
-  }
+  }, true)
 
   return {
     user,
     isAuth,
-    deviceId,
-    register,
-    login,
-    logout,
   }
 })

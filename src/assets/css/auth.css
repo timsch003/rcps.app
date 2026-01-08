@@ -57,14 +57,14 @@ form {
       margin-top: 0;
       margin-bottom: 0;
     }
-
-    .spinner {
-      width: var(--icon-size);
-      height: var(--icon-size);
-      margin-left: 10px;
-      animation: spin 2s linear infinite;
-    }
   }
+}
+
+svg.spinner {
+  width: var(--icon-size);
+  height: var(--icon-size);
+  margin-left: 10px;
+  animation: spin 2s linear infinite;
 }
 
 @keyframes spin {

@@ -8,7 +8,7 @@ export function getOrCreateDeviceId(): string {
   let deviceId = localStorage.getItem('deviceId')
   if (!deviceId) {
     deviceId = generateUuid()
-    localStorage.setItem('deviceId', deviceId)
+    localStorage.setItem(`${import.meta.env.VITE_APP_NAME}_device_id`, deviceId)
   }
   return deviceId
 }

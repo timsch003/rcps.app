@@ -1,14 +1,16 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { RouterLink } from 'vue-router'
+</script>
 
 <template>
-  <a href="/">
+  <RouterLink :to="{ name: 'home' }">
     <div class="logo">
       <h1 aria-label="Recipes app">
         r<span :aria-hidden="true">e</span>c<span :aria-hidden="true">i</span>p<span :aria-hidden="true">e</span>s<span
           :aria-hidden="true">.</span>app
       </h1>
     </div>
-  </a>
+  </RouterLink>
 </template>
 
 <style scoped>

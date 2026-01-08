@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import AppLogo from '../components/AppLogo.vue'
-import LinkButton from '../components/LinkButton.vue'
-import FavoritesIcon from '../components/icons/IconFavorites.vue'
-import HomeIcon from '../components/icons/IconHome.vue'
-import SettingsIcon from '../components/icons/IconSettings.vue'
-import SearchIcon from '../components/icons/IconSearch.vue'
-import MenuIcon from '../components/icons/IconMenu.vue'
+import AppLogo from '@/components/AppLogo.vue'
+import LinkButton from '@/components/LinkButton.vue'
+import FavoritesIcon from '@/components/icons/IconFavorites.vue'
+import HomeIcon from '@/components/icons/IconHome.vue'
+import SettingsIcon from '@/components/icons/IconSettings.vue'
+import SearchIcon from '@/components/icons/IconSearch.vue'
+import MenuIcon from '@/components/icons/IconMenu.vue'
 import { t } from '@/lang/i18n'
 </script>
 

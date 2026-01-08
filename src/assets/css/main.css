@@ -1,4 +1,4 @@
 @import 'variables' layer(variables);
 @import 'reset' layer(reset);
 @import 'base' layer(base);
-@import 'forms' layer(forms);
+@import 'auth' layer(auth);
