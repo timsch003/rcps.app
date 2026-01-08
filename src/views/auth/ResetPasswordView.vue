@@ -34,5 +34,5 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>Reset password view</div>
+  <div>Reset password view: TODO</div>
 </template>

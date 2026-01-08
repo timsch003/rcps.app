@@ -5,7 +5,7 @@ import { validators } from './validators'
 import type { RecipeLocal } from '@/types'
 
 // Use PocketBase's built-in LocalAuthStore for automatic auth persistence
-const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('pb_auth'))
+const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps.app_auth'))
 
 pb.autoCancellation(true)
 

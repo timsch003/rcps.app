@@ -33,5 +33,5 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>Change email view</div>
+  <div>Change email view: TODO</div>
 </template>

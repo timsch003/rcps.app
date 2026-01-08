@@ -2,7 +2,7 @@
 import { RouterLink } from 'vue-router'
 
 defineProps({
-  href: { type: String, required: true },
+  routeName: { type: String, required: true },
   icon: { type: Object, required: false },
   desc: { type: String, required: true },
   showDesc: { type: Boolean, required: false, default: false },
@@ -11,7 +11,7 @@ defineProps({
 
 <template>
   <div v-if="icon" class="link-button">
-    <RouterLink :to="href" :aria-label="desc">
+    <RouterLink :to="{ name: routeName }" :aria-label="desc">
       <component v-if="icon" :is="icon" />
     </RouterLink>
     <span class="link-button__desc" v-if="showDesc">
@@ -19,7 +19,7 @@ defineProps({
     </span>
   </div>
   <div v-else class="link-button">
-    <RouterLink :to="href" :aria-label="desc">
+    <RouterLink :to="{ name: routeName }" :aria-label="desc">
       {{ desc }}
     </RouterLink>
   </div>

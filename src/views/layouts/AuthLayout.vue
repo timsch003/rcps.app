@@ -9,8 +9,8 @@ import { t } from '@/lang/i18n'
     <header>
       <AppLogo />
       <nav class="top">
-        <LinkButton href="/a/login" :desc="t('auth.login')" />
-        <LinkButton href="/a/register" :desc="t('auth.register')" />
+        <LinkButton routeName="login" :desc="t('auth.login')" />
+        <LinkButton routeName="register" :desc="t('auth.register')" />
       </nav>
     </header>
     <section>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { loginUser } from '@/services/pocketbase'
+import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'
 import IconSpinner from '@/components/icons/IconSpinner.vue'
@@ -11,6 +12,12 @@ const password = ref('')
 const isValidating = ref(false)
 const errorMessage = ref('')
 
+onBeforeMount(() => {
+  if (useAuthStore().isAuth) {
+    router.push({ name: 'home' })
+  }
+})
+
 async function onSubmit() {
   errorMessage.value = ''
   isValidating.value = true
@@ -18,7 +25,7 @@ async function onSubmit() {
   const result = await loginUser(email.value, password.value)
 
   if (result.success) {
-    router.replace({ name: 'home' })
+    router.push({ name: 'home' })
   } else {
     errorMessage.value = t('auth.login_failed')
   }

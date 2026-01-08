@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { registerUser } from '@/services/pocketbase'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'
 import IconSpinner from '@/components/icons/IconSpinner.vue'
 
@@ -10,9 +12,12 @@ const passwordConfirm = ref('')
 const isEmailValidationSent = ref(false)
 const isValidating = ref(false)
 const errorMessage = ref('')
-
 const rawLocale = window.navigator.language || 'en-US'
 const locale = rawLocale.split('-')[0]?.toLowerCase() || 'en'
+
+if (useAuthStore().isAuth) {
+  useRouter().push({ name: 'home' })
+}
 
 async function onSubmit() {
   errorMessage.value = ''

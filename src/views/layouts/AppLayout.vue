@@ -7,6 +7,15 @@ import SettingsIcon from '@/components/icons/IconSettings.vue'
 import SearchIcon from '@/components/icons/IconSearch.vue'
 import MenuIcon from '@/components/icons/IconMenu.vue'
 import { t } from '@/lang/i18n'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter, RouterView } from 'vue-router'
+import { onBeforeMount } from 'vue'
+
+onBeforeMount(() => {
+  if (!useAuthStore().isAuth) {
+    useRouter().replace({ name: 'login' })
+  }
+})
 </script>
 
 <template>
@@ -14,17 +23,17 @@ import { t } from '@/lang/i18n'
     <header>
       <AppLogo />
       <nav class="top">
-        <LinkButton href="#" :icon="SearchIcon" :desc="t('Search')" />
-        <LinkButton href="#" :icon="MenuIcon" :desc="t('Menu')" />
+        <LinkButton routeName="" :icon="SearchIcon" :desc="t('Search')" />
+        <LinkButton routeName="" :icon="MenuIcon" :desc="t('Menu')" />
       </nav>
     </header>
     <section>
       <RouterView />
     </section>
     <nav class="bottom">
-      <LinkButton href="#" :icon="FavoritesIcon" :desc="t('Favorites')" show-desc />
-      <LinkButton href="/" :icon="HomeIcon" :desc="t('Home')" show-desc />
-      <LinkButton href="#" :icon="SettingsIcon" :desc="t('Settings')" show-desc />
+      <LinkButton routeName="" :icon="FavoritesIcon" :desc="t('Favorites')" show-desc />
+      <LinkButton routeName="home" :icon="HomeIcon" :desc="t('Home')" show-desc />
+      <LinkButton routeName="" :icon="SettingsIcon" :desc="t('Settings')" show-desc />
     </nav>
   </main>
 </template>
