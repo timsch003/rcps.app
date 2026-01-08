@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { t } from '@/lang/i18n'
+import IconSpinner from '@/components/icons/IconSpinner.vue'
 
 const auth = useAuthStore()
 const email = ref('')
@@ -9,11 +10,14 @@ const password = ref('')
 const passwordConfirm = ref('')
 const responseError = ref('')
 const isEmailValidationSent = ref(false)
+const isValidating = ref(false)
 
 const rawLocale = window.navigator.language || 'en-US'
 const locale = rawLocale.split('-')[0]?.toLowerCase() || 'en'
 
 async function onSubmit() {
+  responseError.value = ''
+  isValidating.value = true
   const register = await auth.register(email.value, password.value, passwordConfirm.value, locale)
 
   if (register.success) {
@@ -21,6 +25,7 @@ async function onSubmit() {
   } else {
     responseError.value = register.error || ''
   }
+  isValidating.value = false
 }
 </script>
 
@@ -34,7 +39,10 @@ async function onSubmit() {
       <input v-model="password" type="password" id="password" required="true" />
       <label for="password_confirm" aria-required="true">{{ t('Confirm password') }}</label>
       <input v-model="passwordConfirm" type="password" id="password_confirm" required="true" />
-      <button type="submit">{{ t('Register') }}</button>
+      <div class="submit">
+        <button type="submit" :disabled="isValidating">{{ t('Register') }}</button>
+        <IconSpinner v-if="isValidating" class="spinner" />
+      </div>
       <p class="error" v-if="!isEmailValidationSent && responseError != ''">
         {{ responseError }}
       </p>

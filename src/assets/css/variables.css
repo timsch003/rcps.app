@@ -1,51 +1,52 @@
 :root {
-    /* Colors
-    
+  /* Colors
+
     For sufficient contrast ratios, when styling text content
     only ever use --text or --accent on --bg(-*)
 
     */
-    --bg: #0a0a0a;
-    --bg-light: #141414;
-    --bg-lighter: #1f1f1f;
-    --decor: #474747;
-    --text: #f5f5f5;
-    --accent: #a5b6ae;
+  --bg: #0a0a0a;
+  --bg-light: #141414;
+  --bg-lighter: #1f1f1f;
+  --decor: #474747;
+  --text: #f5f5f5;
+  --accent: #a5b6ae;
 
-    /* Accent variations */
-    --linen: #ffede1;
-    --silver: #adadad;
-    --blush: #edadc7;
-    --candy: #ff8591;
-    --rose: #dda6a8;
-    --bronze: #e09f7d;
-    --khaki: #c3a995;
-    --canary: #f7f052;
-    --gold: #efcb68;
-    --algae: #a5b6ae; /* default */
-    --lime: #ddfcad;
-    --moss: #72c077;
-    --neon: #5aff15;
-    --tea: #c9e4ca;
-    --turquoise: #73eedc;
-    --periwinkle: #acacec;
-    --cornflower: #7aa4ff;
-    --powder: #92aedd;
-    --sky: #7cb9df;
-    --lilac: #cba4c1;
+  /* Accent variations */
+  --linen: #ffede1;
+  --silver: #adadad;
+  --blush: #edadc7;
+  --candy: #ff8591;
+  --rose: #dda6a8;
+  --bronze: #e09f7d;
+  --khaki: #c3a995;
+  --canary: #f7f052;
+  --gold: #efcb68;
+  --algae: #a5b6ae; /* default */
+  --lime: #ddfcad;
+  --moss: #72c077;
+  --neon: #5aff15;
+  --tea: #c9e4ca;
+  --turquoise: #73eedc;
+  --periwinkle: #acacec;
+  --cornflower: #7aa4ff;
+  --powder: #92aedd;
+  --sky: #7cb9df;
+  --lilac: #cba4c1;
 
-    /* Fonts
+  /* Fonts
     */
-    --secondary-text-opacity: 0.75;
+  --secondary-text-opacity: 0.75;
 
-    /* Spacings
+  /* Spacings
     */
-    --outer-spacing: 10px;
-    --inner-spacing: 12px;
-    --gap: 12px;
+  --outer-spacing: 10px;
+  --inner-spacing: 12px;
+  --gap: 12px;
 
-    /* UI
+  /* UI
     */
-    --border-radius: 7px;
-    --ui-transition-duration: 0.15s;
+  --border-radius: 7px;
+  --ui-transition-duration: 0.15s;
+  --icon-size: 2rem;
 }

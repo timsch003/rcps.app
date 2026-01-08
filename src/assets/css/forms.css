@@ -1,60 +1,77 @@
-input,
-textarea,
-button {
-  background-color: var(--bg-lighter);
-  color: var(--text);
-  border: none;
-  padding: 4px 8px;
-  margin-bottom: 18px;
+form {
+  input,
+  textarea,
+  button {
+    background-color: var(--bg-lighter);
+    color: var(--text);
+    border: none;
+    padding: 4px 8px;
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    padding-bottom: 2px;
+    opacity: var(--secondary-text-opacity);
+  }
+
+  input[type='text'],
+  input[type='password'],
+  input[type='email'],
+  textarea {
+    border-bottom: 1px solid var(--decor);
+  }
+
+  button {
+    display: block;
+    background-color: var(--bg-lighter);
+    box-shadow: 2px 2px var(--decor);
+    font-weight: 600;
+    transform: translate(-1px, -1px);
+    padding: 6px 12px;
+  }
+
+  button:active:not(:disabled) {
+    box-shadow: 0px 0px var(--bg-lighter);
+    transform: translate(1px, 1px);
+    transition:
+      box-shadow var(--ui-transition-duration) ease-in-out,
+      transform var(--ui-transition-duration) ease-in-out;
+  }
+
+  button[type='submit'] {
+    margin-top: 8px;
+  }
+
+  button:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
+
+  div.submit {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+
+    button {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    .spinner {
+      width: var(--icon-size);
+      height: var(--icon-size);
+      margin-left: 10px;
+      animation: spin 2s linear infinite;
+    }
+  }
 }
 
-label {
-  display: block;
-  padding-bottom: 2px;
-  opacity: var(--secondary-text-opacity);
-}
-
-input[type='text'],
-input[type='password'],
-input[type='email'],
-textarea {
-  border-bottom: 1px solid var(--decor);
-}
-
-button {
-  display: block;
-  background-color: var(--bg-lighter);
-  box-shadow: 2px 2px var(--decor);
-  font-weight: 600;
-  transform: translate(-1px, -1px);
-  padding: 6px 12px;
-}
-
-button:active {
-  box-shadow: 0px 0px var(--bg-lighter);
-  transform: translate(1px, 1px);
-  transition:
-    box-shadow var(--ui-transition-duration) ease-in-out,
-    transform var(--ui-transition-duration) ease-in-out;
-}
-
-button[type='submit'] {
-  margin-top: 8px;
-}
-
-.error,
-.success {
-  margin-top: 26px;
-  padding: 12px 8px;
-  max-width: fit-content;
-}
-
-.error {
-  border-top: 2px solid red;
-  border-bottom: 2px solid red;
-}
-
-.success {
-  border-top: 2px solid green;
-  border-bottom: 2px solid green;
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

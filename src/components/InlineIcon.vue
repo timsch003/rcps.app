@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import TagsIcon from './icons/IconTags.vue'
-import { t } from '@/lang/i18n';
+import { t } from '@/lang/i18n'
 
 defineProps({
   icon: {
@@ -23,8 +23,8 @@ defineProps({
 
 <style scoped>
 svg {
-  width: 16px;
-  height: 16px;
+  width: var(--icon-size);
+  height: var(--icon-size);
   display: inline-flex;
   margin-right: 6px;
   transform: translateY(3px);

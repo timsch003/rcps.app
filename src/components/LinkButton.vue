@@ -49,8 +49,8 @@ a {
   padding: 6px 12px;
 
   svg {
-    width: 2rem;
-    height: 1.5rem;
+    width: var(--icon-size);
+    height: var(--icon-size);
   }
 }
 
