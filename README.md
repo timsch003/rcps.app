@@ -1,5 +1,13 @@
 # rcps.app
 
+**Table of Contents:**
+
+1. [Stack](#stack)
+2. [Setup](#setup)
+3. [Features](#features)
+4. [General TODOs](#general-todos)
+5. [Deployment checklist](#deployment-checklist)
+
 ## Stack
 
 - [Vue.js](https://vuejs.org) (Progressive web app frontend)
@@ -90,9 +98,9 @@ npm run lint
 - Card views for browsing tags and recipes
 - Recipe view for creating, viewing, editing and deleting single recipes
 - Importing recipes from screenshots/photos, workflow:
-  1. Select photos/screenshots from gallery (view with large buttons and icons prompting user to choose one for ingredients and one for directions)
-  2. Set cutouts for both images in one view (each indicated by the icons from step 1)
-Images are then scanned with OCR (executed on client via Tesseract.js or similar)
+  1. Select screenshots/photos from gallery (view with large buttons and icons prompting user to choose one for ingredients and one for instructions)
+  2. Crop both images in one view (types indicated by the icons from step 1)  
+     Images are then scanned with OCR (executed on client via Tesseract.js or similar)
   3. Check imported data (quick-correct view with larger monospace font and common OCR errors highlighted)
 - Settings view
   - Dark/light theme switch
@@ -108,3 +116,14 @@ Images are then scanned with OCR (executed on client via Tesseract.js or similar
 - Bulk importing recipes from exports of other recipe apps / Schema.org / JSON-LD
 - Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
 - Ticking ingredients and resetting ticks
+
+## General TODOs
+
+- Set up multilangual landing page with SEO
+- Research about web dev implications of right-to-left and other language types
+
+## Deployment checklist
+
+- [PocketBase docs "Going to production"](https://pocketbase.io/docs/going-to-production)
+- Email translations import endpoint deleted from pb_hooks?
+- All API Rules safe?
