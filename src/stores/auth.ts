@@ -13,6 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     } else {
       user.value = null
     }
+    // TODO: fire custom js event for login
   }, true)
 
   return {

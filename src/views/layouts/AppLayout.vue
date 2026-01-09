@@ -7,15 +7,6 @@ import SettingsIcon from '@/components/icons/IconSettings.vue'
 import SearchIcon from '@/components/icons/IconSearch.vue'
 import MenuIcon from '@/components/icons/IconMenu.vue'
 import { t } from '@/lang/i18n'
-import { useAuthStore } from '@/stores/auth'
-import { useRouter, RouterView } from 'vue-router'
-import { onBeforeMount } from 'vue'
-
-onBeforeMount(() => {
-  if (!useAuthStore().isAuth) {
-    useRouter().replace({ name: 'login' })
-  }
-})
 </script>
 
 <template>

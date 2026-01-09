@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { ref } from 'vue'
 import { loginUser } from '@/services/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -12,12 +12,6 @@ const password = ref('')
 const isValidating = ref(false)
 const errorMessage = ref('')
 
-onBeforeMount(() => {
-  if (useAuthStore().isAuth) {
-    router.push({ name: 'home' })
-  }
-})
-
 async function onSubmit() {
   errorMessage.value = ''
   isValidating.value = true
@@ -25,11 +19,12 @@ async function onSubmit() {
   const result = await loginUser(email.value, password.value)
 
   if (result.success) {
+    // TODO: wait for auth store to update
     router.push({ name: 'home' })
   } else {
     errorMessage.value = t('auth.login_failed')
+    isValidating.value = false
   }
-  isValidating.value = false
 }
 </script>
 

@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/views/layouts/AppLayout.vue'
 import AuthLayout from '@/views/layouts/AuthLayout.vue'
@@ -17,6 +18,11 @@ const router = createRouter({
     {
       path: '/',
       component: AppLayout,
+      beforeEnter: () => {
+        if (!useAuthStore().isAuth) {
+          return { name: 'login' }
+        }
+      },
       children: [
         {
           path: '/',
@@ -38,6 +44,11 @@ const router = createRouter({
     {
       path: '/',
       component: AuthLayout,
+      beforeEnter: () => {
+        if (useAuthStore().isAuth) {
+          return { name: 'home' }
+        }
+      },
       children: [
         {
           path: '/login',
@@ -49,6 +60,12 @@ const router = createRouter({
           name: 'register',
           component: RegisterView,
         },
+      ],
+    },
+    {
+      path: '/',
+      component: AuthLayout,
+      children: [
         {
           path: '/verify-email',
           name: 'verify-email',
