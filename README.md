@@ -92,7 +92,7 @@ npm run lint
 - Importing recipes from screenshots/photos, workflow:
   1. Select photos/screenshots from gallery (view with large buttons and icons prompting user to choose one for ingredients and one for directions)
   2. Set cutouts for both images in one view (each indicated by the icons from step 1)
-  - Images are scanned with OCR (executed on client via Tesseract.js or similar)
+Images are then scanned with OCR (executed on client via Tesseract.js or similar)
   3. Check imported data (quick-correct view with larger monospace font and common OCR errors highlighted)
 - Settings view
   - Dark/light theme switch
