@@ -85,21 +85,26 @@ npm run lint
 
 ### MVP
 
-- User accounts
-- Local data persistence and sync
-- Manual recipe creation
-- Home (tags), recipes and recipe views
-- Top-level favorites filter
+- Basic user accounts
+- Local data persistence and server sync
+- Card views for browsing tags and recipes
+- Recipe view for creating, viewing, editing and deleting single recipes
+- Importing recipes from screenshots/photos, workflow:
+  1. Select photos/screenshots from gallery (view with large buttons and icons prompting user to choose one for ingredients and one for directions)
+  2. Set cutouts for both images in one view (each indicated by the icons from step 1)
+  - Images are scanned with OCR (executed on client via Tesseract.js or similar)
+  3. Check imported data (quick-correct view with larger monospace font and common OCR errors highlighted)
 - Settings view
   - Dark/light theme switch
-  - Accent color (based on theme)
+  - Accent color selection (based on dark/light theme)
   - Tags (view, add, edit, delete)
+  - Language (automatic or manual locale selection)
 
 ### Planned (sorted by urgency in relation to complexity)
 
-- Importing recipes from websites and social media platforms
-- Top-level sorting toggle (alphabetical <-> last opened)
+- Favorites filter toggle for card views
+- Alphabetical <-> recent sorting toggle for card views
 - Multiple tags selection mode
-- Categorized tags options
-- Importing recipes from export files, text and photos
+- Bulk importing recipes from exports of other recipe apps / Schema.org / JSON-LD
+- Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
 - Ticking ingredients and resetting ticks
