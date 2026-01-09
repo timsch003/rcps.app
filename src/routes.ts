@@ -60,25 +60,19 @@ const router = createRouter({
           name: 'register',
           component: RegisterView,
         },
-      ],
-    },
-    {
-      path: '/',
-      component: AuthLayout,
-      children: [
         {
-          path: '/verify-email',
-          name: 'verify-email',
+          path: '/verify',
+          name: 'verify',
           component: VerifyEmailView,
         },
         {
-          path: '/reset-password',
-          name: 'reset-password',
+          path: '/reset',
+          name: 'reset',
           component: ResetPasswordView,
         },
         {
-          path: '/change-email',
-          name: 'change-email',
+          path: '/change',
+          name: 'change',
           component: ChangeEmailView,
         },
         {

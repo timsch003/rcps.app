@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { pb } from '@/services/pocketbase'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<{ id: string; email: string } | null>(null)
-  const isAuth = computed(() => pb.authStore.isValid && !!user.value)
+  const isAuth = ref(<boolean>false)
 
   pb.authStore.onChange((token, model: AuthRecord) => {
     if (model) {
@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     } else {
       user.value = null
     }
-    // TODO: fire custom js event for login
+    isAuth.value = pb.authStore.isValid && !!user.value
   }, true)
 
   return {

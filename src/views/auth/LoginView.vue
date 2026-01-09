@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'
 import IconSpinner from '@/components/icons/IconSpinner.vue'
 
+const authStore = useAuthStore()
 const router = useRouter()
 const email = ref('')
 const password = ref('')
@@ -17,9 +18,7 @@ async function onSubmit() {
   isValidating.value = true
 
   const result = await loginUser(email.value, password.value)
-
-  if (result.success) {
-    // TODO: wait for auth store to update
+  if (result.success && authStore.isAuth) {
     router.push({ name: 'home' })
   } else {
     errorMessage.value = t('auth.login_failed')
