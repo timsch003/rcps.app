@@ -44,9 +44,11 @@
   --inner-spacing: 12px;
   --gap: 12px;
 
-  /* UI
+  /* Miscellaneous
     */
   --border-radius: 7px;
   --transition-duration: 0.15s;
   --icon-size: 2rem;
+  --icon-size-s: 1.5rem;
+  --nav-border-width: 2px;
 }

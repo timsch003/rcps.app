@@ -67,6 +67,23 @@ svg.spinner {
   animation: spin 2s linear infinite;
 }
 
+p.error,
+p.success {
+  margin-top: 26px;
+  padding: 12px 8px;
+  max-width: fit-content;
+}
+
+p.error {
+  border-top: 2px solid red;
+  border-bottom: 2px solid red;
+}
+
+p.success {
+  border-top: 2px solid green;
+  border-bottom: 2px solid green;
+}
+
 @keyframes spin {
   from {
     transform: rotate(0deg);

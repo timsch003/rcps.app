@@ -38,6 +38,8 @@ defineProps({
 span.button-link__desc {
   opacity: var(--secondary-text-opacity);
   margin-top: 2px;
+  max-width: min-content;
+  text-align: center;
 }
 
 a {

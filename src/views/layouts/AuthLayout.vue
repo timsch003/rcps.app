@@ -36,11 +36,19 @@ section {
   padding: var(--inner-spacing) var(--outer-spacing);
 }
 
-header,
+a.logo {
+  display: block;
+  text-align: center;
+  margin-bottom: var(--inner-spacing);
+}
+
 nav.top {
   display: flex;
   align-items: center;
-  background-color: var(--bg);
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  margin-bottom: var(--inner-spacing);
 }
 
 header {
@@ -57,11 +65,5 @@ header {
   background-color: var(--bg);
   border-bottom: var(--nav-border-width) solid var(--bg-lighter);
   padding: var(--outer-spacing) var(--outer-spacing) var(--outer-spacing) var(--outer-spacing);
-}
-
-nav.top {
-  justify-content: flex-end;
-  gap: var(--gap);
-  width: 100vw;
 }
 </style>

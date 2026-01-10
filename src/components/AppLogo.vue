@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+
+defineProps<{ omitAnimation?: boolean }>()
 </script>
 
 <template>
-  <RouterLink :to="{ name: 'home' }">
-    <div class="logo">
-      <h1 aria-label="Recipes app">
-        r<span :aria-hidden="true">e</span>c<span :aria-hidden="true">i</span>p<span :aria-hidden="true">e</span>s<span
-          :aria-hidden="true">.</span>app
-      </h1>
-    </div>
+  <RouterLink class="logo" :to="{ name: 'home' }">
+    <h1 aria-label="recipes app" :class="{ anim: !omitAnimation }">
+      r<span aria-hidden="true">e</span>c<span aria-hidden="true">i</span>p<span
+        aria-hidden="true">e</span>s<span>.</span>app
+    </h1>
   </RouterLink>
 </template>
 
 <style scoped>
-div.logo {
+a.logo {
   --base-letter-spacing: -0.05ch;
 
   h1 {
@@ -29,15 +29,18 @@ div.logo {
   h1 span:not(:last-of-type) {
     opacity: 0;
     letter-spacing: -1ch;
+  }
+
+  h1.anim span:not(:last-of-type) {
     animation: app-name 4s cubic-bezier(0.5, -0.3, 0.5, 1);
   }
 
-  h1 span:last-of-type {
+  h1.anim span:last-of-type {
     animation: app-name-dot 4s cubic-bezier(0.5, -0.3, 0.5, 1);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    h1 span {
+    h1.anim span {
       animation: none;
     }
   }
