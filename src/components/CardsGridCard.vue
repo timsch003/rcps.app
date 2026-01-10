@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import InlineIcon from './InlineIcon.vue'
+import IconInline from './IconInline.vue'
 import type { IdAndName, Recipe } from '../types'
 
 defineProps<{
@@ -16,9 +16,9 @@ defineProps<{
     ">
     <h2 class="heading">{{ tag ? tag.name : recipe?.name }}</h2>
     <div v-if="!tag && recipe?.tags?.length" class="card__section">
-      <InlineIcon icon="tag">
+      <IconInline icon="tag">
         {{recipe?.tags?.map((c) => c.name).join(', ')}}
-      </InlineIcon>
+      </IconInline>
     </div>
   </RouterLink>
 </template>

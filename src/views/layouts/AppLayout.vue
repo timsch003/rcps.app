@@ -1,30 +1,36 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AppLogo from '@/components/AppLogo.vue'
-import LinkButton from '@/components/LinkButton.vue'
+import MenuOverlay from '@/components/MenuOverlay.vue'
+import ButtonLink from '@/components/ButtonLink.vue'
+import ButtonAction from '@/components/ButtonAction.vue'
 import FavoritesIcon from '@/components/icons/IconFavorites.vue'
 import HomeIcon from '@/components/icons/IconHome.vue'
 import SettingsIcon from '@/components/icons/IconSettings.vue'
 import SearchIcon from '@/components/icons/IconSearch.vue'
 import MenuIcon from '@/components/icons/IconMenu.vue'
 import { t } from '@/lang/i18n'
+
+const menuOverlayOpen = ref(false)
 </script>
 
 <template>
+  <MenuOverlay v-model="menuOverlayOpen" />
   <main>
     <header>
       <AppLogo />
       <nav class="top">
-        <LinkButton routeName="" :icon="SearchIcon" :desc="t('Search')" />
-        <LinkButton routeName="" :icon="MenuIcon" :desc="t('Menu')" />
+        <ButtonLink routeName="" :icon="SearchIcon" :desc="t('Search')" />
+        <ButtonAction :icon="MenuIcon" :desc="t('Menu')" @click="menuOverlayOpen = true" />
       </nav>
     </header>
     <section>
       <RouterView />
     </section>
     <nav class="bottom">
-      <LinkButton routeName="" :icon="FavoritesIcon" :desc="t('Favorites')" show-desc />
-      <LinkButton routeName="home" :icon="HomeIcon" :desc="t('Home')" show-desc />
-      <LinkButton routeName="" :icon="SettingsIcon" :desc="t('Settings')" show-desc />
+      <ButtonLink routeName="" :icon="FavoritesIcon" :desc="t('Favorites')" show-desc />
+      <ButtonLink routeName="home" :icon="HomeIcon" :desc="t('Home')" show-desc />
+      <ButtonLink routeName="" :icon="SettingsIcon" :desc="t('Settings')" show-desc />
     </nav>
   </main>
 </template>
@@ -48,6 +54,7 @@ nav.bottom {
   display: flex;
   align-items: center;
   background-color: var(--bg);
+  padding-block: 6px;
 }
 
 header,

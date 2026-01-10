@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import { t } from '@/lang/i18n'
-import InlineIcon from './InlineIcon.vue'
+import IconInline from './IconInline.vue'
 import type { IdAndName, Recipe } from '../types'
 
 const { origin, recipe, isSingleRecipe } = defineProps<{
@@ -14,7 +14,7 @@ const { origin, recipe, isSingleRecipe } = defineProps<{
 <template>
   <nav>
     <RouterLink :to="{ name: 'home' }">
-      <InlineIcon icon="tag" inBreadcrumbs>{{ t('Tags') }}</InlineIcon>
+      <IconInline icon="tag" inBreadcrumbs>{{ t('Tags') }}</IconInline>
     </RouterLink>
     <span aria-hidden="true">→</span>
     <span v-if="!isSingleRecipe" class="shown-tag">{{ origin.name }}</span>

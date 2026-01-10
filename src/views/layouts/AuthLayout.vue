@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue'
-import LinkButton from '@/components/LinkButton.vue'
+import ButtonLink from '@/components/ButtonLink.vue'
 import { t } from '@/lang/i18n'
 </script>
 
@@ -9,8 +9,8 @@ import { t } from '@/lang/i18n'
     <header>
       <AppLogo />
       <nav class="top">
-        <LinkButton routeName="login" :desc="t('auth.login')" />
-        <LinkButton routeName="register" :desc="t('auth.register')" />
+        <ButtonLink routeName="login" :desc="t('auth.login')" />
+        <ButtonLink routeName="register" :desc="t('auth.register')" />
       </nav>
     </header>
     <section>

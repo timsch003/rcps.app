@@ -22,8 +22,8 @@ div.logo {
     font-size: 2rem;
     font-weight: 900;
     letter-spacing: var(--base-letter-spacing);
-    line-height: 1;
-    padding-bottom: 0.4em;
+    transform: translateY(-0.4ex);
+    margin: 0;
   }
 
   h1 span:not(:last-of-type) {

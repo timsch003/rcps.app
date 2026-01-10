@@ -10,15 +10,15 @@ defineProps({
 </script>
 
 <template>
-  <div v-if="icon" class="link-button">
+  <div v-if="icon" class="button-link">
     <RouterLink :to="{ name: routeName }" :aria-label="desc">
       <component v-if="icon" :is="icon" />
     </RouterLink>
-    <span class="link-button__desc" v-if="showDesc">
+    <span class="button-link__desc" v-if="showDesc">
       {{ desc }}
     </span>
   </div>
-  <div v-else class="link-button">
+  <div v-else class="button-link">
     <RouterLink :to="{ name: routeName }" :aria-label="desc">
       {{ desc }}
     </RouterLink>
@@ -26,7 +26,7 @@ defineProps({
 </template>
 
 <style scoped>
-.link-button {
+.button-link {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -35,7 +35,7 @@ defineProps({
   font-weight: 200;
 }
 
-span.link-button__desc {
+span.button-link__desc {
   opacity: var(--secondary-text-opacity);
   margin-top: 2px;
 }
