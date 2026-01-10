@@ -47,6 +47,6 @@
   /* UI
     */
   --border-radius: 7px;
-  --ui-transition-duration: 0.15s;
+  --transition-duration: 0.15s;
   --icon-size: 2rem;
 }

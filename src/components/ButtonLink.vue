@@ -64,7 +64,7 @@ a:focus {
   box-shadow: 0px 0px var(--bg-lighter);
   transform: translate(1px, 1px);
   transition:
-    box-shadow var(--ui-transition-duration) ease-in-out,
-    transform var(--ui-transition-duration) ease-in-out;
+    box-shadow var(--transition-duration) ease-in-out,
+    transform var(--transition-duration) ease-in-out;
 }
 </style>

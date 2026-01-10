@@ -40,8 +40,8 @@ main {
   --nav-border-width: 2px;
 
   min-height: calc(100vh - var(--outer-spacing) * 2);
-  padding-bottom: 100px;
   /* compensate nav.bottom overlap */
+  padding-bottom: 100px;
 }
 
 section {
@@ -62,6 +62,7 @@ nav.bottom {
   z-index: 10;
 }
 
+/* ensure nav.top stays behind AppLogo*/
 nav.top {
   z-index: -1;
 }

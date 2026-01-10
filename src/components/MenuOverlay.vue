@@ -3,24 +3,27 @@ import { t } from '@/lang/i18n'
 import ButtonAction from '@/components/ButtonAction.vue'
 import CloseIcon from '@/components/icons/IconClose.vue'
 
-const model = defineModel()
+const open = defineModel()
+
 const close = () => {
-  model.value = false
+  open.value = false
 }
 </script>
 
 <template>
-  <div :class="model ? 'menu menu--open' : 'menu menu--closed'">
-    <div class="menu__inner">
-      <div class="menu__close">
-        <ButtonAction :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
+  <Transition name="fade">
+    <div v-if="open" class="menu">
+      <div class="menu__inner">
+        <div class="menu__close">
+          <ButtonAction :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
+        </div>
       </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <style scoped>
-div.menu--open {
+div.menu {
   position: fixed;
   inset: 0;
   background-color: var(--bg);
@@ -34,8 +37,14 @@ div.menu--open {
   }
 }
 
-div.menu--closed {
-  display: none;
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--transition-duration) linear;
+}
+
+.fade-leave-to,
+.fade-enter-from {
+  opacity: 0;
 }
 
 div.menu__inner {
