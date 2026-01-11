@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { registerUser } from '@/services/pocketbase'
 import { t } from '@/lang/i18n'
-import IconSpinner from '@/components/icons/IconSpinner.vue'
+import IconSpinner from '@/views/icons/IconSpinner.vue'
 
 const email = ref('')
 const password = ref('')

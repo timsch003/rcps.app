@@ -2,18 +2,20 @@
 import { t } from '@/lang/i18n'
 import { logoutUser } from '@/services/pocketbase'
 import { useRouter } from 'vue-router'
-import AppLogo from '@/components/AppLogo.vue'
-import ButtonButton from '@/components/ButtonButton.vue'
-import CloseIcon from '@/components/icons/IconClose.vue'
-import LogoutIcon from '@/components/icons/IconLogout.vue'
-import ChangeMailIcon from '@/components/icons/IconChangeMail.vue'
-import ResetPasswordIcon from '@/components/icons/IconResetPassword.vue'
-import ModeLightIcon from '@/components/icons/IconModeLight.vue'
-import TagsIcon from '@/components/icons/IconTags.vue'
-import LanguageIcon from '@/components/icons/IconLanguage.vue'
-import SettingsIcon from '@/components/icons/IconSettings.vue'
+import { useAuthStore } from '@/stores/auth'
+import AppLogo from '@/views/components/AppLogo.vue'
+import ButtonMulti from '@/views/components/ButtonMulti.vue'
+import CloseIcon from '@/views/icons/IconClose.vue'
+import LogoutIcon from '@/views/icons/IconLogout.vue'
+import ChangeMailIcon from '@/views/icons/IconChangeMail.vue'
+import ResetPasswordIcon from '@/views/icons/IconResetPassword.vue'
+import ModeLightIcon from '@/views/icons/IconModeLight.vue'
+import TagsIcon from '@/views/icons/IconTags.vue'
+import LanguageIcon from '@/views/icons/IconLanguage.vue'
+import SettingsIcon from '@/views/icons/IconSettings.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const open = defineModel()
 
 const close = () => {
@@ -32,34 +34,35 @@ const logout = async () => {
       <div class="menu__inner">
         <div class="menu__header">
           <AppLogo omitAnimation />
-          <ButtonButton :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
+          <ButtonMulti :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
         </div>
         <h3>{{ t('Settings') }}</h3>
         <menu class="menu__content--settings">
           <li>
-            <ButtonButton :icon="TagsIcon" :desc="t('Tags')" showDesc />
+            <ButtonMulti :icon="TagsIcon" :desc="t('Tags')" showDesc />
           </li>
           <li>
-            <ButtonButton :icon="ModeLightIcon" :desc="t('Colors')" showDesc />
+            <ButtonMulti :icon="ModeLightIcon" :desc="t('Colors')" showDesc />
           </li>
           <li>
-            <ButtonButton :icon="SettingsIcon" :desc="t('User interface')" showDesc />
+            <ButtonMulti :icon="SettingsIcon" :desc="t('User interface')" showDesc />
           </li>
           <li>
-            <ButtonButton :icon="LanguageIcon" :desc="t('Language')" showDesc />
+            <ButtonMulti :icon="LanguageIcon" :desc="t('Language')" showDesc />
           </li>
         </menu>
-        <h3>{{ t('User account') }}</h3>
-        <menu class="menu__conten--account">
-          <!-- TODO: Show user name and logout in a separate row -->
+        <h3>
+          {{ t('User account') }} <span>{{ authStore.user?.email }}</span>
+        </h3>
+        <menu class="menu__content--account">
           <li>
-            <ButtonButton routeName="logout" :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
+            <ButtonMulti :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
           </li>
           <li>
-            <ButtonButton routeName="reset" :icon="ResetPasswordIcon" :desc="t('auth.reset_password')" showDesc />
+            <ButtonMulti route="reset" :icon="ResetPasswordIcon" :desc="t('auth.reset_password')" showDesc />
           </li>
           <li>
-            <ButtonButton routeName="change" :icon="ChangeMailIcon" :desc="t('auth.change_email')" showDesc />
+            <ButtonMulti route="change" :icon="ChangeMailIcon" :desc="t('auth.change_email')" showDesc />
           </li>
         </menu>
       </div>
@@ -88,6 +91,16 @@ div.menu__inner h3 {
   font-weight: 400;
   opacity: var(--secondary-text-opacity);
   margin-bottom: var(--inner-spacing);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+
+  span {
+    color: var(--text);
+    opacity: var(--secondary-text-opacity);
+    font-size: 0.9rem;
+  }
 }
 
 div.menu__header {
@@ -99,7 +112,7 @@ div.menu__header {
 }
 
 menu.menu__content--settings,
-menu.menu__conten--account {
+menu.menu__content--account {
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap);

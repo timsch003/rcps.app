@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import TagsIcon from './icons/IconTags.vue'
+import TagsIcon from '@/views/icons/IconTags.vue'
 import { t } from '@/lang/i18n'
 
 defineProps({

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CardsGrid from '../components/CardsGrid.vue'
+import CardsGrid from '@/views/components/CardsGrid.vue'
 
 import type { IdAndName } from '../types'
 

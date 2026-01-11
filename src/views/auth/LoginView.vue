@@ -4,7 +4,7 @@ import { loginUser } from '@/services/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'
-import IconSpinner from '@/components/icons/IconSpinner.vue'
+import IconSpinner from '@/views/icons/IconSpinner.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()

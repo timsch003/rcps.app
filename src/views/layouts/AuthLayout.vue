@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import AppLogo from '@/components/AppLogo.vue'
-import ButtonLink from '@/components/ButtonLink.vue'
+import AppLogo from '@/views/components/AppLogo.vue'
+import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
+import LoginIcon from '@/views/icons/IconLogin.vue'
+import UserIcon from '@/views/icons/IconUser.vue'
 </script>
 
 <template>
@@ -9,8 +11,8 @@ import { t } from '@/lang/i18n'
     <header>
       <AppLogo />
       <nav class="top">
-        <ButtonLink routeName="login" :desc="t('auth.login')" />
-        <ButtonLink routeName="register" :desc="t('auth.register')" />
+        <ButtonMulti route="login" :icon="LoginIcon" :desc="t('auth.login')" showDesc />
+        <ButtonMulti route="register" :icon="UserIcon" :desc="t('auth.register')" showDesc />
       </nav>
     </header>
     <section>
