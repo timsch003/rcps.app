@@ -1,68 +1,44 @@
 import Dexie from 'dexie'
-import { validators } from './validators'
-import type {
-  RecipeLocal,
-  SyncMetadata,
-  PendingChange,
-  ConflictLog,
-  DeviceRegistry,
-  ValidationError,
-} from '@/types'
+import type { RecipeLocal, SyncMetadata, PendingChange } from '@/types'
 
-export class RecipesDB extends Dexie {
+export class RcpsAppUserDb extends Dexie {
   recipes!: Dexie.Table<RecipeLocal>
+  account!: Dexie.Table<RecipeLocal>
+  settings!: Dexie.Table<RecipeLocal>
   sync_metadata!: Dexie.Table<SyncMetadata>
   pending_changes!: Dexie.Table<PendingChange>
-  conflict_logs!: Dexie.Table<ConflictLog>
-  device_registry!: Dexie.Table<DeviceRegistry>
 
   constructor() {
-    super('RecipesDB')
+    super('RcpsAppUserDb')
     this.version(1).stores({
-      recipes: '++id, userId, synced, updated, pendingSync, conflictDetected',
-      sync_metadata: 'id',
-      pending_changes: '++id, recipeId, timestamp, retryCount',
-      conflict_logs: '++id, recipeId, timestamp',
-      device_registry: '++id, userId, deviceId',
+      recipes: '++id, userId, name',
+      account: '++id, userId',
+      settings: '++id, userId',
+      sync_metadata: '++id',
+      pending_changes: '++id',
     })
   }
 }
 
-export const db = new RecipesDB()
+export const db = new RcpsAppUserDb()
 
-// CRUD with validation
-export async function saveToDbValidated(
-  recipe: RecipeLocal,
-): Promise<{ id: string; errors: ValidationError[] }> {
-  const errors = validators.validateRecipe(recipe as unknown as Record<string, unknown>)
-  if (errors.length > 0) {
-    return { id: '', errors }
-  }
-
-  try {
-    const id = await db.recipes.put(recipe)
-    return { id: String(id), errors: [] }
-  } catch (e) {
-    return {
-      id: '',
-      errors: [{ field: 'database', message: `Save failed: ${String(e)}`, value: null }],
-    }
-  }
+export async function addRecipe(recipe: RecipeLocal): Promise<string> {
+  return db.recipes.put(recipe)
 }
 
-export async function saveToDb(recipe: RecipeLocal): Promise<string> {
-  return String(await db.recipes.put(recipe))
-}
-
-export async function getRecipeFromDB(id: string): Promise<RecipeLocal | undefined> {
+export async function getRecipe(id: string): Promise<RecipeLocal | undefined> {
   return db.recipes.get(id)
 }
 
-export async function getAllRecipesByUser(userId: string): Promise<RecipeLocal[]> {
+export async function getAllRecipes(userId: string): Promise<RecipeLocal[]> {
   return db.recipes.where('userId').equals(userId).toArray()
 }
 
-export async function getPendingRecipesByUser(userId: string): Promise<RecipeLocal[]> {
+export async function deleteRecipe(id: string): Promise<void> {
+  return db.recipes.delete(id)
+}
+
+export async function getPendingRecipes(userId: string): Promise<RecipeLocal[]> {
   return db.recipes
     .where('userId')
     .equals(userId)
@@ -70,38 +46,22 @@ export async function getPendingRecipesByUser(userId: string): Promise<RecipeLoc
     .toArray()
 }
 
-export async function getConflictedRecipes(userId: string): Promise<RecipeLocal[]> {
-  return db.recipes
-    .where('userId')
-    .equals(userId)
-    .filter((r) => r.conflictDetected)
-    .toArray()
-}
-
-export async function deleteFromDb(id: string): Promise<void> {
-  return db.recipes.delete(id)
-}
-
-// Sync Metadata
 export async function getSyncMetadata(): Promise<SyncMetadata | undefined> {
   return db.sync_metadata.get('recipes')
 }
 
-export async function updateSyncMetadata(metadata: Partial<SyncMetadata>): Promise<void> {
+export async function updateSyncMetadata(metadata: SyncMetadata): Promise<void> {
   const current =
     (await getSyncMetadata()) ||
     ({
-      id: 'recipes',
+      type: 'recipes',
       lastSynced: 0,
-      lastConflictResolved: 0,
       pendingCount: 0,
-      failedCount: 0,
     } as SyncMetadata)
 
   await db.sync_metadata.put({ ...current, ...metadata })
 }
 
-// Pending Changes Queue
 export async function addPendingChange(change: PendingChange): Promise<string> {
   return String(await db.pending_changes.add(change))
 }
@@ -110,11 +70,7 @@ export async function getPendingChanges(): Promise<PendingChange[]> {
   return db.pending_changes.toArray()
 }
 
-export async function getPendingChangesByRecipe(recipeId: string): Promise<PendingChange[]> {
-  return db.pending_changes.where('recipeId').equals(recipeId).toArray()
-}
-
-export async function removePendingChange(id: string): Promise<void> {
+export async function deletePendingChange(id: string): Promise<void> {
   return db.pending_changes.delete(id)
 }
 
@@ -123,60 +79,4 @@ export async function updatePendingChange(
   updates: Partial<PendingChange>,
 ): Promise<void> {
   await db.pending_changes.update(id, updates)
-}
-
-// Conflict Logs (Audit Trail)
-export async function logConflict(conflict: ConflictLog): Promise<string> {
-  return String(await db.conflict_logs.add(conflict))
-}
-
-export async function getConflictLogsForRecipe(recipeId: string): Promise<ConflictLog[]> {
-  return db.conflict_logs.where('recipeId').equals(recipeId).toArray()
-}
-
-// Device Registry
-export async function registerDevice(device: DeviceRegistry): Promise<string> {
-  return String(await db.device_registry.add(device))
-}
-
-export async function getDevicesForUser(userId: string): Promise<DeviceRegistry[]> {
-  return db.device_registry.where('userId').equals(userId).toArray()
-}
-
-// Data Pruning (manage storage)
-export async function pruneOldRecipes(
-  userId: string,
-  ageMs: number = 30 * 24 * 60 * 60 * 1000, // 30 days
-): Promise<number> {
-  const cutoff = Date.now() - ageMs
-  const oldRecipes = await db.recipes
-    .where('userId')
-    .equals(userId)
-    .filter((r) => r.updated < cutoff && r.synced)
-    .toArray()
-
-  const ids = oldRecipes.map((r) => r.id)
-  await db.recipes.bulkDelete(ids)
-
-  return ids.length
-}
-
-export async function getDbStats(): Promise<{
-  totalRecipes: number
-  pendingChanges: number
-  conflictedRecipes: number
-  totalSize: number
-}> {
-  const [recipes, pending, conflicts] = await Promise.all([
-    db.recipes.toArray(),
-    db.pending_changes.toArray(),
-    db.recipes.filter((r) => r.conflictDetected).toArray(),
-  ])
-
-  return {
-    totalRecipes: recipes.length,
-    pendingChanges: pending.length,
-    conflictedRecipes: conflicts.length,
-    totalSize: JSON.stringify(recipes).length + JSON.stringify(pending).length,
-  }
 }
