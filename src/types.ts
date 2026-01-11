@@ -1,66 +1,67 @@
-export interface IdAndName {
-  id: string
+export type UUID = string
+
+export type IdAndName = {
+  id: UUID
   name: string
 }
 
-export interface User {
-  id: string
+// Derived from PocketBase collections {
+
+export type Ingredient = IdAndName
+
+export type Tag = IdAndName
+
+export type Unit = IdAndName
+
+export type User = {
+  id: UUID
   email: string
   verified: boolean
+  settings: { key: string; value: string }[]
 }
 
-export interface RecipeIngredient {
-  id: string
-  recipeId: string
+export type RecipeIngredient = {
+  id: UUID
+  recipeId: UUID
+  ingredientId: UUID
   quantity?: number
-  unitId?: string
+  unitId?: UUID
   notes?: string
   sortOrder?: number
 }
 
-export interface Recipe {
-  id: string
-  userId: string
+export type Recipe = {
+  id: UUID
+  userId: UUID
   name: string
-  tagIds?: string[]
-  ingredients?: RecipeIngredient[]
+  tagIds?: UUID[]
+  recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string
+  updated?: number | null
 }
 
-export type SyncDataType = 'recipes' | 'account' | 'settings'
-export type SyncState = 'synced' | 'syncing' | 'offline'
-export type LocalSyncState = 'synced' | 'pending' | 'syncing'
-
-export interface RecipeLocal extends Recipe {
-  updated: number
-  deviceId: string
+export type RecipeLocal = Omit<Recipe, 'userId'> & {
   synced: boolean
   pendingSync: boolean
-  localOnly: boolean
-  serverVersion?: RecipeLocal
-  original?: RecipeLocal
 }
 
-export function setRecipeLocalField<K extends keyof RecipeLocal>(
-  obj: RecipeLocal,
-  key: K,
-  value: RecipeLocal[K],
-) {
-  obj[key] = value
-}
-
-export interface SyncMetadata {
-  type: SyncDataType
+export type SyncMetadata = {
   lastSynced: number
-  pendingCount: number
+  pendingChanges: number
 }
 
-export interface PendingChange {
-  id: string
+export type SyncDataType = 'recipes' | 'settings'
+
+export type SyncState = 'synced' | 'syncing' | 'offline'
+
+export type PendingChangeOperation = 'create' | 'update' | 'delete'
+
+export type PendingChange = {
+  id: UUID
   type: SyncDataType
-  operation: 'create' | 'update' | 'delete'
+  operation: PendingChangeOperation
   timestamp: number
   data: Partial<RecipeLocal>
-  deviceId: string
+  deviceId: UUID
 }

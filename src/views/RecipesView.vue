@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import CardsGrid from '@/views/components/CardsGrid.vue'
-import type { Recipe } from '@/types'
+import type { RecipeLocal } from '@/types'
 
-const { recipes } = defineProps<{
-  recipes: Recipe[]
+defineProps<{
+  recipes: RecipeLocal[]
 }>()
 </script>
 

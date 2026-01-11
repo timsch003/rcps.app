@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import IconInline from './IconInline.vue'
-import type { IdAndName, Recipe } from '../types'
+import type { Tag, RecipeLocal } from '@/types'
 
 defineProps<{
-  recipe?: Recipe
-  tag?: IdAndName
+  recipe?: RecipeLocal
+  tag?: Tag
 }>()
 </script>
 
@@ -15,9 +15,9 @@ defineProps<{
       : { name: 'recipe', params: { id: recipe?.id } }
     ">
     <h2 class="heading">{{ tag ? tag.name : recipe?.name }}</h2>
-    <div v-if="!tag && recipe?.tags?.length" class="card__section">
+    <div v-if="!tag && recipe?.tagIds?.length" class="card__section">
       <IconInline icon="tag">
-        {{recipe?.tags?.map((c) => c.name).join(', ')}}
+        {{recipe?.tagIds.map((tag) => tag).join(', ')}}
       </IconInline>
     </div>
   </RouterLink>

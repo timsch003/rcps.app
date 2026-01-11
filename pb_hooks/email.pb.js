@@ -33,7 +33,7 @@ onRecordCreateRequest((e) => {
 <body>
   <p style="font-family: sans-serif;">${t('hello', locale)}</p>
   <p style="font-family: sans-serif;">${t('verification.please_verify', locale)}</p>
-  <p><a style="font-family: sans-serif;" href="${appURL}/a/verify-email?token=${verificationToken}" target="_blank" rel="noopener">${t('verification.subject', locale)}</a></p>
+  <p><a style="font-family: sans-serif;" href="${appURL}/verify?token=${verificationToken}" target="_blank" rel="noopener">${t('verification.subject', locale)}</a></p>
   <p style="font-family: sans-serif;">${appName}</p>
   <br/>
 </body>
@@ -80,7 +80,7 @@ onMailerRecordPasswordResetSend((e) => {
 <body>
   <p style="font-family: sans-serif;">${t('hello', locale)}</p>
   <p style="font-family: sans-serif;">${t('password_reset.please_reset', locale)}</p>
-  <p><a style="font-family: sans-serif;" href="${e.app.settings().meta.appURL}/a/reset-password?token=${e.record.token}" target="_blank" rel="noopener">${t('password_reset.subject', locale)}</a></p>
+  <p><a style="font-family: sans-serif;" href="${e.app.settings().meta.appURL}/reset?token=${e.record.token}" target="_blank" rel="noopener">${t('password_reset.subject', locale)}</a></p>
   <p style="font-family: sans-serif;">${t('password_reset.ignore', locale)}</p>
   <p style="font-family: sans-serif;">${e.app.settings().meta.appName}</p>
   <br/>
@@ -119,7 +119,7 @@ onMailerRecordEmailChangeSend((e) => {
 <body>
   <p style="font-family: sans-serif;">${t('hello', locale)}</p>
   <p style="font-family: sans-serif;">${t('email_change.please_confirm', locale)}</p>
-  <p><a style="font-family: sans-serif;" href="${e.app.settings().meta.appURL}/a/change-email?token=${e.record.token}" target="_blank" rel="noopener">${t('email_change.subject', locale)}</a></p>
+  <p><a style="font-family: sans-serif;" href="${e.app.settings().meta.appURL}/change?token=${e.record.token}" target="_blank" rel="noopener">${t('email_change.subject', locale)}</a></p>
   <p style="font-family: sans-serif;">${t('email_change.ignore', locale)}</p>
   <p style="font-family: sans-serif;">${e.app.settings().meta.appName}</p>
   <br/>

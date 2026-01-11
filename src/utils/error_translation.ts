@@ -1,7 +1,7 @@
 import { ClientResponseError } from 'pocketbase'
 import { t } from '@/lang/i18n'
 
-export default function errorTranslationHandler(e: unknown): string {
+export default function translateError(e: unknown): string {
   if (e instanceof ClientResponseError && e.response && e.response.data) {
     const keyName = Object.keys(e.response.data)[0]!
     const d = e.response.data

@@ -5,10 +5,10 @@ export function generateUuid(): string {
 }
 
 export function getOrCreateDeviceId(): string {
-  let deviceId = localStorage.getItem('deviceId')
+  let deviceId = localStorage.getItem('rcps-app-device-id')
   if (!deviceId) {
     deviceId = generateUuid()
-    localStorage.setItem(`${import.meta.env.VITE_APP_NAME}_device_id`, deviceId)
+    localStorage.setItem('rcps-app-device-id', deviceId)
   }
   return deviceId
 }

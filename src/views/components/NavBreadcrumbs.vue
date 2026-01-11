@@ -2,7 +2,7 @@
 import { RouterLink } from 'vue-router'
 import { t } from '@/lang/i18n'
 import IconInline from './IconInline.vue'
-import type { IdAndName, Recipe } from '../types'
+import type { IdAndName, Recipe } from '@/types'
 
 const { origin, recipe, isSingleRecipe } = defineProps<{
   origin: IdAndName

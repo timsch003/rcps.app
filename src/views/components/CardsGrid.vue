@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import CardsGridCard from './CardsGridCard.vue'
-import type { IdAndName, Recipe } from '../types'
+import type { Tag, RecipeLocal } from '@/types'
 
-const { recipes, tags } = defineProps<{
-  recipes?: Recipe[]
-  tags?: IdAndName[]
+defineProps<{
+  recipes?: RecipeLocal[]
+  tags?: Tag[]
 }>()
 </script>
 
@@ -12,7 +12,7 @@ const { recipes, tags } = defineProps<{
   <div v-if="recipes?.length">
     <CardsGridCard v-for="recipe in recipes" :key="recipe.id" :recipe="recipe" />
   </div>
-  <div v-if="tags?.length">
+  <div v-else>
     <CardsGridCard v-for="tag in tags" :key="tag.id" :tag="tag" />
   </div>
 </template>

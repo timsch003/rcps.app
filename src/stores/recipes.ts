@@ -30,18 +30,12 @@ export const useRecipesStore = defineStore('recipes', () => {
       updated: Date.now(),
       pendingSync: true,
       synced: false,
-      deviceId: deviceId,
     }
 
     recipes.value.set(id, updated)
   }
 
-  async function add(
-    recipe: Omit<
-      RecipeLocal,
-      'id' | 'updated' | 'deviceId' | 'synced' | 'pendingSync' | 'localOnly'
-    >,
-  ) {
+  async function add(recipe: Omit<RecipeLocal, 'id' | 'updated' | 'synced' | 'pendingSync'>) {
     const id = generateUuid()
     const newRecipe: RecipeLocal = {
       ...recipe,
@@ -49,8 +43,6 @@ export const useRecipesStore = defineStore('recipes', () => {
       updated: Date.now(),
       pendingSync: true,
       synced: false,
-      localOnly: true,
-      deviceId: deviceId,
     }
 
     recipes.value.set(id, newRecipe)

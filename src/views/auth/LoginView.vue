@@ -18,6 +18,7 @@ async function onSubmit() {
   isValidating.value = true
 
   const result = await loginUser(email.value, password.value)
+
   if (result.success && authStore.isAuth) {
     router.push({ name: 'home' })
   } else {

@@ -1,21 +1,33 @@
 import Dexie from 'dexie'
-import type { RecipeLocal, SyncMetadata, PendingChange } from '@/types'
+import type {
+  Ingredient,
+  RecipeIngredient,
+  RecipeLocal,
+  Tag,
+  Unit,
+  PendingChange,
+  SyncMetadata,
+} from '@/types'
 
 export class RcpsAppUserDb extends Dexie {
+  ingredients!: Dexie.Table<Ingredient>
+  recipeIngredients!: Dexie.Table<RecipeIngredient>
   recipes!: Dexie.Table<RecipeLocal>
-  account!: Dexie.Table<RecipeLocal>
-  settings!: Dexie.Table<RecipeLocal>
-  sync_metadata!: Dexie.Table<SyncMetadata>
+  tags!: Dexie.Table<Tag>
+  units!: Dexie.Table<Unit>
   pending_changes!: Dexie.Table<PendingChange>
+  sync_metadata!: Dexie.Table<SyncMetadata>
 
   constructor() {
     super('RcpsAppUserDb')
     this.version(1).stores({
-      recipes: '++id, userId, name',
-      account: '++id, userId',
-      settings: '++id, userId',
-      sync_metadata: '++id',
-      pending_changes: '++id',
+      ingredients: 'id, &name',
+      recipeIngredients: 'id, recipeId',
+      recipes: 'id, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      tags: 'id, &name',
+      units: 'id, &name',
+      pending_changes: 'id',
+      sync_metadata: 'id',
     })
   }
 }
@@ -54,9 +66,8 @@ export async function updateSyncMetadata(metadata: SyncMetadata): Promise<void> 
   const current =
     (await getSyncMetadata()) ||
     ({
-      type: 'recipes',
       lastSynced: 0,
-      pendingCount: 0,
+      pendingChanges: 0,
     } as SyncMetadata)
 
   await db.sync_metadata.put({ ...current, ...metadata })

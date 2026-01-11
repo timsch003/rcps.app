@@ -13,9 +13,8 @@ export const useSyncStore = defineStore('sync', () => {
 
   async function recordSyncTime() {
     const metadata: SyncMetadata = {
-      type: 'recipes',
       lastSynced: Date.now(),
-      pendingCount: 0,
+      pendingChanges: 0,
     }
     await updateSyncMetadata(metadata)
     lastSyncTime.value = Date.now()

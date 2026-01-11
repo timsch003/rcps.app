@@ -1,9 +1,10 @@
 import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
 import { generateUuid } from '@/utils/uuid'
-import errorTranslationHandler from '@/utils/errorTranslationHandler'
+import { useAuthStore } from '@/stores/auth'
+import translateError from '@/utils/error_translation'
 import type { RecipeLocal } from '@/types'
 
-const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps.app_auth'))
+const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps-app-auth'))
 
 pb.autoCancellation(true)
 
@@ -23,7 +24,7 @@ export async function registerUser(
     })
     return { success: true }
   } catch (e: unknown) {
-    return { success: false, error: errorTranslationHandler(e) }
+    return { success: false, error: translateError(e) }
   }
 }
 
@@ -32,7 +33,7 @@ export async function verifyEmail(token: string) {
     await pb.collection('users').confirmVerification(token)
     return { success: true }
   } catch (e: unknown) {
-    return { success: false, error: errorTranslationHandler(e) }
+    return { success: false, error: translateError(e) }
   }
 }
 
@@ -41,7 +42,7 @@ export async function loginUser(email: string, password: string) {
     await pb.collection('users').authWithPassword(email, password)
     return { success: true }
   } catch (e: unknown) {
-    return { success: false, error: errorTranslationHandler(e) }
+    return { success: false, error: translateError(e) }
   }
 }
 
@@ -90,45 +91,42 @@ export async function syncRecipe(
   recipe: RecipeLocal,
 ): Promise<{ success: boolean; data?: RecipeLocal; error?: string }> {
   try {
-    if (recipe.localOnly) {
+    if (!recipe.synced) {
       const created = await pb.collection('recipes').create({
         id: recipe.id,
-        userId: recipe.userId,
+        userId: useAuthStore().user!.id,
         name: recipe.name,
-        tags: recipe.tags,
-        recipeIngredients: recipe.recipeIngredients,
+        tagIds: recipe.tagIds,
+        recipeIngredientIds: recipe.recipeIngredientIds,
         instructions: recipe.instructions,
         notes: recipe.notes,
-        updated: new Date().toISOString(),
-        deviceId: recipe.deviceId,
+        updated: Date.now(),
       })
       return {
         success: true,
         data: {
           ...recipe,
           id: created.id,
-          updated: new Date(created.updated).getTime(),
+          updated: created.updated,
           synced: true,
           pendingSync: false,
-          localOnly: false,
         },
       }
     } else {
       const updated = await pb.collection('recipes').update(recipe.id, {
-        userId: recipe.userId,
+        userId: useAuthStore().user!.id,
         name: recipe.name,
         tagIds: recipe.tagIds,
-        ingredients: recipe.ingredients,
+        recipeIngredientIds: recipe.recipeIngredientIds,
         instructions: recipe.instructions,
         notes: recipe.notes,
-        updated: new Date().toISOString(),
-        deviceId: recipe.deviceId,
+        updated: Date.now(),
       })
       return {
         success: true,
         data: {
           ...recipe,
-          updated: new Date(updated.updated).getTime(),
+          updated: updated.updated,
           synced: true,
           pendingSync: false,
         },
