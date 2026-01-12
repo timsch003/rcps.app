@@ -23,7 +23,8 @@ export class RcpsAppUserDb extends Dexie {
     this.version(1).stores({
       ingredients: 'id, &name',
       recipeIngredients: 'id, recipeId',
-      recipes: 'id, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      recipes:
+        'id, userId, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
       tags: 'id, &name',
       units: 'id, &name',
       pending_changes: 'id',
@@ -66,7 +67,7 @@ export async function updateSyncMetadata(metadata: SyncMetadata): Promise<void> 
   const current =
     (await getSyncMetadata()) ||
     ({
-      lastSynced: 0,
+      lastSync: 0,
       pendingChanges: 0,
     } as SyncMetadata)
 

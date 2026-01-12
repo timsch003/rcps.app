@@ -5,19 +5,23 @@ export type IdAndName = {
   name: string
 }
 
-// Derived from PocketBase collections {
-
 export type Ingredient = IdAndName
 
 export type Tag = IdAndName
 
 export type Unit = IdAndName
 
+export type SyncState = 'synced' | 'syncing' | 'offline'
+
+export type PendingChangeOperation = 'create' | 'update' | 'delete'
+
+export type UserSetting = { key: string; value: string }
+
 export type User = {
   id: UUID
   email: string
   verified: boolean
-  settings: { key: string; value: string }[]
+  settings: UserSetting[]
 }
 
 export type RecipeIngredient = {
@@ -38,30 +42,22 @@ export type Recipe = {
   recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string
-  updated?: number | null
+  updated?: number
 }
 
-export type RecipeLocal = Omit<Recipe, 'userId'> & {
+export type RecipeLocal = Recipe & {
   synced: boolean
   pendingSync: boolean
 }
 
 export type SyncMetadata = {
-  lastSynced: number
+  lastSync: number
   pendingChanges: number
 }
 
-export type SyncDataType = 'recipes' | 'settings'
-
-export type SyncState = 'synced' | 'syncing' | 'offline'
-
-export type PendingChangeOperation = 'create' | 'update' | 'delete'
-
 export type PendingChange = {
   id: UUID
-  type: SyncDataType
   operation: PendingChangeOperation
   timestamp: number
   data: Partial<RecipeLocal>
-  deviceId: UUID
 }

@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/views/layouts/AppLayout.vue'
 import AuthLayout from '@/views/layouts/AuthLayout.vue'
-import HomeView from './views/HomeView.vue'
+import TagsView from './views/TagsView.vue'
 import RecipesView from './views/RecipesView.vue'
 import RecipeView from './views/RecipeView.vue'
 import LoginView from './views/auth/LoginView.vue'
@@ -26,16 +26,16 @@ const router = createRouter({
       children: [
         {
           path: '/',
-          name: 'home',
-          component: HomeView,
+          name: 'tags',
+          component: TagsView,
         },
         {
-          path: '/tag/:id?',
+          path: '/tag/:id',
           name: 'tag',
           component: RecipesView,
         },
         {
-          path: '/recipe/:id?',
+          path: '/recipe/:id',
           name: 'recipe',
           component: RecipeView,
         },
@@ -46,7 +46,7 @@ const router = createRouter({
       component: AuthLayout,
       beforeEnter: () => {
         if (useAuthStore().isAuth) {
-          return { name: 'home' }
+          return { name: 'tags' }
         }
       },
       children: [
@@ -77,7 +77,7 @@ const router = createRouter({
         },
         {
           path: '/:pathMatch(.*)*', // 404 catch-all route
-          redirect: { name: 'home' },
+          redirect: { name: 'tags' },
         },
       ],
     },

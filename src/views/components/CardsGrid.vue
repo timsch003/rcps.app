@@ -9,7 +9,7 @@ defineProps<{
 </script>
 
 <template>
-  <div v-if="recipes?.length">
+  <div v-if="!!recipes?.length">
     <CardsGridCard v-for="recipe in recipes" :key="recipe.id" :recipe="recipe" />
   </div>
   <div v-else>

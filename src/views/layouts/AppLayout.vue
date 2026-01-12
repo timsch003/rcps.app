@@ -28,7 +28,7 @@ const menuOverlayOpen = ref(false)
     </section>
     <nav class="bottom">
       <ButtonMulti route="" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor />
-      <ButtonMulti route="home" :icon="TagsIcon" :desc="t('Tags')" accentColor />
+      <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor />
       <ButtonMulti route="" :icon="AddIcon" :desc="t('Add recipe')" accentColor />
     </nav>
   </main>
@@ -56,6 +56,7 @@ nav.bottom {
 header,
 nav.bottom {
   z-index: 10;
+  background-color: var(--bg);
 }
 
 /* ensure nav.top stays behind AppLogo*/

@@ -13,7 +13,7 @@ const { origin, recipe, isSingleRecipe } = defineProps<{
 
 <template>
   <nav>
-    <RouterLink :to="{ name: 'home' }">
+    <RouterLink :to="{ name: 'tags' }">
       <IconInline icon="tag" inBreadcrumbs>{{ t('Tags') }}</IconInline>
     </RouterLink>
     <span aria-hidden="true">→</span>

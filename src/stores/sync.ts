@@ -1,23 +1,34 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import { getOrCreateDeviceId } from '@/utils/uuid'
-import { updateSyncMetadata } from '@/services/dexie'
-import type { SyncMetadata, SyncState } from '@/types'
+import { ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { updateSyncMetadata, db } from '@/services/dexie'
+import { remoteGetRecipes } from '@/services/pocketbase'
+import type { SyncMetadata, SyncState, RecipeLocal } from '@/types'
 
 export const useSyncStore = defineStore('sync', () => {
-  const lastSyncTime = ref(0)
+  const lastSync = ref(0)
   const isOnline = ref(navigator.onLine)
   const state = ref<SyncState>('synced')
-  const deviceId = getOrCreateDeviceId()
-  const syncStateReady = computed(() => state.value !== 'syncing')
+
+  async function init() {
+    if (isOnline.value && lastSync.value === 0) {
+      const recipes = await remoteGetRecipes(useAuthStore().user!.id)
+      if (!!recipes.length) {
+        db.recipes.bulkAdd(recipes)
+        await recordSyncTime()
+      }
+    }
+  }
+
+  async function compareLocalRemote(collection: string, records: RecipeLocal[]) {}
 
   async function recordSyncTime() {
     const metadata: SyncMetadata = {
-      lastSynced: Date.now(),
+      lastSync: Date.now(),
       pendingChanges: 0,
     }
     await updateSyncMetadata(metadata)
-    lastSyncTime.value = Date.now()
+    lastSync.value = Date.now()
   }
 
   function resetSyncState() {
@@ -25,11 +36,10 @@ export const useSyncStore = defineStore('sync', () => {
   }
 
   return {
-    lastSyncTime,
+    lastSync,
     isOnline,
     state,
-    deviceId,
-    syncStateReady,
+    init,
     recordSyncTime,
     resetSyncState,
   }

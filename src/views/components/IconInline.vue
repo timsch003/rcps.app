@@ -23,8 +23,8 @@ defineProps({
 
 <style scoped>
 svg {
-  width: var(--icon-size);
-  height: var(--icon-size);
+  width: var(--icon-size-xs);
+  height: var(--icon-size-xs);
   display: inline-flex;
   margin-right: 6px;
   transform: translateY(3px);

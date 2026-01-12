@@ -5,6 +5,7 @@ export const useSettingsStore = defineStore('settings', {
     theme: 'dark',
   }),
   persist: {
+    storage: localStorage,
     key: 'rcps-app-settings',
   },
 })

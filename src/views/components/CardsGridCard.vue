@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
+import { useTagsStore } from '@/stores/tags'
 import IconInline from './IconInline.vue'
 import type { Tag, RecipeLocal } from '@/types'
 
@@ -7,19 +8,23 @@ defineProps<{
   recipe?: RecipeLocal
   tag?: Tag
 }>()
+
+const tagsStore = useTagsStore()
 </script>
 
 <template>
-  <RouterLink :class="['card', { 'card--tag': tag }]" :to="tag
-      ? { name: 'tag-recipes', params: { id: tag.id } }
-      : { name: 'recipe', params: { id: recipe?.id } }
-    ">
-    <h2 class="heading">{{ tag ? tag.name : recipe?.name }}</h2>
-    <div v-if="!tag && recipe?.tagIds?.length" class="card__section">
-      <IconInline icon="tag">
-        {{recipe?.tagIds.map((tag) => tag).join(', ')}}
-      </IconInline>
+  <RouterLink v-if="recipe" class="card" :to="{ name: 'recipe', params: { id: recipe?.id } }">
+    <h2 class="heading">{{ recipe?.name }}</h2>
+    <div class="card__section">
+      <Suspense>
+        <IconInline v-if="!!tagsStore.names" icon="tag">
+          {{ tagsStore.names.join(', ') }}
+        </IconInline>
+      </Suspense>
     </div>
+  </RouterLink>
+  <RouterLink v-else class="card card--tag" :to="{ name: 'tag', params: { id: tag?.id } }">
+    <h2 class="heading">{{ tag?.name }}</h2>
   </RouterLink>
 </template>
 

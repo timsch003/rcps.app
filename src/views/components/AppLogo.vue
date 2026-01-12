@@ -5,7 +5,7 @@ defineProps<{ omitAnimation?: boolean }>()
 </script>
 
 <template>
-  <RouterLink class="logo" :to="{ name: 'home' }">
+  <RouterLink class="logo" :to="{ name: 'tags' }">
     <h1 aria-label="recipes app" :class="{ anim: !omitAnimation }">
       r<span aria-hidden="true">e</span>c<span aria-hidden="true">i</span>p<span
         aria-hidden="true">e</span>s<span>.</span>app
@@ -16,6 +16,8 @@ defineProps<{ omitAnimation?: boolean }>()
 <style scoped>
 a.logo {
   --base-letter-spacing: -0.05ch;
+  background-color: var(--bg);
+  padding-right: 4px;
 
   h1 {
     color: var(--accent);

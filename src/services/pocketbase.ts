@@ -1,5 +1,5 @@
 import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
-import { generateUuid } from '@/utils/uuid'
+import { v7 as uuid } from 'uuid'
 import { useAuthStore } from '@/stores/auth'
 import translateError from '@/utils/error_translation'
 import type { RecipeLocal } from '@/types'
@@ -16,7 +16,7 @@ export async function registerUser(
 ) {
   try {
     await pb.collection('users').create({
-      id: generateUuid(),
+      id: uuid(),
       email: email,
       password: password,
       passwordConfirm: passwordConfirm,
@@ -50,7 +50,7 @@ export async function logoutUser(): Promise<void> {
   pb.authStore.clear()
 }
 
-export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
+export async function remoteGetRecipes(userId: string): Promise<RecipeLocal[]> {
   try {
     const records = await pb.collection('recipes').getFullList({
       filter: pb.filter('userId = {:userId}', { userId }),
@@ -67,7 +67,6 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
       instructions: r.instructions,
       notes: r.notes,
       updated: new Date(r.updated).getTime(),
-      deviceId: r.deviceId,
       synced: true,
       pendingSync: false,
       localOnly: false,
@@ -87,7 +86,7 @@ export async function fetchUserRecipes(userId: string): Promise<RecipeLocal[]> {
   }
 }
 
-export async function syncRecipe(
+export async function remoteAddRecipe(
   recipe: RecipeLocal,
 ): Promise<{ success: boolean; data?: RecipeLocal; error?: string }> {
   try {
@@ -141,7 +140,9 @@ export async function syncRecipe(
   }
 }
 
-export async function deleteRecipe(id: string): Promise<{ success: boolean; error?: string }> {
+export async function remoteDeleteRecipe(
+  id: string,
+): Promise<{ success: boolean; error?: string }> {
   try {
     await pb.collection('recipes').delete(id)
     return { success: true }

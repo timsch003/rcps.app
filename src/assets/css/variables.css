@@ -10,7 +10,7 @@
   --bg-lighter: #1f1f1f;
   --decor: #474747;
   --text: #f5f5f5;
-  --accent: #efcb68;
+  --accent: #acacec;
 
   /* Accent variations */
   --linen: #ffede1;
@@ -50,5 +50,6 @@
   --transition-duration: 0.15s;
   --icon-size: 2rem;
   --icon-size-s: 1.5rem;
+  --icon-size-xs: 1rem;
   --nav-border-width: 2px;
 }
