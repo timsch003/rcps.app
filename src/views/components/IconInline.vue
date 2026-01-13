@@ -36,7 +36,6 @@ svg {
 
   svg {
     transform: translateY(0px);
-    margin-right: 3px;
   }
 }
 </style>

@@ -33,11 +33,17 @@ export const useRecipesStore = defineStore('recipes', () => {
     return all.value.find((r) => r.id === id)
   }
 
+  function getName(id: string): string {
+    const recipe = all.value.find((r) => r.id === id)
+    return recipe ? recipe.name : ''
+  }
+
   return {
     all,
     init,
     add,
     get,
     getAllWithTag,
+    getName,
   }
 })

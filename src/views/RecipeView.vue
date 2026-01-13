@@ -4,6 +4,7 @@ import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
 import { useRecipesStore } from '@/stores/recipes'
 import { useUnitsStore } from '@/stores/units'
 import { t } from '@/lang/i18n'
+import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
 
 const route = useRoute()
 const recipeIngredientsStore = useRecipeIngredientsStore()
@@ -12,13 +13,12 @@ const unitsStore = useUnitsStore()
 
 const recipe = recipesStore.get(route.params.id as string)
 const ingredients = recipeIngredientsStore.getIngredientsByRecipeId(route.params.id as string)
-console.log(ingredients)
 </script>
 
 <template>
-  <h2>{{ recipe?.name }}</h2>
-  <h3 v-if="ingredients">{{ t('Ingredients') }}</h3>
-  <ul v-if="ingredients">
+  <NavBreadcrumbs v-if="route.params.tag" />
+  <h3 v-if="ingredients?.length" class="heading--muted">{{ t('Ingredients') }}</h3>
+  <ul v-if="ingredients?.length">
     <li v-for="ingredient in ingredients" :key="ingredient?.id">
       <span v-if="ingredient?.quantity">{{ ingredient.quantity }} &nbsp;</span>
       <span v-if="ingredient?.unitId">{{ unitsStore.getName(ingredient.unitId) }} &nbsp;</span>
@@ -26,10 +26,14 @@ console.log(ingredients)
       <span v-if="ingredient?.notes">({{ ingredient.notes }})</span>
     </li>
   </ul>
-  <h3 v-if="recipe?.instructions">{{ t('Instructions') }}</h3>
+  <h3 v-if="recipe?.instructions" class="heading--muted">{{ t('Instructions') }}</h3>
   <p v-if="recipe?.instructions">{{ recipe?.instructions }}</p>
-  <h3 v-if="recipe?.notes">{{ t('Notes') }}</h3>
+  <h3 v-if="recipe?.notes" class="heading--muted">{{ t('Notes') }}</h3>
   <p v-if="recipe?.notes">{{ recipe?.notes }}</p>
 </template>
 
-<style scoped></style>
+<style scoped>
+h3:not(:first-of-type) {
+  margin-top: var(--inner-spacing);
+}
+</style>

@@ -36,7 +36,7 @@ const logout = async () => {
           <AppLogo omitAnimation />
           <ButtonMulti :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
         </div>
-        <h3>{{ t('Settings') }}</h3>
+        <h3 class="heading--muted">{{ t('Settings') }}</h3>
         <menu class="menu__content--settings">
           <li>
             <ButtonMulti :icon="TagsIcon" :desc="t('Tags')" showDesc />
@@ -51,7 +51,7 @@ const logout = async () => {
             <ButtonMulti :icon="LanguageIcon" :desc="t('Language')" showDesc />
           </li>
         </menu>
-        <h3>
+        <h3 class="heading--muted">
           {{ t('User account') }} <span>{{ authStore.user?.email }}</span>
         </h3>
         <menu class="menu__content--account">
@@ -86,10 +86,6 @@ div.menu {
 }
 
 div.menu__inner h3 {
-  font-size: 1.1rem;
-  letter-spacing: 1px;
-  font-weight: 400;
-  opacity: var(--secondary-text-opacity);
   margin-bottom: var(--inner-spacing);
   display: flex;
   justify-content: space-between;
@@ -98,7 +94,7 @@ div.menu__inner h3 {
 
   span {
     color: var(--text);
-    opacity: var(--secondary-text-opacity);
+    opacity: var(--text-secondary-opacity);
     font-size: 0.9rem;
   }
 }

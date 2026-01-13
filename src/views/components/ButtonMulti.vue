@@ -66,19 +66,19 @@ const link = baseElem === 'RouterLink' ? { name: props.route } : null
 
 .btn-link__desc,
 .btn-button__desc {
-  opacity: var(--secondary-text-opacity);
+  opacity: var(--text-secondary-opacity);
   margin-left: var(--gap);
 }
 
 .btn-link:hover,
-.btn-button:hover {
+.btn-button:hover,
+.btn-link:focus,
+.btn-button:focus {
   background-color: var(--bg-lighter);
 }
 
 .btn-link:active,
-.btn-link:focus,
-.btn-button:active,
-.btn-button:focus {
+.btn-button:active {
   background-color: var(--bg-lighter);
   box-shadow: 0px 0px var(--bg-lighter);
   transform: translate(1px, 1px);

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useTagsStore } from '@/stores/tags'
 import IconInline from './IconInline.vue'
 import type { Tag, RecipeLocal } from '@/types'
@@ -9,11 +9,12 @@ defineProps<{
   tag?: Tag
 }>()
 
+const route = useRoute()
 const tagsStore = useTagsStore()
 </script>
 
 <template>
-  <RouterLink v-if="recipe" class="card" :to="{ name: 'recipe', params: { id: recipe?.id } }">
+  <RouterLink v-if="recipe" class="card" :to="{ name: 'recipe', params: { id: recipe?.id, tag: route.params.id } }">
     <h2 class="heading">{{ recipe?.name }}</h2>
     <div class="card__section">
       <IconInline v-if="!!recipe.tagIds" icon="tag">
@@ -22,7 +23,9 @@ const tagsStore = useTagsStore()
     </div>
   </RouterLink>
   <RouterLink v-else class="card card--tag" :to="{ name: 'tag', params: { id: tag?.id } }">
-    <h2 class="heading">{{ tag?.name }}</h2>
+    <h2 class="heading">
+      <IconInline icon="tag" />{{ tag?.name }}
+    </h2>
   </RouterLink>
 </template>
 
@@ -36,14 +39,14 @@ a.card {
 
   h2 {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: var(--heading-font-size);
   }
 
   .card__section {
     margin-top: 15px;
     font-size: 0.9rem;
     color: var(--text);
-    opacity: var(--secondary-text-opacity);
+    opacity: var(--text-secondary-opacity);
   }
 }
 
@@ -51,7 +54,7 @@ a.card--tag {
   text-align: center;
 
   h2 {
-    font-size: 1.1rem;
+    font-size: var(--heading-font-size);
     font-weight: 600;
   }
 }

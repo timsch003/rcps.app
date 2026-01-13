@@ -35,7 +35,7 @@ const router = createRouter({
           component: RecipesView,
         },
         {
-          path: '/recipe/:id',
+          path: '/tag/:tag/recipe/:id',
           name: 'recipe',
           component: RecipeView,
         },
