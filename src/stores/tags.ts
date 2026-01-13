@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { db } from '@/services/dexie'
 import { add as addDry } from '@/utils/dry_store_actions'
 import type { IdAndName, Tag } from '@/types'

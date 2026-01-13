@@ -17,9 +17,15 @@ export const useIngredientsStore = defineStore(STORE_ID, () => {
     await addDry(name, id, all, STORE_ID)
   }
 
+  function getName(id: Ingredient['id']): Ingredient['name'] | undefined {
+    const ingredient = all.value.find((ing) => ing.id === id)
+    return ingredient ? ingredient.name : undefined
+  }
+
   return {
     all,
     init,
     add,
+    getName,
   }
 })

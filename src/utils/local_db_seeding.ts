@@ -9,6 +9,9 @@ export const seedLocalDB = () => {
   const flourId = uuidv7()
   const sugarId = uuidv7()
   const tofuId = uuidv7()
+  const carrotsId = uuidv7()
+  const potatoesId = uuidv7()
+  const onionsId = uuidv7()
   const dessertTagId = uuidv7()
   const mainDishTagId = uuidv7()
   const recipeId = uuidv7()
@@ -18,12 +21,22 @@ export const seedLocalDB = () => {
   const recipeIngredient1Id = uuidv7()
   const recipeIngredient2Id = uuidv7()
   const recipeIngredient3Id = uuidv7()
+  const recipeIngredient4Id = uuidv7()
+  const recipeIngredient5Id = uuidv7()
+  const recipeIngredient6Id = uuidv7()
+  const recipeIngredient7Id = uuidv7()
+  const recipeIngredient8Id = uuidv7()
+  const recipeIngredient9Id = uuidv7()
+
   const unitGramId = uuidv7()
   const unitCupId = uuidv7()
 
   useIngredientsStore().add('Flour', flourId)
   useIngredientsStore().add('Sugar', sugarId)
   useIngredientsStore().add('Tofu', tofuId)
+  useIngredientsStore().add('Carrots', carrotsId)
+  useIngredientsStore().add('Potatoes', potatoesId)
+  useIngredientsStore().add('Onions', onionsId)
 
   useTagsStore().add('Dessert', dessertTagId)
   useTagsStore().add('Main dish', mainDishTagId)
@@ -36,7 +49,13 @@ export const seedLocalDB = () => {
       name: 'Cake',
       instructions: 'Mix ingredients and bake.',
       tagIds: [mainDishTagId, dessertTagId],
-      recipeIngredientIds: [recipeIngredient1Id, recipeIngredient2Id],
+      recipeIngredientIds: [
+        recipeIngredient1Id,
+        recipeIngredient2Id,
+        recipeIngredient3Id,
+        recipeIngredient4Id,
+        recipeIngredient5Id,
+      ],
     },
     recipeId,
   )
@@ -56,7 +75,7 @@ export const seedLocalDB = () => {
       name: 'Tofu stir-fry',
       instructions: 'Cook tofu with vegetables.',
       tagIds: [mainDishTagId],
-      recipeIngredientIds: [recipeIngredient3Id, recipeIngredient1Id, recipeIngredient2Id],
+      recipeIngredientIds: [recipeIngredient6Id, recipeIngredient7Id, recipeIngredient8Id],
     },
     recipe3Id,
   )
@@ -67,7 +86,7 @@ export const seedLocalDB = () => {
       instructions: 'Mix ingredients and cook on griddle.',
       notes: 'Serve with syrup.',
       tagIds: [dessertTagId],
-      recipeIngredientIds: [recipeIngredient2Id],
+      recipeIngredientIds: [recipeIngredient9Id],
     },
     recipe4Id,
   )
@@ -77,7 +96,7 @@ export const seedLocalDB = () => {
     recipeId: recipeId,
     ingredientId: flourId,
     quantity: 2,
-    unitId: undefined,
+    unitId: unitCupId,
     notes: 'Use all-purpose flour',
     sortOrder: 1,
   })
@@ -87,17 +106,71 @@ export const seedLocalDB = () => {
     recipeId: recipeId,
     ingredientId: sugarId,
     quantity: 1,
-    unitId: undefined,
+    unitId: unitGramId,
     sortOrder: 2,
   })
 
   useRecipeIngredientsStore().add({
     id: recipeIngredient3Id,
-    recipeId: recipe3Id,
+    recipeId: recipeId,
     ingredientId: tofuId,
     quantity: 300,
-    unitId: undefined,
+    unitId: unitGramId,
     notes: 'Firm tofu works best',
+    sortOrder: 1,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient4Id,
+    recipeId: recipeId,
+    ingredientId: carrotsId,
+    quantity: 50,
+    unitId: unitGramId,
+    sortOrder: 3,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient5Id,
+    recipeId: recipeId,
+    ingredientId: potatoesId,
+    quantity: 100,
+    unitId: unitGramId,
+    sortOrder: 2,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient6Id,
+    recipeId: recipe3Id,
+    ingredientId: onionsId,
+    quantity: 50,
+    unitId: unitGramId,
+    sortOrder: 3,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient7Id,
+    recipeId: recipe3Id,
+    ingredientId: carrotsId,
+    quantity: 75,
+    unitId: unitGramId,
+    sortOrder: 2,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient8Id,
+    recipeId: recipe3Id,
+    ingredientId: tofuId,
+    quantity: 200,
+    unitId: unitGramId,
+    sortOrder: 1,
+  })
+
+  useRecipeIngredientsStore().add({
+    id: recipeIngredient9Id,
+    recipeId: recipe4Id,
+    ingredientId: flourId,
+    quantity: 1.5,
+    unitId: unitCupId,
     sortOrder: 1,
   })
 }

@@ -11,7 +11,7 @@ import type {
 
 export class RcpsAppUserDb extends Dexie {
   ingredients!: Dexie.Table<Ingredient>
-  recipeIngredients!: Dexie.Table<RecipeIngredient>
+  recipe_ingredients!: Dexie.Table<RecipeIngredient>
   recipes!: Dexie.Table<RecipeLocal>
   tags!: Dexie.Table<Tag>
   units!: Dexie.Table<Unit>
@@ -22,9 +22,8 @@ export class RcpsAppUserDb extends Dexie {
     super('RcpsAppUserDb')
     this.version(1).stores({
       ingredients: 'id, &name',
-      recipe_ingredients: 'id, recipeId',
-      recipes:
-        'id, userId, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      recipe_ingredients: '[id+recipeId], [recipeId+id]',
+      recipes: 'id, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
       tags: 'id, &name',
       units: 'id, &name',
       pending_changes: 'id',

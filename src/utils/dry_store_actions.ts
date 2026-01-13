@@ -9,16 +9,18 @@ export async function add(
   storeAll: Ref<IdAndName[]>,
   storeId: 'ingredients' | 'tags' | 'units',
 ) {
-  const existing = await db.table(storeId).where('name').equals(name).first()
-  if (existing) return
-
   const newItem: IdAndName = { id, name }
 
+  const existsInStore = !!storeAll.value.find((item) => item.name === name)
+  if (existsInStore) return
   storeAll.value.push(newItem)
+
+  const existsInDb = !!(await db.table(storeId).where('name').equals(name).first())
+  if (existsInDb) return
 
   try {
     await db[storeId].add(newItem)
   } catch (error) {
-    console.error(`Failed to add ${storeId.slice(0, -1)} to the database:`, error)
+    console.error(`Failed to add ${storeId.slice(0, -1)} to the local database:`, error)
   }
 }

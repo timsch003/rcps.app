@@ -18,10 +18,16 @@ export const useUnitsStore = defineStore(STORE_ID, () => {
     await addDry(name, id, all, STORE_ID)
   }
 
+  function getName(id: Unit['id']): Unit['name'] | undefined {
+    const unit = all.value.find((u) => u.id === id)
+    return unit ? unit.name : undefined
+  }
+
   return {
     all,
     names,
     init,
     add,
+    getName,
   }
 })
