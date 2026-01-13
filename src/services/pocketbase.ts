@@ -1,5 +1,5 @@
 import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
-import { v7 as uuid } from 'uuid'
+import { v7 as uuidv7 } from 'uuid'
 import { useAuthStore } from '@/stores/auth'
 import translateError from '@/utils/error_translation'
 import type { RecipeLocal } from '@/types'
@@ -16,7 +16,7 @@ export async function registerUser(
 ) {
   try {
     await pb.collection('users').create({
-      id: uuid(),
+      id: uuidv7(),
       email: email,
       password: password,
       passwordConfirm: passwordConfirm,

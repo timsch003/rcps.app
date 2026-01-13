@@ -16,11 +16,9 @@ const tagsStore = useTagsStore()
   <RouterLink v-if="recipe" class="card" :to="{ name: 'recipe', params: { id: recipe?.id } }">
     <h2 class="heading">{{ recipe?.name }}</h2>
     <div class="card__section">
-      <Suspense>
-        <IconInline v-if="!!tagsStore.names" icon="tag">
-          {{ tagsStore.names.join(', ') }}
-        </IconInline>
-      </Suspense>
+      <IconInline v-if="!!recipe.tagIds" icon="tag">
+        {{ tagsStore.getNames(recipe.tagIds).join(', ') }}
+      </IconInline>
     </div>
   </RouterLink>
   <RouterLink v-else class="card card--tag" :to="{ name: 'tag', params: { id: tag?.id } }">

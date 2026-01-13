@@ -2,29 +2,26 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { db } from '@/services/dexie'
 import { add as addDry } from '@/utils/dry_store_actions'
-import type { IdAndName, Tag } from '@/types'
+import type { IdAndName, Unit } from '@/types'
 
-const STORE_ID = 'tags'
+const STORE_ID = 'units'
 
-export const useTagsStore = defineStore(STORE_ID, () => {
-  const all = ref<Tag[]>([])
+export const useUnitsStore = defineStore(STORE_ID, () => {
+  const all = ref<Unit[]>([])
+  const names = computed(() => all.value.map((t) => t.name))
 
   async function init() {
-    all.value = await db.tags.toArray()
+    all.value = await db.units.toArray()
   }
 
   async function add(name: IdAndName['name'], id?: IdAndName['id']) {
     await addDry(name, id, all, STORE_ID)
   }
 
-  function getNames(ids: Tag['id'][]) {
-    return all.value.filter((t) => ids.includes(t.id)).map((t) => t.name)
-  }
-
   return {
     all,
+    names,
     init,
     add,
-    getNames,
   }
 })

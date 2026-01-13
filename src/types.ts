@@ -45,9 +45,8 @@ export type Recipe = {
   updated?: number
 }
 
-export type RecipeLocal = Recipe & {
+export type RecipeLocal = Omit<Recipe, 'userId'> & {
   synced: boolean
-  pendingSync: boolean
 }
 
 export type SyncMetadata = {
