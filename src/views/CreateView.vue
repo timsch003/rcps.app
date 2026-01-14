@@ -1,18 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
-import { useRecipesStore } from '@/stores/recipes'
-import { useUnitsStore } from '@/stores/units'
 import { t } from '@/lang/i18n'
 import type { ParsedIngredient } from '@/types'
 import ButtonMulti from './components/ButtonMulti.vue'
 import CheckIcon from './icons/IconCheck.vue'
-
-const route = useRoute()
-const recipeIngredientsStore = useRecipeIngredientsStore()
-const recipesStore = useRecipesStore()
-const unitsStore = useUnitsStore()
 
 const servings = ref<number | undefined>(undefined)
 
@@ -56,6 +47,7 @@ async function onCreate() {
 </script>
 
 <template>
+  <h2 class="heading--root">{{ t('Create recipe') }}</h2>
   <form class="create" @submit.prevent>
     <h3 class="heading--muted" id="name-heading">{{ t('Name') }}</h3>
     <input type="text" autofocus="true" aria-labelledby="name-heading" required />
@@ -79,6 +71,7 @@ async function onCreate() {
 input,
 textarea {
   width: 100%;
+  border-radius: var(--border-radius);
 }
 
 textarea {

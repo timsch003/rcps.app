@@ -5,6 +5,13 @@
   opacity: var(--text-secondary-opacity);
 }
 
+.heading--root {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-size: var(--heading-font-size);
+  padding-bottom: var(--inner-spacing);
+}
+
 svg.spinner {
   width: var(--icon-size);
   height: var(--icon-size);

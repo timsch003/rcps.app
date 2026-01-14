@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import CardsGrid from '@/views/components/CardsGrid.vue'
 import { useTagsStore } from '@/stores/tags'
-import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
 
 const tagsStore = useTagsStore()
 </script>
 
 <template>
-  <NavBreadcrumbs />
+  <h2 class="heading--root">{{ $t('Tags') }}</h2>
   <CardsGrid :tags="tagsStore.all" />
 </template>

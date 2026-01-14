@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { useRecipesStore } from '@/stores/recipes'
 import CardsGrid from '@/views/components/CardsGrid.vue'
-import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
 
 const recipesStore = useRecipesStore()
 </script>
 
 <template>
-  <NavBreadcrumbs />
+  <h2 class="heading--root">{{ $t('Favorites') }}</h2>
   <CardsGrid :recipes="recipesStore.all" />
 </template>
 

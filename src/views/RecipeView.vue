@@ -4,7 +4,6 @@ import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
 import { useRecipesStore } from '@/stores/recipes'
 import { useUnitsStore } from '@/stores/units'
 import { t } from '@/lang/i18n'
-import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
 import ButtonMulti from './components/ButtonMulti.vue'
 
 const route = useRoute()
@@ -25,7 +24,7 @@ function onServingsIncrease() {
 </script>
 
 <template>
-  <NavBreadcrumbs v-if="route.params.tag" />
+  <h2 class="heading--root">{{ recipe?.name }}</h2>
   <div v-if="recipe?.servings" class="servings">
     <h3>{{ `${t('Servings')}: ${recipe?.servings}` }}</h3>
     <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
@@ -34,8 +33,8 @@ function onServingsIncrease() {
   <h3 v-if="ingredients?.length" class="heading--muted">{{ t('Ingredients') }}</h3>
   <ul v-if="ingredients?.length">
     <li v-for="ingredient in ingredients" :key="ingredient?.id">
-      <span v-if="ingredient?.quantity">{{ ingredient.quantity }} &nbsp;</span>
-      <span v-if="ingredient?.unitId">{{ unitsStore.getName(ingredient.unitId) }} &nbsp;</span>
+      <span v-if="ingredient?.quantity">{{ ingredient.quantity }}&nbsp;</span>
+      <span v-if="ingredient?.unitId">{{ unitsStore.getName(ingredient.unitId) }}&nbsp;</span>
       <span>{{ ingredient?.name }}&nbsp;</span>
       <span v-if="ingredient?.notes">({{ ingredient.notes }})</span>
     </li>

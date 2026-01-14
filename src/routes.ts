@@ -32,22 +32,17 @@ const router = createRouter({
           component: TagsView,
         },
         {
-          path: '/favorites',
-          name: 'favorites',
-          component: FavoritesView,
-        },
-        {
-          path: '/favorite/:id',
-          name: 'favorite',
-          component: RecipeView,
-        },
-        {
           path: '/tag/:id',
           name: 'tag',
           component: RecipesView,
         },
         {
-          path: '/tag/:tag/recipe/:id',
+          path: '/favorites',
+          name: 'favorites',
+          component: FavoritesView,
+        },
+        {
+          path: '/tag/:id',
           name: 'recipe',
           component: RecipeView,
         },

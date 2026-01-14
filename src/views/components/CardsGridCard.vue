@@ -14,17 +14,7 @@ const tagsStore = useTagsStore()
 </script>
 
 <template>
-  <RouterLink v-if="recipe && route.name === 'favorites'" class="card"
-    :to="{ name: 'favorite', params: { id: recipe?.id } }">
-    <h2 class="heading">{{ recipe?.name }}</h2>
-    <div class="card__section">
-      <IconInline v-if="!!recipe.tagIds" icon="tag">
-        {{ tagsStore.getNames(recipe.tagIds).join(', ') }}
-      </IconInline>
-    </div>
-  </RouterLink>
-  <RouterLink v-else-if="recipe && (route.name === 'tag' || route.name === 'favorite')" class="card"
-    :to="{ name: 'recipe', params: { id: recipe?.id, tag: route.params.id } }">
+  <RouterLink v-if="recipe" class="card" :to="{ name: 'recipe', params: { id: recipe?.id } }">
     <h2 class="heading">{{ recipe?.name }}</h2>
     <div class="card__section">
       <IconInline v-if="!!recipe.tagIds" icon="tag">
