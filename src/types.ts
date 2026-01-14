@@ -34,6 +34,13 @@ export type RecipeIngredient = {
   sortOrder?: number
 }
 
+export type ParsedIngredient = {
+  quantity?: number
+  unit?: string
+  name: string
+  notes?: string
+}
+
 export type Recipe = {
   id: UUID
   userId: UUID
