@@ -1,16 +1,18 @@
 <script setup lang="ts">
-const props = defineProps<{
+const { route, accentColor, inNavBottom } = defineProps<{
   route?: string
   desc: string
   icon?: object
   showDesc?: boolean | false
   accentColor?: boolean | false
+  inNavBottom?: boolean | false
 }>()
 
-const baseElem = !!props.route ? 'RouterLink' : 'button'
-const baseClass = !!props.route ? 'btn-link' : 'btn-button'
-const accentClass = !!props.accentColor ? 'btn--accent' : ''
-const link = baseElem === 'RouterLink' ? { name: props.route } : null
+const baseElem = !!route ? 'RouterLink' : 'button'
+const baseClass = !!route ? 'btn-link' : 'btn-button'
+const accentClass = !!accentColor ? 'btn--accent' : ''
+const modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
+const link = baseElem === 'RouterLink' ? { name: route } : null
 </script>
 
 <template>
@@ -18,8 +20,8 @@ const link = baseElem === 'RouterLink' ? { name: props.route } : null
     <component :is="icon" />
     <span :class="`${baseClass}__desc`">{{ desc }}</span>
   </component>
-  <component :is="baseElem" v-else-if="icon && !showDesc" :to="link" :class="`${baseClass} ${accentClass}`"
-    :aria-label="desc">
+  <component :is="baseElem" v-else-if="icon && !showDesc" :to="link"
+    :class="`${baseClass} ${accentClass} ${modifierClass}`" :aria-label="desc">
     <component :is="icon" />
   </component>
   <component :is="baseElem" v-else :to="link" :class="`${baseClass} ${accentClass}`" :aria-label="desc">
@@ -78,12 +80,27 @@ const link = baseElem === 'RouterLink' ? { name: props.route } : null
 }
 
 .btn-link:active,
-.btn-button:active {
+.btn-button:active,
+.btn-link--nav-bottom.active {
   background-color: var(--bg-lighter);
   box-shadow: 0px 0px var(--bg-lighter);
   transform: translate(1px, 1px);
   transition:
     box-shadow var(--transition-duration) ease-in-out,
     transform var(--transition-duration) ease-in-out;
+}
+
+/* .active is added by RouterLink when the route is active */
+.btn-link--nav-bottom.active {
+  transition: none;
+}
+
+.btn-link--nav-bottom.active::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  z-index: 30;
+  width: 100%;
+  border-top: 2px solid var(--accent);
 }
 </style>

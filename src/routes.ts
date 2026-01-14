@@ -18,7 +18,7 @@ const router = createRouter({
   linkActiveClass: 'active',
   routes: [
     {
-      path: '/',
+      path: '/app',
       component: AppLayout,
       beforeEnter: () => {
         if (!useAuthStore().isAuth) {
@@ -50,7 +50,7 @@ const router = createRouter({
       ],
     },
     {
-      path: '/',
+      path: '/auth',
       component: AuthLayout,
       beforeEnter: () => {
         if (useAuthStore().isAuth) {

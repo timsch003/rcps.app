@@ -2,7 +2,6 @@
 import { RouterLink, useRoute } from 'vue-router'
 import { t } from '@/lang/i18n'
 import { useTagsStore } from '@/stores/tags'
-import IconInline from './IconInline.vue'
 
 const route = useRoute()
 const tagsStore = useTagsStore()
@@ -16,9 +15,7 @@ const tagId = route.params.id as string
       {{ t('Tags') }}
     </RouterLink>
     <span aria-hidden="true">→</span>
-    <IconInline icon="tag" inBreadcrumbs>
-      <h2 class="heading--root">{{ tagsStore.getName(tagId) }}</h2>
-    </IconInline>
+    <h2 class="heading--root">{{ tagsStore.getName(tagId) }}</h2>
   </nav>
 </template>
 

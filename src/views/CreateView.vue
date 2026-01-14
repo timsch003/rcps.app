@@ -50,9 +50,9 @@ async function onCreate() {
   <h2 class="heading--root">{{ t('Create recipe') }}</h2>
   <form class="create" @submit.prevent>
     <h3 class="heading--muted" id="name-heading">{{ t('Name') }}</h3>
-    <input type="text" autofocus="true" aria-labelledby="name-heading" required />
+    <input type="text" aria-labelledby="name-heading" required />
     <h3 class="heading--muted" id="tags-heading">{{ t('Tags') }}</h3>
-    <input type="text" autofocus="true" aria-labelledby="tags-heading" />
+    <input type="text" aria-labelledby="tags-heading" />
     <div class="servings">
       <h3 class="heading--muted" id="servings-heading">{{ t('Servings') }}</h3>
       <input type="number" aria-labelledby="servings-heading" max="999" :value="servings" @input="onServingsInput" />
@@ -63,7 +63,7 @@ async function onCreate() {
     <textarea aria-labelledby="instructions-heading"></textarea>
     <h3 class="heading--muted" id="notes-heading">{{ t('Notes') }}</h3>
     <textarea aria-labelledby="notes-heading"></textarea>
-    <ButtonMulti :icon="CheckIcon" :desc="t('Create')" showDesc @click="onCreate" />
+    <ButtonMulti :icon="CheckIcon" :desc="t('Create recipe')" showDesc @click="onCreate" />
   </form>
 </template>
 
@@ -72,13 +72,13 @@ input,
 textarea {
   width: 100%;
   border-radius: var(--border-radius);
+  background-color: var(--bg-light);
+  border: none;
 }
 
 textarea {
   min-height: 240px;
   resize: vertical;
-  border-left: 1px solid var(--decor);
-  border-bottom: 1px solid var(--decor);
   white-space: nowrap;
   overflow-x: auto;
 }

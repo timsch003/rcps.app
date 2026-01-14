@@ -27,9 +27,9 @@ const menuOverlayOpen = ref(false)
       <RouterView />
     </section>
     <nav class="bottom">
-      <ButtonMulti route="favorites" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor />
-      <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor />
-      <ButtonMulti route="create" :icon="AddIcon" :desc="t('Add recipe')" accentColor />
+      <ButtonMulti route="favorites" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor inNavBottom />
+      <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor inNavBottom />
+      <ButtonMulti route="create" :icon="AddIcon" :desc="t('Add recipe')" accentColor inNavBottom />
     </nav>
   </main>
 </template>
