@@ -1,4 +1,4 @@
-@import 'variables' layer(variables);
-@import 'reset' layer(reset);
-@import 'utility' layer(base);
-@import 'auth' layer(auth);
+@import 'variables.css' layer(variables);
+@import 'reset.css' layer(reset);
+@import 'utility.css' layer(utility);
+@import 'forms.css' layer(forms);

@@ -9,7 +9,6 @@ const route = useRoute()
 const tagsStore = useTagsStore()
 const recipesStore = useRecipesStore()
 
-const isRoot = route.name === 'tags'
 const isSingleRecipe = route.name === 'recipe'
 const tagId = route.params.id as string
 const viaTagId = route.params.tag as string
@@ -17,7 +16,17 @@ const recipeId = route.params.id as string
 </script>
 
 <template>
-  <nav v-if="!isRoot">
+  <div v-if="route.name === 'tags'">
+    <span class="breadcrumbs__root">
+      {{ t('Tags') }}
+    </span>
+  </div>
+  <div v-else-if="route.name === 'favorites'">
+    <span class="breadcrumbs__root">
+      {{ t('Favorites') }}
+    </span>
+  </div>
+  <nav v-else>
     <RouterLink :to="{ name: 'tags' }">
       {{ t('Tags') }}
     </RouterLink>
@@ -33,11 +42,6 @@ const recipeId = route.params.id as string
       <h2 class="breadcrumbs__shown-recipe">{{ recipesStore.getName(recipeId) }}</h2>
     </span>
   </nav>
-  <div v-else>
-    <span class="breadcrumbs__root">
-      {{ t('Tags') }}
-    </span>
-  </div>
 </template>
 
 <style scoped>

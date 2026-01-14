@@ -75,6 +75,7 @@ export const seedLocalDB = () => {
       name: 'Tofu stir-fry',
       instructions: 'Cook tofu with vegetables.',
       tagIds: [mainDishTagId],
+      servings: 2,
       recipeIngredientIds: [recipeIngredient6Id, recipeIngredient7Id, recipeIngredient8Id],
     },
     recipe3Id,
@@ -86,6 +87,7 @@ export const seedLocalDB = () => {
       instructions: 'Mix ingredients and cook on griddle.',
       notes: 'Serve with syrup.',
       tagIds: [dessertTagId],
+      servings: 4,
       recipeIngredientIds: [recipeIngredient9Id],
     },
     recipe4Id,
@@ -173,4 +175,6 @@ export const seedLocalDB = () => {
     unitId: unitCupId,
     sortOrder: 1,
   })
+
+  localStorage.setItem('seeded', 'true')
 }

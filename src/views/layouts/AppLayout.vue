@@ -27,9 +27,9 @@ const menuOverlayOpen = ref(false)
       <RouterView />
     </section>
     <nav class="bottom">
-      <ButtonMulti route="" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor />
+      <ButtonMulti route="favorites" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor />
       <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor />
-      <ButtonMulti route="" :icon="AddIcon" :desc="t('Add recipe')" accentColor />
+      <ButtonMulti route="create" :icon="AddIcon" :desc="t('Add recipe')" accentColor />
     </nav>
   </main>
 </template>
@@ -38,7 +38,7 @@ const menuOverlayOpen = ref(false)
 main {
   min-height: calc(100vh - var(--outer-spacing) * 2);
   /* compensate nav.bottom overlap */
-  padding-bottom: 100px;
+  padding-bottom: 75px;
 }
 
 section {

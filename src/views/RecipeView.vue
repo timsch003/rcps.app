@@ -5,6 +5,7 @@ import { useRecipesStore } from '@/stores/recipes'
 import { useUnitsStore } from '@/stores/units'
 import { t } from '@/lang/i18n'
 import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
+import ButtonMulti from './components/ButtonMulti.vue'
 
 const route = useRoute()
 const recipeIngredientsStore = useRecipeIngredientsStore()
@@ -13,10 +14,23 @@ const unitsStore = useUnitsStore()
 
 const recipe = recipesStore.get(route.params.id as string)
 const ingredients = recipeIngredientsStore.getIngredientsByRecipeId(route.params.id as string)
+
+function onServingsDecrease() {
+  // TODO
+}
+
+function onServingsIncrease() {
+  // TODO
+}
 </script>
 
 <template>
   <NavBreadcrumbs v-if="route.params.tag" />
+  <div v-if="recipe?.servings" class="servings">
+    <h3>{{ `${t('Servings')}: ${recipe?.servings}` }}</h3>
+    <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
+    <ButtonMulti desc="+" showDesc :aria-label="t('Increase')" @click="onServingsIncrease" />
+  </div>
   <h3 v-if="ingredients?.length" class="heading--muted">{{ t('Ingredients') }}</h3>
   <ul v-if="ingredients?.length">
     <li v-for="ingredient in ingredients" :key="ingredient?.id">
@@ -35,5 +49,15 @@ const ingredients = recipeIngredientsStore.getIngredientsByRecipeId(route.params
 <style scoped>
 h3:not(:first-of-type) {
   margin-top: var(--inner-spacing);
+}
+
+div.servings {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+
+  h3 {
+    font-size: 0.9rem;
+  }
 }
 </style>

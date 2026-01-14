@@ -24,7 +24,7 @@ const recipesStore = useRecipesStore()
 const tagsStore = useTagsStore()
 const unitsStore = useUnitsStore()
 
-if (import.meta.env.DEV) await seedLocalDB()
+if (import.meta.env.DEV && !localStorage.getItem('seeded')) await seedLocalDB()
 await ingredientsStore.init()
 await recipeIngredientsStore.init()
 await recipesStore.init()

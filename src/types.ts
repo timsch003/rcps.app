@@ -39,6 +39,7 @@ export type Recipe = {
   userId: UUID
   name: string
   tagIds?: UUID[]
+  servings?: number
   recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string

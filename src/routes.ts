@@ -10,6 +10,8 @@ import RegisterView from './views/auth/RegisterView.vue'
 import VerifyEmailView from './views/auth/VerifyEmailView.vue'
 import ResetPasswordView from './views/auth/ResetPasswordView.vue'
 import ChangeEmailView from './views/auth/ChangeEmailView.vue'
+import FavoritesView from './views/FavoritesView.vue'
+import CreateView from './views/CreateView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,6 +32,16 @@ const router = createRouter({
           component: TagsView,
         },
         {
+          path: '/favorites',
+          name: 'favorites',
+          component: FavoritesView,
+        },
+        {
+          path: '/favorite/:id',
+          name: 'favorite',
+          component: RecipeView,
+        },
+        {
           path: '/tag/:id',
           name: 'tag',
           component: RecipesView,
@@ -39,6 +51,7 @@ const router = createRouter({
           name: 'recipe',
           component: RecipeView,
         },
+        { path: '/create', name: 'create', component: CreateView },
       ],
     },
     {
