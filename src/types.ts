@@ -6,9 +6,7 @@ export type IdAndName = {
 }
 
 export type Ingredient = IdAndName
-
 export type Tag = IdAndName
-
 export type Unit = IdAndName
 
 export type SyncState = 'synced' | 'syncing' | 'offline'
@@ -34,7 +32,10 @@ export type RecipeIngredient = {
   sortOrder?: number
 }
 
-export type ParsedIngredient = {
+export type ParsedRecipeIngredient = Omit<
+  RecipeIngredient,
+  'id' | 'recipeId' | 'ingredientId' | 'unitId'
+> & {
   quantity?: number
   unit?: string
   name: string
@@ -55,6 +56,11 @@ export type Recipe = {
 
 export type RecipeLocal = Omit<Recipe, 'userId'> & {
   synced: boolean
+}
+
+export type ParsedRecipe = Omit<Recipe, 'userId' | 'tagIds' | 'recipeIngredientIds' | 'updated'> & {
+  tags: string[]
+  ingredients: ParsedRecipeIngredient[]
 }
 
 export type SyncMetadata = {

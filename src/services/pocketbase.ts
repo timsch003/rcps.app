@@ -108,7 +108,6 @@ export async function remoteAddRecipe(
           id: created.id,
           updated: created.updated,
           synced: true,
-          pendingSync: false,
         },
       }
     } else {
@@ -127,7 +126,6 @@ export async function remoteAddRecipe(
           ...recipe,
           updated: updated.updated,
           synced: true,
-          pendingSync: false,
         },
       }
     }

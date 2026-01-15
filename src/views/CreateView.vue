@@ -1,68 +1,74 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { reactive } from 'vue'
 import { t } from '@/lang/i18n'
-import type { ParsedIngredient } from '@/types'
+import { parseIngredients } from '@/utils/ingredients_parsing'
 import ButtonMulti from './components/ButtonMulti.vue'
 import CheckIcon from './icons/IconCheck.vue'
+import { v7 as uuidv7 } from 'uuid'
+import type { ParsedRecipe } from '@/types'
 
-const servings = ref<number | undefined>(undefined)
+const data = reactive({
+  name: '',
+  tags: '',
+  servings: undefined as number | undefined,
+  ingredients: '',
+  instructions: '',
+  notes: '',
+})
 
-const onServingsInput = (e: Event) => {
+const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
   const value = input.value.trim()
   input.value = /^[1-9]{1,3}$/g.test(value) ? value : ''
 }
 
-function parseIngredientLine(line: string): ParsedIngredient | null {
-  const trimmed = line.trim()
-  if (!trimmed) return null
-
-  // Match: [optional number] [optional unit] [name] [optional (notes)]
-  const regex = /^(?:(\d+(?:\.\d+)?)\s+)?(?:(\w+)\s+)?(.+?)(?:\s+\((.+)\))?$/
-  const match = trimmed.match(regex)
-
-  if (!match) return null
-
-  const [, quantityStr, unit, name, notes] = match
-
-  return {
-    quantity: quantityStr ? parseFloat(quantityStr) : undefined,
-    unit: unit || undefined,
-    name: name?.trim() || '',
-    notes: notes || undefined,
-  }
-}
-
-function parseIngredients(text: string): ParsedIngredient[] {
-  return text
-    .split('\n')
-    .map(parseIngredientLine)
-    .filter((ing): ing is ParsedIngredient => ing !== null)
+const fitTextareaHeight = (e: Event) => {
+  const textarea = e.target as HTMLTextAreaElement
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
 }
 
 async function onCreate() {
-  const ingredientsText = (document.getElementById('ingredients') as HTMLTextAreaElement).value
-  console.log(parseIngredients(ingredientsText))
+  const recipe: ParsedRecipe = {
+    id: uuidv7(),
+    name: data.name,
+    tags: data.tags
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter((tag) => tag.length > 0),
+    servings: data.servings === undefined ? 1 : data.servings,
+    ingredients: parseIngredients(data.ingredients),
+  }
+  console.log(recipe)
 }
 </script>
 
 <template>
   <h2 class="heading--root">{{ t('Create recipe') }}</h2>
   <form class="create" @submit.prevent>
-    <h3 class="heading--muted" id="name-heading">{{ t('Name') }}</h3>
-    <input type="text" aria-labelledby="name-heading" required />
-    <h3 class="heading--muted" id="tags-heading">{{ t('Tags') }}</h3>
-    <input type="text" aria-labelledby="tags-heading" />
+    <h3 class="heading--muted" id="create__name-heading">{{ t('Name') }}</h3>
+    <input type="text" id="create__name-input" aria-labelledby="create__name-heading" required
+      v-model.trim="data.name" />
+    <h3 class="heading--muted" id="create__tags-heading">
+      {{ t('Tags') }} {{ t('create.tags_hint') }}
+    </h3>
+    <input type="text" id="create__tags-input" aria-labelledby="create__tags-heading" v-model.trim="data.tags" />
     <div class="servings">
-      <h3 class="heading--muted" id="servings-heading">{{ t('Servings') }}</h3>
-      <input type="number" aria-labelledby="servings-heading" max="999" :value="servings" @input="onServingsInput" />
+      <h3 class="heading--muted" id="create__servings-heading">{{ t('Servings') }}</h3>
+      <input type="number" aria-labelledby="create__servings-heading" max="999" placeholder="1" v-model="data.servings"
+        @input="validateServingsInput" />
     </div>
-    <h3 class="heading--muted" id="ingredients-heading">{{ t('Ingredients') }}</h3>
-    <textarea aria-labelledby="ingredients-heading" id="ingredients"></textarea>
-    <h3 class="heading--muted" id="instructions-heading">{{ t('Instructions') }}</h3>
-    <textarea aria-labelledby="instructions-heading"></textarea>
-    <h3 class="heading--muted" id="notes-heading">{{ t('Notes') }}</h3>
-    <textarea aria-labelledby="notes-heading"></textarea>
+    <h3 class="heading--muted" id="create__ingredients-heading">
+      {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
+    </h3>
+    <textarea aria-labelledby="create__ingredients-heading" id="create__ingredients-input" rows="3"
+      v-model="data.ingredients" @input="fitTextareaHeight"></textarea>
+    <h3 class="heading--muted" id="create__instructions-heading">{{ t('Instructions') }}</h3>
+    <textarea aria-labelledby="create__instructions-heading" rows="3" v-model="data.instructions"
+      @input="fitTextareaHeight"></textarea>
+    <h3 class="heading--muted" id="create__notes-heading">{{ t('Notes') }}</h3>
+    <textarea aria-labelledby="create__notes-heading" rows="2" v-model="data.notes"
+      @input="fitTextareaHeight"></textarea>
     <ButtonMulti :icon="CheckIcon" :desc="t('Create recipe')" showDesc @click="onCreate" />
   </form>
 </template>
@@ -77,8 +83,7 @@ textarea {
 }
 
 textarea {
-  min-height: 240px;
-  resize: vertical;
+  resize: none;
   white-space: nowrap;
   overflow-x: auto;
 }
@@ -100,11 +105,7 @@ div.servings {
   }
 }
 
-/* Hide number input controls */
-input[type='number'] {
-  max-width: max-content;
-}
-
+/* Hide input controls */
 input[type='number'] {
   -webkit-appearance: textfield;
   -moz-appearance: textfield;

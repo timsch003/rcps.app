@@ -23,7 +23,7 @@ export class RcpsAppUserDb extends Dexie {
     this.version(1).stores({
       ingredients: 'id, &name',
       recipe_ingredients: '[id+recipeId], [recipeId+id]',
-      recipes: 'id, name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      recipes: '&id, &name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
       tags: 'id, &name',
       units: 'id, &name',
       pending_changes: 'id',
@@ -54,7 +54,7 @@ export async function getPendingRecipes(userId: string): Promise<RecipeLocal[]> 
   return db.recipes
     .where('userId')
     .equals(userId)
-    .filter((r) => r.pendingSync)
+    .filter((r) => r.synced === false)
     .toArray()
 }
 
