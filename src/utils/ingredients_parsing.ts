@@ -1,11 +1,6 @@
 import type { ParsedRecipeIngredient } from '@/types'
 
-// Matches integers, decimals, common fractions, fraction characters and mixed numbers
-// (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0")
-export const regexFloatFraction =
-  /(?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|[1-9]\s?[-–—−]\s?[1-9]|\d+/
-
-export const fractionsMap: Record<string, number> = {
+export const fractionMap: Record<string, number> = {
   '½': 0.5,
   '⅓': 1 / 3,
   '⅔': 2 / 3,
@@ -26,6 +21,11 @@ export const fractionsMap: Record<string, number> = {
   '⅒': 0.1,
 }
 
+// Matches integers, decimals, common fractions, fraction characters and mixed numbers
+// (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0")
+export const regexFloatOrFractionAndUnit =
+  /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|[1-9]\s?[-–—−~〜～]\s?[1-9]|\d+)\s?([\p{L}-]+)/gu
+
 export function convertFractionToFloat(quantityStr: string): number | undefined {
   let total = 0
 
@@ -33,8 +33,8 @@ export function convertFractionToFloat(quantityStr: string): number | undefined 
   const parts = quantityStr.trim().split(/\s+/)
 
   for (const part of parts) {
-    if (fractionsMap[part]) {
-      total += fractionsMap[part]
+    if (fractionMap[part]) {
+      total += fractionMap[part]
     } else {
       const num = parseFloat(part)
       if (!isNaN(num)) {
@@ -46,30 +46,55 @@ export function convertFractionToFloat(quantityStr: string): number | undefined 
   return total > 0 ? total : undefined
 }
 
-export function parseIngredientLine(line: string): ParsedRecipeIngredient | null {
-  const trimmed = line.trim()
+export function getQuantityUnitPairs(ingredients: string): {
+  trimmedLine: string
+  quantityUnitPairs?: { quantity: string; unit: string }[]
+}[] {
+  return ingredients.split('\n').map((line) => {
+    const trimmedLine = line.replace(/\s+/g, ' ').trim()
 
-  if (!trimmed) return null
+    const matches = trimmedLine.matchAll(regexFloatOrFractionAndUnit)
 
-  // Match: [optional quantity of fractions/numbers] [optional unit] [name] [optional (notes)]
-  const regex = /^(?:([\d\s½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)\s+)?(?:(\w+)\s+)?(.+?)(?:\s+\((.+)\))?$/
-  const match = trimmed.match(regex)
+    const ingredientParts: { quantity: string; unit: string }[] = []
 
-  if (!match) return null
+    for (const match of matches) {
+      if (!match[0]) continue
 
-  const [quantityStr, unit, name, notes] = match
+      ingredientParts.push({
+        quantity: match[1] || '',
+        unit: match[2] || '',
+      })
+    }
 
-  return {
-    quantity: convertFractionToFloat(quantityStr),
-    unit: unit || undefined,
-    name: name?.trim() || '',
-    notes: notes || undefined,
-  }
+    return {
+      trimmedLine,
+      quantityUnitPairs: ingredientParts,
+    }
+  })
 }
 
-export function parseIngredients(text: string): ParsedRecipeIngredient[] {
-  return text
-    .split('\n')
-    .map(parseIngredientLine)
-    .filter((ing): ing is ParsedRecipeIngredient => ing !== null)
-}
+// export function parseIngredientLine(
+//   line: string,
+// ): (Omit<ParsedRecipeIngredient, 'quantity'> & { quantities: number[] }) | null {
+//   const trimmed = line.trim()
+
+//   if (!trimmed) return null
+
+//   const quantities = trimmed.match(regexFloatOrFractionAndUnit)
+
+//   return {
+//     quantities: quantities
+//       ? quantities.map(convertFractionToFloat).filter((q): q is number => q !== undefined)
+//       : [],
+//     unit: unit || undefined,
+//     name: name?.trim() || '',
+//     notes: notes || undefined,
+//   }
+// }
+
+// export function parseIngredients(text: string): ParsedRecipeIngredient[] {
+//   return text
+//     .split('\n')
+//     .map(parseIngredientLine)
+//     .filter((ing): ing is ParsedRecipeIngredient => ing !== null)
+// }

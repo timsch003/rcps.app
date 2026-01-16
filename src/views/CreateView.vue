@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { t } from '@/lang/i18n'
-import { parseIngredients } from '@/utils/ingredients_parsing'
+import { getQuantityUnitPairs } from '@/utils/ingredients_parsing'
 import ButtonMulti from './components/ButtonMulti.vue'
 import CheckIcon from './icons/IconCheck.vue'
+import PreviewIcon from './icons/IconPreview.vue'
 import { v7 as uuidv7 } from 'uuid'
 import type { ParsedRecipe } from '@/types'
 
@@ -29,47 +30,45 @@ const fitTextareaHeight = (e: Event) => {
 }
 
 async function onCreate() {
-  const recipe: ParsedRecipe = {
-    id: uuidv7(),
-    name: data.name,
-    tags: data.tags
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0),
-    servings: data.servings === undefined ? 1 : data.servings,
-    ingredients: parseIngredients(data.ingredients),
-  }
-  console.log(recipe)
+  // const recipe: ParsedRecipe = {
+  //   id: uuidv7(),
+  //   name: data.name,
+  //   tags: data.tags
+  //     .split(',')
+  //     .map((tag) => tag.trim())
+  //     .filter((tag) => tag.length > 0),
+  //   servings: data.servings === undefined ? 1 : data.servings,
+  //   ingredients: parseIngredients(data.ingredients),
+  // }
+  // console.log(recipe)
+  console.log(getQuantityUnitPairs(data.ingredients))
 }
 </script>
 
 <template>
   <h2 class="heading--root">{{ t('Create recipe') }}</h2>
   <form class="create" @submit.prevent>
-    <h3 class="heading--muted" id="create__name-heading">{{ t('Name') }}</h3>
-    <input type="text" id="create__name-input" aria-labelledby="create__name-heading" required
-      v-model.trim="data.name" />
-    <h3 class="heading--muted" id="create__tags-heading">
+    <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
+    <input type="text" id="create__name-input" required v-model.trim="data.name" />
+    <label for="create__tags-input" class="heading--muted">
       {{ t('Tags') }} {{ t('create.tags_hint') }}
-    </h3>
-    <input type="text" id="create__tags-input" aria-labelledby="create__tags-heading" v-model.trim="data.tags" />
+    </label>
+    <input type="text" id="create__tags-input" v-model.trim="data.tags" />
     <div class="servings">
-      <h3 class="heading--muted" id="create__servings-heading">{{ t('Servings') }}</h3>
-      <input type="number" aria-labelledby="create__servings-heading" max="999" placeholder="1" v-model="data.servings"
+      <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
+      <input type="number" id="create__servings-input" max="999" placeholder="1" v-model="data.servings"
         @input="validateServingsInput" />
     </div>
-    <h3 class="heading--muted" id="create__ingredients-heading">
+    <label for="create__ingredients-input" class="heading--muted" id="create__ingredients-heading">
       {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
-    </h3>
-    <textarea aria-labelledby="create__ingredients-heading" id="create__ingredients-input" rows="3"
-      v-model="data.ingredients" @input="fitTextareaHeight"></textarea>
-    <h3 class="heading--muted" id="create__instructions-heading">{{ t('Instructions') }}</h3>
-    <textarea aria-labelledby="create__instructions-heading" rows="3" v-model="data.instructions"
+    </label>
+    <textarea id="create__ingredients-input" rows="3" v-model="data.ingredients" @input="fitTextareaHeight"></textarea>
+    <label for="create__instructions-input" class="heading--muted">{{ t('Instructions') }}</label>
+    <textarea id="create__instructions-input" rows="3" v-model="data.instructions"
       @input="fitTextareaHeight"></textarea>
-    <h3 class="heading--muted" id="create__notes-heading">{{ t('Notes') }}</h3>
-    <textarea aria-labelledby="create__notes-heading" rows="2" v-model="data.notes"
-      @input="fitTextareaHeight"></textarea>
-    <ButtonMulti :icon="CheckIcon" :desc="t('Create recipe')" showDesc @click="onCreate" />
+    <label for="create__notes-input" class="heading--muted">{{ t('Notes') }}</label>
+    <textarea id="create__notes-input" rows="2" v-model="data.notes" @input="fitTextareaHeight"></textarea>
+    <ButtonMulti :icon="PreviewIcon" :desc="t('Preview')" showDesc @click="onCreate" />
   </form>
 </template>
 
@@ -84,8 +83,10 @@ textarea {
 
 textarea {
   resize: none;
-  white-space: nowrap;
-  overflow-x: auto;
+}
+
+textarea.create__ingredients {
+  font-family: var(--font-monospace);
 }
 
 div.servings {

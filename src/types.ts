@@ -26,9 +26,8 @@ export type RecipeIngredient = {
   id: UUID
   recipeId: UUID
   ingredientId: UUID
-  quantity?: number
+  quantities?: number[]
   unitId?: UUID
-  notes?: string
   sortOrder?: number
 }
 
@@ -36,10 +35,9 @@ export type ParsedRecipeIngredient = Omit<
   RecipeIngredient,
   'id' | 'recipeId' | 'ingredientId' | 'unitId'
 > & {
-  quantity?: number
+  quantities?: number[]
   unit?: string
   name: string
-  notes?: string
 }
 
 export type Recipe = {
