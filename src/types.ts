@@ -26,18 +26,19 @@ export type RecipeIngredient = {
   id: UUID
   recipeId: UUID
   ingredientId: UUID
-  quantities?: number[]
+  quantity?: number
   unitId?: UUID
   sortOrder?: number
 }
 
-export type ParsedRecipeIngredient = Omit<
-  RecipeIngredient,
-  'id' | 'recipeId' | 'ingredientId' | 'unitId'
-> & {
-  quantities?: number[]
+export type ParsedIngredient = {
   unit?: string
   name: string
+}
+
+export type MatchedIngredient = {
+  trimmedLine: string
+  parts?: { quantity: number; knownUnit: string; text: string }[]
 }
 
 export type Recipe = {
@@ -45,7 +46,7 @@ export type Recipe = {
   userId: UUID
   name: string
   tagIds?: UUID[]
-  servings?: number
+  servings: number
   recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string
@@ -58,7 +59,17 @@ export type RecipeLocal = Omit<Recipe, 'userId'> & {
 
 export type ParsedRecipe = Omit<Recipe, 'userId' | 'tagIds' | 'recipeIngredientIds' | 'updated'> & {
   tags: string[]
-  ingredients: ParsedRecipeIngredient[]
+  ingredients: ParsedIngredient[]
+}
+
+export type RawRecipe = {
+  name: string
+  tags: string
+  servings: number | undefined
+  ingredients: string
+  matchedIngredients: MatchedIngredient[] | []
+  instructions: string
+  notes: string
 }
 
 export type SyncMetadata = {
