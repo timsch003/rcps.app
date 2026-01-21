@@ -1,17 +1,19 @@
 <script setup lang="ts">
-const { route, accentColor, inNavBottom } = defineProps<{
+const { route, accentColor, inNavBottom, inline } = defineProps<{
   route?: string
   desc: string
   icon?: object
   showDesc?: boolean | false
   accentColor?: boolean | false
   inNavBottom?: boolean | false
+  inline?: boolean | false
 }>()
 
 const baseElem = !!route ? 'RouterLink' : 'button'
 const baseClass = !!route ? 'btn-link' : 'btn-button'
 const accentClass = !!accentColor ? 'btn--accent' : ''
-const modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
+let modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
+modifierClass = !inNavBottom && inline ? 'btn-button--inline' : ''
 const link = baseElem === 'RouterLink' ? { name: route } : null
 </script>
 
@@ -59,7 +61,8 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
   color: var(--accent);
 }
 
-.btn--icon-desc {
+.btn--icon-desc,
+.btn-button--inline {
   svg {
     width: var(--icon-size-s);
     height: var(--icon-size-s);
@@ -102,5 +105,19 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
   z-index: 30;
   width: 100%;
   border-top: 2px solid var(--accent);
+}
+
+.btn-button--inline {
+  padding: 0;
+  box-shadow: none;
+  background-color: transparent;
+  transform: none;
+}
+
+.btn-button--inline:hover,
+.btn-button--inline:focus,
+.btn-button--inline:active {
+  transform: none;
+  transition: none;
 }
 </style>

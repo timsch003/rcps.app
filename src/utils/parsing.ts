@@ -56,6 +56,17 @@ export function convertFloatToFraction(value: number): string {
   return value.toString()
 }
 
+export function limitDecimals(value: number): number {
+  const numString = value.toString()
+  if (numString.includes('.')) {
+    const [, decimalPart] = numString.split('.')
+    if (decimalPart!.length > 2) {
+      return parseFloat(value.toFixed(2))
+    }
+  }
+  return value
+}
+
 export function matchIngredients(ingredients: string): MatchedIngredient[] | [] {
   if (!ingredients.trim()) return []
 

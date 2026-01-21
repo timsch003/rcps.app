@@ -7,8 +7,6 @@ import { matchIngredients } from '@/utils/parsing'
 import PreviewIcon from '@/views/icons/IconPreview.vue'
 import type { RawRecipe } from '@/types'
 
-const previewing = ref(false)
-
 const data = reactive<RawRecipe>({
   name: '',
   tags: '',
@@ -18,6 +16,8 @@ const data = reactive<RawRecipe>({
   instructions: '',
   notes: '',
 })
+const previewing = ref(false)
+const deselectedIngredientParts = ref<{ ingredientIndex: number; partIndex: number }[]>([])
 
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -38,7 +38,6 @@ const resetTextareaHeight = (e: Event) => {
 
 async function onPreview() {
   data.name = data.name.trim()
-  if (!data.name) return
 
   data.tags = data.tags
     .split(',')
@@ -52,6 +51,8 @@ async function onPreview() {
 
   data.instructions = data.instructions.trim()
   data.notes = data.notes.trim()
+
+  scrollTo(0, 0)
 
   previewing.value = true
 }
@@ -86,7 +87,8 @@ async function onPreview() {
       <ButtonMulti :icon="PreviewIcon" :desc="t('Preview')" showDesc @click="onPreview" />
     </form>
   </div>
-  <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing" />
+  <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing"
+    v-model:deselectedIngredientParts="deselectedIngredientParts" />
 </template>
 
 <style scoped>

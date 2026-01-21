@@ -1,15 +1,19 @@
-.heading--muted {
+h2.heading--muted,
+h3.heading--muted {
   font-size: var(--heading-font-size);
   letter-spacing: 1px;
   font-weight: 300;
   opacity: var(--text-secondary-opacity);
 }
 
+h3.heading--muted {
+  font-size: 1rem;
+}
+
 .heading--root {
-  font-size: 0.9rem;
-  font-weight: 600;
   font-size: var(--heading-font-size);
   padding-bottom: var(--inner-spacing);
+  font-weight: 600;
 }
 
 svg.spinner {
