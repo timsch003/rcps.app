@@ -12,9 +12,6 @@ const data = defineModel<RawRecipe>('data')
 const previewing = defineModel<boolean>('previewing')
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsInfoVisible = ref(false)
-const deselectedIngredientParts = defineModel<{ ingredientIndex: number; partIndex: number }[]>(
-  'deselectedIngredientParts',
-)
 
 onMounted(() => {
   ingredientsInfoElement.value = document.querySelector(
@@ -54,15 +51,20 @@ function toggleIngredientPart(
   const className = withKnownUnit
     ? 'preview__ingredient-quantity-unit--selected'
     : 'preview__ingredient-quantity--selected'
-
   span.classList.toggle(className)
 
+  const matchedIngredient = data?.value?.matchedIngredients[ingredientIndex]
+
+  if (typeof matchedIngredient === 'string' || !matchedIngredient) return
+
+  const matchedIngredientPart = matchedIngredient[partIndex]
+
+  if (!matchedIngredientPart) return
+
   if (!span.classList.contains(className)) {
-    deselectedIngredientParts.value?.push({ ingredientIndex, partIndex })
+    matchedIngredientPart.deselected = true
   } else {
-    deselectedIngredientParts.value = deselectedIngredientParts.value?.filter(
-      (d) => d.ingredientIndex !== ingredientIndex || d.partIndex !== partIndex,
-    )
+    matchedIngredientPart.deselected = false
   }
 }
 
@@ -103,17 +105,15 @@ async function onCreate() {
     <div class="preview__ingredients-info">
       <div class="preview__ingredients-info--overlay">
         <p>
-          <span class="preview__ingredient-quantity--selected">{{ t('Quantity') }}</span
-          ><br />
-          {{ t('preview.ingredients_info.quantity') }}
+          <span class="preview__ingredient-quantity--selected">{{ t('Quantity') }}</span>
         </p>
+        <p>{{ t('preview.ingredients_info.quantity') }}</p>
         <p>
           <span class="preview__ingredient-quantity-unit--selected">{{
             t('Quantity and unit')
-          }}</span
-          ><br />
-          {{ t('preview.ingredients_info.quantity_unit') }}
+          }}</span>
         </p>
+        <p>{{ t('preview.ingredients_info.quantity_unit') }}</p>
         <p>
           {{ t('preview.ingredients_info.deselect') }}
         </p>
@@ -121,9 +121,9 @@ async function onCreate() {
     </div>
     <ul>
       <li v-for="(ing, IngIndex) in data?.matchedIngredients" :key="IngIndex">
-        <span v-if="ing.parts!.length <= 0">{{ ing.trimmedLine }}</span>
+        <span v-if="typeof ing === 'string'">{{ ing }}</span>
 
-        <span v-else v-for="(part, partIndex) in ing.parts" :key="partIndex">
+        <span v-else v-for="(part, partIndex) in ing" :key="partIndex">
           <span
             v-if="part.quantity && !part.knownUnit"
             class="preview__ingredient-quantity preview__ingredient-quantity--selected"
@@ -138,7 +138,7 @@ async function onCreate() {
           >
             {{ limitDecimals(part.quantity) }} {{ part.knownUnit }}</span
           >
-          <span v-if="part.text">{{ part.text }}</span>
+          <span v-if="part.textAfterQuantity">{{ part.textAfterQuantity }}</span>
         </span>
       </li>
     </ul>
@@ -167,6 +167,11 @@ h3.heading--with-icon {
   }
 }
 
+p:not(:last-child),
+ul {
+  padding-bottom: var(--inner-spacing);
+}
+
 div.preview__ingredients-info {
   position: relative;
 
@@ -179,12 +184,15 @@ div.preview__ingredients-info {
     background-color: var(--bg);
     border: 2px solid var(--decor);
     transition: clip-path var(--transition-duration);
-  }
-}
 
-p:not(:last-child),
-ul {
-  padding-bottom: var(--inner-spacing);
+    p:has(span) {
+      padding-bottom: 5px;
+    }
+
+    p:last-child {
+      font-weight: 600;
+    }
+  }
 }
 
 li {
@@ -199,7 +207,7 @@ li {
 .preview__ingredient-quantity-unit,
 .preview__ingredient-quantity--selected,
 .preview__ingredient-quantity-unit--selected {
-  padding-inline: 1px;
+  padding: 2px 1px;
   font-weight: 600;
   cursor: pointer;
   border-radius: var(--border-radius);

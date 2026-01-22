@@ -36,7 +36,6 @@ function onServingsIncrease() {
       <span v-if="ingredient?.quantity">{{ ingredient.quantity }}&nbsp;</span>
       <span v-if="ingredient?.unitId">{{ unitsStore.getName(ingredient.unitId) }}&nbsp;</span>
       <span>{{ ingredient?.name }}&nbsp;</span>
-      <span v-if="ingredient?.notes">({{ ingredient.notes }})</span>
     </li>
   </ul>
   <h3 v-if="recipe?.instructions" class="heading--muted">{{ t('Instructions') }}</h3>

@@ -17,7 +17,6 @@ const data = reactive<RawRecipe>({
   notes: '',
 })
 const previewing = ref(false)
-const deselectedIngredientParts = ref<{ ingredientIndex: number; partIndex: number }[]>([])
 
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -70,25 +69,48 @@ async function onPreview() {
       <input type="text" id="create__tags-input" v-model.trim="data.tags" />
       <div class="servings">
         <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
-        <input type="number" id="create__servings-input" placeholder="1" v-model="data.servings"
-          @input="validateServingsInput" />
+        <input
+          type="number"
+          id="create__servings-input"
+          placeholder="1"
+          v-model="data.servings"
+          @input="validateServingsInput"
+        />
       </div>
-      <label for="create__ingredients-input" class="heading--muted" id="create__ingredients-heading">
+      <label
+        for="create__ingredients-input"
+        class="heading--muted"
+        id="create__ingredients-heading"
+      >
         {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
       </label>
-      <textarea id="create__ingredients-input" v-model="data.ingredients" @focus="fitTextareaHeight"
-        @blur="resetTextareaHeight" @input="fitTextareaHeight"></textarea>
+      <textarea
+        id="create__ingredients-input"
+        v-model="data.ingredients"
+        @focus="fitTextareaHeight"
+        @blur="resetTextareaHeight"
+        @input="fitTextareaHeight"
+      ></textarea>
       <label for="create__instructions-input" class="heading--muted">{{ t('Instructions') }}</label>
-      <textarea id="create__instructions-input" v-model="data.instructions" @focus="fitTextareaHeight"
-        @blur="resetTextareaHeight" @input="fitTextareaHeight"></textarea>
+      <textarea
+        id="create__instructions-input"
+        v-model="data.instructions"
+        @focus="fitTextareaHeight"
+        @blur="resetTextareaHeight"
+        @input="fitTextareaHeight"
+      ></textarea>
       <label for="create__notes-input" class="heading--muted">{{ t('Notes') }}</label>
-      <textarea id="create__notes-input" v-model="data.notes" @focus="fitTextareaHeight" @blur="resetTextareaHeight"
-        @input="fitTextareaHeight"></textarea>
+      <textarea
+        id="create__notes-input"
+        v-model="data.notes"
+        @focus="fitTextareaHeight"
+        @blur="resetTextareaHeight"
+        @input="fitTextareaHeight"
+      ></textarea>
       <ButtonMulti :icon="PreviewIcon" :desc="t('Preview')" showDesc @click="onPreview" />
     </form>
   </div>
-  <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing"
-    v-model:deselectedIngredientParts="deselectedIngredientParts" />
+  <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing" />
 </template>
 
 <style scoped>

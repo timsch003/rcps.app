@@ -36,10 +36,14 @@ export type ParsedIngredient = {
   name: string
 }
 
-export type MatchedIngredient = {
-  trimmedLine: string
-  parts?: { quantity: number; knownUnit: string; text: string }[]
-}
+export type MatchedIngredient =
+  | {
+      quantity?: number
+      knownUnit?: string
+      textAfterQuantity?: string
+      deselected: boolean
+    }[]
+  | string
 
 export type Recipe = {
   id: UUID

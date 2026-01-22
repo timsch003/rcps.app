@@ -7,7 +7,7 @@ const unitSet = new Set(units.map((u) => u.toLowerCase()))
 // (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0")
 // plus everything that follows until the next quantity
 export const regex =
-  /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)/gu
+  /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
 
 export function convertFractionToFloat(quantityStr: string): number {
   if (quantityStr.trim() === '') return 0
@@ -79,21 +79,20 @@ export function matchIngredients(ingredients: string): MatchedIngredient[] | [] 
     let match
 
     while ((match = regex.exec(trimmedLine)) !== null) {
-      const quantity = (match[1] && match[1]) || ''
-      const potentialUnit = (match[2] && match[2]) || ''
-      const knownUnit = potentialUnit.split(' ').find((part) => unitSet.has(part.toLowerCase()))
-      const text = knownUnit ? potentialUnit.replace(knownUnit, '') : potentialUnit
+      const quantity = match[1] && match[1]
+      const potentialUnit = match[2] && match[2]
+      const knownUnit = potentialUnit?.split(' ').find((part) => unitSet.has(part.toLowerCase()))
+      const textAfterQuantity = knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit
 
       parts.push({
-        quantity: convertFractionToFloat(quantity),
-        knownUnit: knownUnit || '',
-        text: text,
+        quantity: (quantity && convertFractionToFloat(quantity)) || undefined,
+        knownUnit: knownUnit || undefined,
+        textAfterQuantity: textAfterQuantity || undefined,
+        deselected: false,
       })
     }
 
-    return {
-      trimmedLine,
-      parts: parts,
-    }
+    if (!parts.length) return trimmedLine
+    else return parts
   })
 }

@@ -47,6 +47,7 @@ export const seedLocalDB = () => {
   useRecipesStore().add(
     {
       name: 'Cake',
+      servings: 8,
       instructions: 'Mix ingredients and bake.',
       tagIds: [mainDishTagId, dessertTagId],
       recipeIngredientIds: [
@@ -63,6 +64,7 @@ export const seedLocalDB = () => {
   useRecipesStore().add(
     {
       name: 'Fruit salad',
+      servings: 0,
       instructions: 'Chop fruit and mix.',
       tagIds: [dessertTagId],
       recipeIngredientIds: [],
@@ -99,7 +101,6 @@ export const seedLocalDB = () => {
     ingredientId: flourId,
     quantity: 2,
     unitId: unitCupId,
-    notes: 'Use all-purpose flour',
     sortOrder: 1,
   })
 
@@ -118,7 +119,6 @@ export const seedLocalDB = () => {
     ingredientId: tofuId,
     quantity: 300,
     unitId: unitGramId,
-    notes: 'Firm tofu works best',
     sortOrder: 1,
   })
 
