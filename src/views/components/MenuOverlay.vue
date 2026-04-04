@@ -59,10 +59,20 @@ const logout = async () => {
             <ButtonMulti :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
           </li>
           <li>
-            <ButtonMulti route="reset" :icon="ResetPasswordIcon" :desc="t('auth.reset_password')" showDesc />
+            <ButtonMulti
+              route="reset"
+              :icon="ResetPasswordIcon"
+              :desc="t('auth.reset_password')"
+              showDesc
+            />
           </li>
           <li>
-            <ButtonMulti route="change" :icon="ChangeMailIcon" :desc="t('auth.change_email')" showDesc />
+            <ButtonMulti
+              route="change"
+              :icon="ChangeMailIcon"
+              :desc="t('auth.change_email')"
+              showDesc
+            />
           </li>
         </menu>
       </div>
@@ -75,7 +85,7 @@ div.menu {
   position: fixed;
   inset: 0;
   background-color: var(--bg);
-  z-index: 11;
+  z-index: 20;
   padding: var(--outer-spacing);
 
   svg {

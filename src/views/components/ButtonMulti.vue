@@ -13,20 +13,36 @@ const baseElem = !!route ? 'RouterLink' : 'button'
 const baseClass = !!route ? 'btn-link' : 'btn-button'
 const accentClass = !!accentColor ? 'btn--accent' : ''
 let modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
-modifierClass = !inNavBottom && inline ? 'btn-button--inline' : ''
+if (!inNavBottom && inline) modifierClass = 'btn-button--inline'
 const link = baseElem === 'RouterLink' ? { name: route } : null
 </script>
 
 <template>
-  <component :is="baseElem" v-if="icon && showDesc" :to="link" :class="`${baseClass} ${accentClass} btn--icon-desc`">
+  <component
+    :is="baseElem"
+    v-if="icon && showDesc"
+    :to="link"
+    :class="`${baseClass} ${accentClass} btn--icon-desc`"
+  >
     <component :is="icon" />
     <span :class="`${baseClass}__desc`">{{ desc }}</span>
   </component>
-  <component :is="baseElem" v-else-if="icon && !showDesc" :to="link"
-    :class="`${baseClass} ${accentClass} ${modifierClass}`" :aria-label="desc">
+  <component
+    :is="baseElem"
+    v-else-if="icon && !showDesc"
+    :to="link"
+    :class="`${baseClass} ${accentClass} ${modifierClass}`"
+    :aria-label="desc"
+  >
     <component :is="icon" />
   </component>
-  <component :is="baseElem" v-else :to="link" :class="`${baseClass} ${accentClass}`" :aria-label="desc">
+  <component
+    :is="baseElem"
+    v-else
+    :to="link"
+    :class="`${baseClass} ${accentClass}`"
+    :aria-label="desc"
+  >
     {{ desc }}
   </component>
 </template>
@@ -57,6 +73,10 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
   }
 }
 
+.btn-button:disabled {
+  cursor: not-allowed;
+}
+
 .btn--accent {
   color: var(--accent);
 }
@@ -76,14 +96,14 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
 }
 
 .btn-link:hover,
-.btn-button:hover,
+.btn-button:hover:not(:disabled),
 .btn-link:focus,
-.btn-button:focus {
+.btn-button:focus:not(:disabled) {
   background-color: var(--bg-lighter);
 }
 
 .btn-link:active,
-.btn-button:active,
+.btn-button:active:not(:disabled),
 .btn-link--nav-bottom.active {
   background-color: var(--bg-lighter);
   box-shadow: 0px 0px var(--bg-lighter);
@@ -102,7 +122,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
   content: '';
   position: absolute;
   top: -15px;
-  z-index: 30;
+  z-index: 11;
   width: 100%;
   border-top: 2px solid var(--accent);
 }

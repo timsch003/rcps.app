@@ -9,10 +9,6 @@ export type Ingredient = IdAndName
 export type Tag = IdAndName
 export type Unit = IdAndName
 
-export type SyncState = 'synced' | 'syncing' | 'offline'
-
-export type PendingChangeOperation = 'create' | 'update' | 'delete'
-
 export type UserSetting = { key: string; value: string }
 
 export type User = {
@@ -31,44 +27,34 @@ export type RecipeIngredient = {
   sortOrder?: number
 }
 
-export type ParsedIngredient = {
-  unit?: string
-  name: string
-}
+export type MatchedIngredient = QuantityUnitText[] | string
 
-export type MatchedIngredient =
-  | {
-      quantity?: number
-      knownUnit?: string
-      textAfterQuantity?: string
-      deselected: boolean
-    }[]
-  | string
+export type QuantityUnitText = {
+  quantity?: number
+  knownUnit?: string
+  textAfterQuantity?: string
+  selected?: boolean
+}
 
 export type Recipe = {
   id: UUID
   userId: UUID
   name: string
-  tagIds?: UUID[]
   servings: number
+  tagIds?: UUID[]
   recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string
   updated?: number
 }
 
-export type RecipeLocal = Omit<Recipe, 'userId'> & {
+export type RecipeLocal = Omit<Recipe, 'userId' | 'updated'> & {
   synced: boolean
 }
 
-export type ParsedRecipe = Omit<Recipe, 'userId' | 'tagIds' | 'recipeIngredientIds' | 'updated'> & {
-  tags: string[]
-  ingredients: ParsedIngredient[]
-}
-
-export type RawRecipe = {
+export type RecipeRaw = {
   name: string
-  tags: string
+  tags: string | string[]
   servings: number | undefined
   ingredients: string
   matchedIngredients: MatchedIngredient[] | []
@@ -80,6 +66,10 @@ export type SyncMetadata = {
   lastSync: number
   pendingChanges: number
 }
+
+export type SyncState = 'synced' | 'syncing' | 'offline'
+
+export type PendingChangeOperation = 'create' | 'update' | 'delete'
 
 export type PendingChange = {
   id: UUID

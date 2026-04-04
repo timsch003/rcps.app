@@ -42,20 +42,4 @@ form {
   button[type='submit'] {
     margin-top: 8px;
   }
-
-  button:disabled {
-    opacity: 0.75;
-    cursor: not-allowed;
-  }
-
-  div.submit {
-    display: flex;
-    align-items: center;
-    margin-top: 8px;
-
-    button {
-      margin-top: 0;
-      margin-bottom: 0;
-    }
-  }
 }

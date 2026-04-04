@@ -19,7 +19,7 @@ export const fractionsMap: Record<string, number> = {
   '⅒': 0.1,
 }
 
-export const metricUnits = [
+const metricUnits = [
   'g',
   'gram',
   'grams',
@@ -119,7 +119,7 @@ export const metricUnits = [
   'リットル',
 ]
 
-export const imperialUnits = [
+const imperialUnits = [
   'oz',
   'ounce',
   'ounces',
@@ -222,4 +222,4 @@ export const imperialUnits = [
   '汤匙',
 ]
 
-export const units = [...metricUnits, ...imperialUnits]
+export const unitsSet = new Set([...metricUnits, ...imperialUnits].map((u) => u.toLowerCase()))

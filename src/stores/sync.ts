@@ -20,7 +20,9 @@ export const useSyncStore = defineStore('sync', () => {
     }
   }
 
-  async function compareLocalRemote(collection: string, records: RecipeLocal[]) {}
+  async function compareLocalRemote(collection: string, records: RecipeLocal[]) {
+    // TODO
+  }
 
   async function recordSyncTime() {
     const metadata: SyncMetadata = {

@@ -1,19 +1,18 @@
-h2.heading--muted,
-h3.heading--muted {
+.heading--muted {
   font-size: var(--heading-font-size);
   letter-spacing: 1px;
   font-weight: 300;
   opacity: var(--text-secondary-opacity);
 }
 
-h3.heading--muted {
-  font-size: 1rem;
-}
-
 .heading--root {
   font-size: var(--heading-font-size);
   padding-bottom: var(--inner-spacing);
   font-weight: 600;
+}
+
+.multiline_text {
+  white-space: pre-wrap;
 }
 
 svg.spinner {
@@ -38,6 +37,22 @@ p.error {
 p.success {
   border-top: 2px solid green;
   border-bottom: 2px solid green;
+}
+
+div.submit {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+
+  button {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
 }
 
 @keyframes spin {

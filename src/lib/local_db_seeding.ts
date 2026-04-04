@@ -31,12 +31,12 @@ export const seedLocalDB = () => {
   const unitGramId = uuidv7()
   const unitCupId = uuidv7()
 
-  useIngredientsStore().add('Flour', flourId)
-  useIngredientsStore().add('Sugar', sugarId)
-  useIngredientsStore().add('Tofu', tofuId)
-  useIngredientsStore().add('Carrots', carrotsId)
-  useIngredientsStore().add('Potatoes', potatoesId)
-  useIngredientsStore().add('Onions', onionsId)
+  useIngredientsStore().add('Flour')
+  useIngredientsStore().add('Sugar')
+  useIngredientsStore().add('Tofu')
+  useIngredientsStore().add('Carrots')
+  useIngredientsStore().add('Potatoes')
+  useIngredientsStore().add('Onions')
 
   useTagsStore().add('Dessert', dessertTagId)
   useTagsStore().add('Main dish', mainDishTagId)
@@ -44,56 +44,52 @@ export const seedLocalDB = () => {
   useUnitsStore().add('gram', unitGramId)
   useUnitsStore().add('cup', unitCupId)
 
-  useRecipesStore().add(
-    {
-      name: 'Cake',
-      servings: 8,
-      instructions: 'Mix ingredients and bake.',
-      tagIds: [mainDishTagId, dessertTagId],
-      recipeIngredientIds: [
-        recipeIngredient1Id,
-        recipeIngredient2Id,
-        recipeIngredient3Id,
-        recipeIngredient4Id,
-        recipeIngredient5Id,
-      ],
-    },
-    recipeId,
-  )
+  useRecipesStore().add({
+    id: recipeId,
+    name: 'Cake',
+    servings: 8,
+    instructions: 'Mix ingredients and bake.',
+    tagIds: [mainDishTagId, dessertTagId],
+    recipeIngredientIds: [
+      recipeIngredient1Id,
+      recipeIngredient2Id,
+      recipeIngredient3Id,
+      recipeIngredient4Id,
+      recipeIngredient5Id,
+    ],
+    synced: false,
+  })
 
-  useRecipesStore().add(
-    {
-      name: 'Fruit salad',
-      servings: 0,
-      instructions: 'Chop fruit and mix.',
-      tagIds: [dessertTagId],
-      recipeIngredientIds: [],
-    },
-    recipe2Id,
-  )
+  useRecipesStore().add({
+    id: recipe2Id,
+    name: 'Fruit salad',
+    servings: 0,
+    instructions: 'Chop fruit and mix.',
+    tagIds: [dessertTagId],
+    recipeIngredientIds: [],
+    synced: false,
+  })
 
-  useRecipesStore().add(
-    {
-      name: 'Tofu stir-fry',
-      instructions: 'Cook tofu with vegetables.',
-      tagIds: [mainDishTagId],
-      servings: 2,
-      recipeIngredientIds: [recipeIngredient6Id, recipeIngredient7Id, recipeIngredient8Id],
-    },
-    recipe3Id,
-  )
+  useRecipesStore().add({
+    id: recipe3Id,
+    name: 'Tofu stir-fry',
+    instructions: 'Cook tofu with vegetables.',
+    tagIds: [mainDishTagId],
+    servings: 2,
+    recipeIngredientIds: [recipeIngredient6Id, recipeIngredient7Id, recipeIngredient8Id],
+    synced: false,
+  })
 
-  useRecipesStore().add(
-    {
-      name: 'Pancakes',
-      instructions: 'Mix ingredients and cook on griddle.',
-      notes: 'Serve with syrup.',
-      tagIds: [dessertTagId],
-      servings: 4,
-      recipeIngredientIds: [recipeIngredient9Id],
-    },
-    recipe4Id,
-  )
+  useRecipesStore().add({
+    id: recipe4Id,
+    name: 'Pancakes',
+    instructions: 'Mix ingredients and cook on griddle.',
+    notes: 'Serve with syrup.',
+    tagIds: [dessertTagId],
+    servings: 4,
+    recipeIngredientIds: [recipeIngredient9Id],
+    synced: false,
+  })
 
   useRecipeIngredientsStore().add({
     id: recipeIngredient1Id,

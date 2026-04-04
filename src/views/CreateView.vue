@@ -3,13 +3,14 @@ import { ref, reactive } from 'vue'
 import PreviewQuickCorrect from '@/views/components/PreviewQuickCorrect.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
-import { matchIngredients } from '@/utils/parsing'
+import { matchIngredients } from '@/lib/pattern_matching'
+import { useRecipesStore } from '@/stores/recipes'
 import PreviewIcon from '@/views/icons/IconPreview.vue'
-import type { RawRecipe } from '@/types'
+import type { RecipeRaw } from '@/types'
 
-const data = reactive<RawRecipe>({
+const data = reactive<RecipeRaw>({
   name: '',
-  tags: '',
+  tags: [],
   servings: undefined,
   ingredients: '',
   matchedIngredients: [],
@@ -17,6 +18,7 @@ const data = reactive<RawRecipe>({
   notes: '',
 })
 const previewing = ref(false)
+const recipesStore = useRecipesStore()
 
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -36,47 +38,55 @@ const resetTextareaHeight = (e: Event) => {
 }
 
 async function onPreview() {
-  data.name = data.name.trim()
+  if (!data.name) {
+    alert(t('create.alert_name_required'))
+    return
+  } else if (recipesStore.nameExists(data.name)) {
+    alert(t('create.alert_name_exists'))
+    return
+  }
 
-  data.tags = data.tags
-    .split(',')
-    .map((tag) => tag.trim())
-    .join(', ')
+  data.servings = data.servings ? data.servings : 1
 
-  data.servings = data.servings === undefined ? 1 : Number(data.servings)
+  data.tags = Array.isArray(data.tags)
+    ? data.tags
+    : data.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag !== '')
 
-  data.ingredients = data.ingredients.trim()
   if (data.ingredients) data.matchedIngredients = matchIngredients(data.ingredients)
 
-  data.instructions = data.instructions.trim()
-  data.notes = data.notes.trim()
+  previewing.value = true
 
   scrollTo(0, 0)
-
-  previewing.value = true
 }
 </script>
 
 <template>
   <div v-if="!previewing">
     <h2 class="heading--root">{{ t('Create recipe') }}</h2>
+
     <form class="create" @submit.prevent>
       <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
       <input type="text" id="create__name-input" v-model.trim="data.name" />
-      <label for="create__tags-input" class="heading--muted">
-        {{ t('Tags') }} {{ t('create.tags_hint') }}
-      </label>
-      <input type="text" id="create__tags-input" v-model.trim="data.tags" />
+
       <div class="servings">
         <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
         <input
           type="number"
           id="create__servings-input"
           placeholder="1"
-          v-model="data.servings"
+          v-model.number="data.servings"
           @input="validateServingsInput"
         />
       </div>
+
+      <label for="create__tags-input" class="heading--muted">
+        {{ t('Tags') }} {{ t('create.tags_hint') }}
+      </label>
+      <input type="text" id="create__tags-input" v-model="data.tags" />
+
       <label
         for="create__ingredients-input"
         class="heading--muted"
@@ -86,28 +96,36 @@ async function onPreview() {
       </label>
       <textarea
         id="create__ingredients-input"
-        v-model="data.ingredients"
+        v-model.trim="data.ingredients"
         @focus="fitTextareaHeight"
         @blur="resetTextareaHeight"
         @input="fitTextareaHeight"
       ></textarea>
+
       <label for="create__instructions-input" class="heading--muted">{{ t('Instructions') }}</label>
       <textarea
         id="create__instructions-input"
-        v-model="data.instructions"
+        v-model.trim="data.instructions"
         @focus="fitTextareaHeight"
         @blur="resetTextareaHeight"
         @input="fitTextareaHeight"
       ></textarea>
+
       <label for="create__notes-input" class="heading--muted">{{ t('Notes') }}</label>
       <textarea
         id="create__notes-input"
-        v-model="data.notes"
+        v-model.trim="data.notes"
         @focus="fitTextareaHeight"
         @blur="resetTextareaHeight"
         @input="fitTextareaHeight"
       ></textarea>
-      <ButtonMulti :icon="PreviewIcon" :desc="t('Preview')" showDesc @click="onPreview" />
+
+      <ButtonMulti
+        :icon="PreviewIcon"
+        :desc="t('Preview & quick-correct')"
+        showDesc
+        @click="onPreview"
+      />
     </form>
   </div>
   <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing" />

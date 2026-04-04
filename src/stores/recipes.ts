@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { db } from '@/services/dexie'
-import { v7 as uuidv7 } from 'uuid'
 import type { RecipeLocal, UUID } from '@/types'
 
 export const useRecipesStore = defineStore('recipes', () => {
@@ -11,17 +10,14 @@ export const useRecipesStore = defineStore('recipes', () => {
     all.value = await db.recipes.toArray()
   }
 
-  async function add(recipe: Omit<RecipeLocal, 'id' | 'synced'>, id?: UUID) {
-    const newRecipe: RecipeLocal = {
-      id: id || uuidv7(),
-      ...recipe,
-      synced: false,
-    }
-    all.value.push(newRecipe)
+  async function add(recipe: RecipeLocal): Promise<UUID | undefined> {
     try {
-      await db.recipes.add(newRecipe)
+      await db.recipes.add(recipe)
+      all.value.push(recipe)
+      return recipe.id
     } catch (error) {
-      console.error('Failed to add recipe to the database:', error)
+      console.error('Failed to add recipe to the local database:', error)
+      return undefined
     }
   }
 
@@ -38,6 +34,10 @@ export const useRecipesStore = defineStore('recipes', () => {
     return recipe ? recipe.name : ''
   }
 
+  function nameExists(name: string): boolean {
+    return all.value.some((r) => r.name === name)
+  }
+
   return {
     all,
     init,
@@ -45,5 +45,6 @@ export const useRecipesStore = defineStore('recipes', () => {
     get,
     getAllWithTag,
     getName,
+    nameExists,
   }
 })

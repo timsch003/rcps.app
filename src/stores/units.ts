@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { db } from '@/services/dexie'
-import { add as addDry } from '@/utils/dry_store_actions'
-import type { IdAndName, Unit } from '@/types'
+import type { Unit } from '@/types'
 
 const STORE_ID = 'units'
 
@@ -14,8 +13,8 @@ export const useUnitsStore = defineStore(STORE_ID, () => {
     all.value = await db.units.toArray()
   }
 
-  async function add(name: IdAndName['name'], id?: IdAndName['id']) {
-    await addDry(name, id, all, STORE_ID)
+  async function add(name: Unit['name'], id?: Unit['id']) {
+    // TODO
   }
 
   function getName(id: Unit['id']): Unit['name'] | undefined {

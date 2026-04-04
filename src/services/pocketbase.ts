@@ -1,7 +1,7 @@
 import PocketBase, { LocalAuthStore, ClientResponseError, type RecordModel } from 'pocketbase'
 import { v7 as uuidv7 } from 'uuid'
 import { useAuthStore } from '@/stores/auth'
-import translateError from '@/utils/error_translation'
+import translateError from '@/lib/pb_error_translation'
 import type { RecipeLocal } from '@/types'
 
 const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps-app-auth'))

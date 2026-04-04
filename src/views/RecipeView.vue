@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
 import { useRecipesStore } from '@/stores/recipes'
+import { useTagsStore } from '@/stores/tags'
+import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
 import { useUnitsStore } from '@/stores/units'
 import { t } from '@/lang/i18n'
 import ButtonMulti from './components/ButtonMulti.vue'
 
 const route = useRoute()
-const recipeIngredientsStore = useRecipeIngredientsStore()
 const recipesStore = useRecipesStore()
+const tagsStore = useTagsStore()
+const recipeIngredientsStore = useRecipeIngredientsStore()
 const unitsStore = useUnitsStore()
 
 const recipe = recipesStore.get(route.params.id as string)
 const ingredients = recipeIngredientsStore.getIngredientsByRecipeId(route.params.id as string)
+const tags = tagsStore.getNames(recipe?.tagIds || [])
 
 function onServingsDecrease() {
   // TODO
@@ -25,11 +28,21 @@ function onServingsIncrease() {
 
 <template>
   <h2 class="heading--root">{{ recipe?.name }}</h2>
+
   <div v-if="recipe?.servings" class="servings">
     <h3>{{ `${t('Servings')}: ${recipe?.servings}` }}</h3>
     <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
     <ButtonMulti desc="+" showDesc :aria-label="t('Increase')" @click="onServingsIncrease" />
   </div>
+
+  <h3 class="heading--muted">{{ t('Tags') }}</h3>
+  <p>
+    <span v-if="!tags.length">{{ '-' }}</span>
+    <span v-else v-for="(tag, index) in tags" :key="index"
+      >{{ tag }}{{ index < tags.length - 1 ? ', ' : '' }}</span
+    >
+  </p>
+
   <h3 v-if="ingredients?.length" class="heading--muted">{{ t('Ingredients') }}</h3>
   <ul v-if="ingredients?.length">
     <li v-for="ingredient in ingredients" :key="ingredient?.id">

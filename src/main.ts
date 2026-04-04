@@ -9,7 +9,7 @@ import { useRecipeIngredientsStore } from './stores/recipe_ingredients'
 import { useRecipesStore } from './stores/recipes'
 import { useTagsStore } from './stores/tags'
 import { useUnitsStore } from './stores/units'
-import { seedLocalDB } from './utils/local_db_seeding'
+import { seedLocalDB } from './lib/local_db_seeding'
 import { i18n } from './lang/i18n'
 
 const app = createApp(App)
