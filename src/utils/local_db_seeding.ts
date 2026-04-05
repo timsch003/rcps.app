@@ -1,17 +1,18 @@
-import { useIngredientsStore } from '@/stores/ingredients'
-import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
-import { useRecipesStore } from '@/stores/recipes'
-import { useTagsStore } from '@/stores/tags'
-import { useUnitsStore } from '@/stores/units'
+import { ingredientsManager } from '@/services/ingredients_manager'
+import { recipeIngredientsManager } from '@/services/recipe_ingredients_manager'
+import { tagsManager } from '@/services/tags_manager'
+import { unitsManager } from '@/services/units_manager'
+import { db } from '@/adapters/dexie'
 import { v7 as uuidv7 } from 'uuid'
+import type { RecipeLocal } from '@/types'
 
-export const seedLocalDB = () => {
-  const flourId = uuidv7()
-  const sugarId = uuidv7()
-  const tofuId = uuidv7()
-  const carrotsId = uuidv7()
-  const potatoesId = uuidv7()
-  const onionsId = uuidv7()
+export const seedLocalDB = async () => {
+  const flourId = await ingredientsManager.add('Flour')
+  const sugarId = await ingredientsManager.add('Sugar')
+  const tofuId = await ingredientsManager.add('Tofu')
+  const carrotsId = await ingredientsManager.add('Carrots')
+  const potatoesId = await ingredientsManager.add('Potatoes')
+  const onionsId = await ingredientsManager.add('Onions')
   const dessertTagId = uuidv7()
   const mainDishTagId = uuidv7()
   const recipeId = uuidv7()
@@ -31,20 +32,13 @@ export const seedLocalDB = () => {
   const unitGramId = uuidv7()
   const unitCupId = uuidv7()
 
-  useIngredientsStore().add('Flour')
-  useIngredientsStore().add('Sugar')
-  useIngredientsStore().add('Tofu')
-  useIngredientsStore().add('Carrots')
-  useIngredientsStore().add('Potatoes')
-  useIngredientsStore().add('Onions')
+  await tagsManager.add('Dessert', dessertTagId)
+  await tagsManager.add('Main dish', mainDishTagId)
 
-  useTagsStore().add('Dessert', dessertTagId)
-  useTagsStore().add('Main dish', mainDishTagId)
+  await unitsManager.add('gram', unitGramId)
+  await unitsManager.add('cup', unitCupId)
 
-  useUnitsStore().add('gram', unitGramId)
-  useUnitsStore().add('cup', unitCupId)
-
-  useRecipesStore().add({
+  const recipe1: RecipeLocal = {
     id: recipeId,
     name: 'Cake',
     servings: 8,
@@ -58,9 +52,10 @@ export const seedLocalDB = () => {
       recipeIngredient5Id,
     ],
     synced: false,
-  })
+  }
+  await db.recipes.add(recipe1)
 
-  useRecipesStore().add({
+  const recipe2: RecipeLocal = {
     id: recipe2Id,
     name: 'Fruit salad',
     servings: 0,
@@ -68,9 +63,10 @@ export const seedLocalDB = () => {
     tagIds: [dessertTagId],
     recipeIngredientIds: [],
     synced: false,
-  })
+  }
+  await db.recipes.add(recipe2)
 
-  useRecipesStore().add({
+  const recipe3: RecipeLocal = {
     id: recipe3Id,
     name: 'Tofu stir-fry',
     instructions: 'Cook tofu with vegetables.',
@@ -78,9 +74,10 @@ export const seedLocalDB = () => {
     servings: 2,
     recipeIngredientIds: [recipeIngredient6Id, recipeIngredient7Id, recipeIngredient8Id],
     synced: false,
-  })
+  }
+  await db.recipes.add(recipe3)
 
-  useRecipesStore().add({
+  const recipe4: RecipeLocal = {
     id: recipe4Id,
     name: 'Pancakes',
     instructions: 'Mix ingredients and cook on griddle.',
@@ -89,84 +86,85 @@ export const seedLocalDB = () => {
     servings: 4,
     recipeIngredientIds: [recipeIngredient9Id],
     synced: false,
-  })
+  }
+  await db.recipes.add(recipe4)
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient1Id,
     recipeId: recipeId,
-    ingredientId: flourId,
+    ingredientId: flourId!,
     quantity: 2,
     unitId: unitCupId,
     sortOrder: 1,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient2Id,
     recipeId: recipeId,
-    ingredientId: sugarId,
+    ingredientId: sugarId!,
     quantity: 1,
     unitId: unitGramId,
     sortOrder: 2,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient3Id,
     recipeId: recipeId,
-    ingredientId: tofuId,
+    ingredientId: tofuId!,
     quantity: 300,
     unitId: unitGramId,
     sortOrder: 1,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient4Id,
     recipeId: recipeId,
-    ingredientId: carrotsId,
+    ingredientId: carrotsId!,
     quantity: 50,
     unitId: unitGramId,
     sortOrder: 3,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient5Id,
     recipeId: recipeId,
-    ingredientId: potatoesId,
+    ingredientId: potatoesId!,
     quantity: 100,
     unitId: unitGramId,
     sortOrder: 2,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient6Id,
     recipeId: recipe3Id,
-    ingredientId: onionsId,
+    ingredientId: onionsId!,
     quantity: 50,
     unitId: unitGramId,
     sortOrder: 3,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient7Id,
     recipeId: recipe3Id,
-    ingredientId: carrotsId,
+    ingredientId: carrotsId!,
     quantity: 75,
     unitId: unitGramId,
     sortOrder: 2,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient8Id,
     recipeId: recipe3Id,
-    ingredientId: tofuId,
+    ingredientId: tofuId!,
     quantity: 200,
     unitId: unitGramId,
     sortOrder: 1,
   })
 
-  useRecipeIngredientsStore().add({
+  await recipeIngredientsManager.add({
     id: recipeIngredient9Id,
     recipeId: recipe4Id,
-    ingredientId: flourId,
+    ingredientId: flourId!,
     quantity: 1.5,
     unitId: unitCupId,
     sortOrder: 1,
