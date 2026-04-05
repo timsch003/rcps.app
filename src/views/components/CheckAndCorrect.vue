@@ -38,6 +38,7 @@ onMounted(() => {
 
 function toggleIngredientsInfoOverlay() {
   if (!ingredientsInfoElement.value) return
+
   if (ingredientsInfoVisible.value) {
     ingredientsInfoElement.value.style.clipPath = 'inset(0 0 100% 0)'
     ingredientsInfoVisible.value = false
@@ -74,7 +75,7 @@ function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number
 
 function onBackToEditing() {
   checking.value = false
-  // Only keep raw ingredients string
+  // Reset ingredients matching to keep data consistent
   if (data?.value?.matchedIngredients) data.value.matchedIngredients = []
 }
 

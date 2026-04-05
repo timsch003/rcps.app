@@ -32,10 +32,10 @@ async function add(
     }
   }
 
-  const existsInDb = await db.ingredients.where({ name: ingredient }).first()
+  const existingIngredient = await db.ingredients.where({ name: ingredient }).first()
 
-  if (existsInDb) {
-    ingredientId = existsInDb.id
+  if (existingIngredient) {
+    ingredientId = existingIngredient.id
   } else {
     try {
       const newIngredient: Ingredient = {

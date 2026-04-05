@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import PreviewQuickCorrect from '@/views/components/PreviewQuickCorrect.vue'
+import CheckAndCorrect from '@/views/components/CheckAndCorrect.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
 import { matchIngredients } from '@/utils/pattern_matching'
@@ -123,7 +123,7 @@ async function onPreview() {
       <ButtonMulti :icon="PreviewIcon" :desc="t('Check & correct')" showDesc @click="onPreview" />
     </form>
   </div>
-  <PreviewQuickCorrect v-else v-model:data="data" v-model:checking="checking" />
+  <CheckAndCorrect v-else v-model:data="data" v-model:checking="checking" />
 </template>
 
 <style scoped>
