@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { pb } from '@/services/pocketbase'
+import { pb } from '@/adapters/pocketbase'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {

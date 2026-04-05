@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { updateSyncMetadata, db } from '@/services/dexie'
-import { remoteGetRecipes } from '@/services/pocketbase'
+import { updateSyncMetadata, db } from '@/adapters/dexie'
+import { remoteGetRecipes } from '@/adapters/pocketbase'
 import type { SyncMetadata, SyncState, RecipeLocal } from '@/types'
 
 export const useSyncStore = defineStore('sync', () => {

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { db } from '@/services/dexie'
+import { db } from '@/adapters/dexie'
 import type { Unit } from '@/types'
 
 const STORE_ID = 'units'

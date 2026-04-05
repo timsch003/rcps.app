@@ -1,4 +1,4 @@
-import { fractionsMap } from '@/lib/fixed_values'
+import { fractionsMap } from '@/utils/fixed_values'
 
 export function convertFractionToFloat(quantityStr: string): number {
   if (quantityStr.trim() === '') return 0

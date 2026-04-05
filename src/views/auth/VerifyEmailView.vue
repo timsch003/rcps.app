@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { verifyEmail } from '@/services/pocketbase'
+import { verifyEmail } from '@/adapters/pocketbase'
 import { t } from '@/lang/i18n'
 
 const status = ref<'verifying' | 'success' | 'error'>('verifying')

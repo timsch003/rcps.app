@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '@/services/dexie'
 import { useIngredientsStore } from './ingredients'
+import { recipeIngredientsManager } from '@/services/recipe_ingredients_manager'
 import { v7 as uuidv7 } from 'uuid'
 import type { RecipeIngredient, Ingredient, UUID } from '@/types'
 
@@ -11,35 +11,15 @@ export const useRecipeIngredientsStore = defineStore('recipeIngredients', () => 
   const all = ref<RecipeIngredient[]>([])
 
   async function init() {
-    all.value = await db.recipe_ingredients.toArray()
+    all.value = await recipeIngredientsManager.getAll()
   }
 
   async function add(recipeIngredient: RecipeIngredient): Promise<UUID | undefined> {
-    let recipeIngredientId: UUID | undefined
-
-    const existsinStore = all.value.find(
-      (ri) => ri.id === recipeIngredient.id && ri.recipeId === recipeIngredient.recipeId,
-    )
-
-    if (existsinStore) return undefined
-
-    const existsInDb = await db.recipe_ingredients
-      .where({
-        id: recipeIngredient.id,
-        recipeId: recipeIngredient.recipeId,
-      })
-      .first()
-
-    if (existsInDb) return undefined
-
-    try {
-      recipeIngredientId = await db.recipe_ingredients.add(recipeIngredient)
+    const newId = await recipeIngredientsManager.add(recipeIngredient)
+    if (newId) {
       all.value.push(recipeIngredient)
-    } catch (error) {
-      console.error('Failed to add recipe ingredient to the local database:', error)
+      return newId
     }
-
-    return recipeIngredientId
   }
 
   async function addManyByIngredientId(recipeId: UUID, ingredientIds: UUID[]): Promise<UUID[]> {

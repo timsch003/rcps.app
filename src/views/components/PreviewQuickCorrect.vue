@@ -2,28 +2,21 @@
 import { onMounted, ref } from 'vue'
 import { t } from '@/lang/i18n'
 import { useRecipesStore } from '@/stores/recipes'
-import { useTagsStore } from '@/stores/tags'
-import { useIngredientsStore } from '@/stores/ingredients'
-import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
 import { useRouter } from 'vue-router'
 import CheckIcon from '@/views/icons/IconCheck.vue'
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import ButtonMulti from './ButtonMulti.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '../icons/IconSpinner.vue'
-import { limitDecimals } from '@/lib/conversion'
-import { v7 as uuidv7 } from 'uuid'
-import type { RecipeRaw, RecipeLocal, UUID } from '@/types'
+import { limitDecimals } from '@/utils/conversion'
+import type { RecipeRaw } from '@/types'
 
 const data = defineModel<RecipeRaw>('data')
 const checking = defineModel<boolean>('checking')
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsInfoVisible = ref(false)
 const isValidating = ref(false)
-const tagsStore = useTagsStore()
 const recipesStore = useRecipesStore()
-const ingredientsStore = useIngredientsStore()
-const recipeIngredientsStore = useRecipeIngredientsStore()
 const router = useRouter()
 
 onMounted(() => {
@@ -38,12 +31,12 @@ onMounted(() => {
       !ingredientsInfoElement.value.contains(e.target as Node) &&
       !(e.target as HTMLElement).closest('button')
     ) {
-      toggleIngredientsInfo()
+      toggleIngredientsInfoOverlay()
     }
   })
 })
 
-function toggleIngredientsInfo() {
+function toggleIngredientsInfoOverlay() {
   if (!ingredientsInfoElement.value) return
   if (ingredientsInfoVisible.value) {
     ingredientsInfoElement.value.style.clipPath = 'inset(0 0 100% 0)'
@@ -54,7 +47,7 @@ function toggleIngredientsInfo() {
   }
 }
 
-function setQuantityUnit(e: Event, ingredientIndex: number, partIndex: number) {
+function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number) {
   const span = e.target as HTMLSpanElement
   const className = 'checkcorrect__ingredient-quantity-unit--selected'
 
@@ -87,61 +80,14 @@ function onBackToEditing() {
 
 async function onCreate() {
   if (isValidating.value) return
+
   isValidating.value = true
 
-  const newRecipeId = uuidv7()
+  const result = await recipesStore.add(data.value!)
 
-  let tagIds: UUID[] = []
-  let newOrExistingTags: Promise<UUID | undefined>[] = []
-  if (Array.isArray(data.value?.tags)) {
-    newOrExistingTags = data.value?.tags.map(async (newOrExistingTag) => {
-      let tagId = await tagsStore.add(newOrExistingTag)
-      if (!tagId) tagId = tagsStore.getExistingId(newOrExistingTag)
-      return tagId
-    })
+  if (result) router.push({ name: 'recipe', params: { id: result } })
 
-    const resolvedIds = await Promise.all(newOrExistingTags)
-    tagIds = resolvedIds.filter((id): id is UUID => id !== undefined)
-  }
-
-  let ingredientIds: UUID[] = []
-  if (Array.isArray(data.value?.matchedIngredients)) {
-    const recipeIngredientIdPromises: Promise<UUID | undefined>[] =
-      data.value?.matchedIngredients.map(async (mi) => {
-        const id = await ingredientsStore.add(mi)
-        if (id) return id
-      })
-
-    const resolvedIds = await Promise.all(recipeIngredientIdPromises)
-    ingredientIds = resolvedIds.filter((id): id is UUID => id !== undefined)
-  }
-
-  const recipeIngredientIds = await recipeIngredientsStore.addManyByIngredientId(
-    newRecipeId,
-    ingredientIds,
-  )
-
-  if (data.value?.matchedIngredients) {
-    const newRecipe: RecipeLocal = {
-      id: newRecipeId,
-      name: data.value!.name!,
-      tagIds: tagIds,
-      servings: data.value?.servings || 1,
-      recipeIngredientIds: recipeIngredientIds,
-      instructions: data.value?.instructions,
-      notes: data.value?.notes,
-      synced: false,
-    }
-
-    console.log('Added recipe: ', newRecipe)
-
-    const result = await recipesStore.add(newRecipe)
-
-    if (result) router.push({ name: 'recipe', params: { id: result } })
-    else alert(t('create.failed'))
-
-    isValidating.value = false
-  }
+  isValidating.value = false
 }
 </script>
 
@@ -176,7 +122,7 @@ async function onCreate() {
         :icon="InfoIcon"
         :desc="t('Info')"
         inline
-        @click="toggleIngredientsInfo"
+        @click="toggleIngredientsInfoOverlay"
       />
     </h3>
     <div class="checkcorrect__ingredients-info">
@@ -221,7 +167,7 @@ async function onCreate() {
                 ? 'checkcorrect__ingredient-quantity-unit--selected'
                 : 'checkcorrect__ingredient-quantity-unit--ignored'
             "
-            @click="setQuantityUnit($event, ingIndex, partIndex)"
+            @click="selectQuantityUnit($event, ingIndex, partIndex)"
           >
             {{ limitDecimals(part.quantity) }} {{ part.knownUnit }}</span
           >

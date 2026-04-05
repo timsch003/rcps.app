@@ -1,24 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '@/services/dexie'
-import type { RecipeLocal, UUID } from '@/types'
+import { recipesManager } from '@/services/recipes_manager'
+import type { RecipeLocal, RecipeRaw, UUID } from '@/types'
 
 export const useRecipesStore = defineStore('recipes', () => {
   const all = ref<RecipeLocal[]>([])
 
   async function init() {
-    all.value = await db.recipes.toArray()
+    all.value = await recipesManager.getAll()
   }
 
-  async function add(recipe: RecipeLocal): Promise<UUID | undefined> {
-    try {
-      await db.recipes.add(recipe)
-      all.value.push(recipe)
-      return recipe.id
-    } catch (error) {
-      console.error('Failed to add recipe to the local database:', error)
-      return undefined
-    }
+  async function add(data: RecipeRaw): Promise<UUID | undefined> {
+    const addedRecipe = await recipesManager.add(data)
+    if (!addedRecipe) return undefined
+    all.value.push(addedRecipe)
+    return addedRecipe.id
   }
 
   function getAllWithTag(tagId: string): RecipeLocal[] {

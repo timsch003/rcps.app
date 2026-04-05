@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { t } from '@/lang/i18n'
-import { logoutUser } from '@/services/pocketbase'
+import { logoutUser } from '@/adapters/pocketbase'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import AppLogo from '@/views/components/AppLogo.vue'

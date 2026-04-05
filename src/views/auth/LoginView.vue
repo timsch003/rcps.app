@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { loginUser } from '@/services/pocketbase'
+import { loginUser } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'

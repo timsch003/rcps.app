@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { db } from '@/services/dexie'
-import { v7 as uuidv7 } from 'uuid'
+import { tagsManager } from '@/services/tags_manager'
 import type { Tag, UUID } from '@/types'
 
 const STORE_ID = 'tags'
@@ -10,27 +9,15 @@ export const useTagsStore = defineStore(STORE_ID, () => {
   const all = ref<Tag[]>([])
 
   async function init() {
-    all.value = await db.tags.toArray()
+    all.value = await tagsManager.getAll()
   }
 
   async function add(name: Tag['name'], id?: Tag['id']): Promise<UUID | undefined> {
-    const newItem: Tag = { id: id ?? uuidv7(), name }
-
-    const existsInDb = await db.table(STORE_ID).where('name').equals(name).first()
-    if (existsInDb) return undefined
-
-    const existsInStore = getExistingId(name)
-    if (existsInStore) return undefined
-
-    try {
-      await db[STORE_ID].add(newItem)
-      all.value.push(newItem)
-    } catch (error) {
-      console.error(`Failed to add ${STORE_ID.slice(0, -1)} to the local database:`, error)
-      return undefined
+    const newId = await tagsManager.add(name, id)
+    if (newId) {
+      all.value.push({ id: newId, name })
+      return newId
     }
-
-    return newItem.id
   }
 
   function getName(id: Tag['id']) {

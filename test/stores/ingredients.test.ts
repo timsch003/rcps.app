@@ -1,6 +1,6 @@
 import { describe, beforeEach, expect, it } from 'vitest'
 import 'fake-indexeddb/auto'
-import { db } from '@/services/dexie'
+import { db } from '@/adapters/dexie'
 import { setActivePinia, createPinia } from 'pinia'
 import { useIngredientsStore } from '/src/stores/ingredients'
 

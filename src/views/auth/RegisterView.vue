@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { registerUser } from '@/services/pocketbase'
+import { registerUser } from '@/adapters/pocketbase'
 import { t } from '@/lang/i18n'
 import IconSpinner from '@/views/icons/IconSpinner.vue'
 

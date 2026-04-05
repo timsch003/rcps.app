@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { pb } from '@/services/pocketbase'
+import { pb } from '@/adapters/pocketbase'
 
 const route = useRoute()
 const router = useRouter()
