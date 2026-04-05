@@ -17,7 +17,7 @@ const data = reactive<RecipeRaw>({
   instructions: '',
   notes: '',
 })
-const previewing = ref(false)
+const checking = ref(false)
 const recipesStore = useRecipesStore()
 
 const validateServingsInput = (e: Event) => {
@@ -57,14 +57,14 @@ async function onPreview() {
 
   if (data.ingredients) data.matchedIngredients = matchIngredients(data.ingredients)
 
-  previewing.value = true
+  checking.value = true
 
   scrollTo(0, 0)
 }
 </script>
 
 <template>
-  <div v-if="!previewing">
+  <div v-if="!checking">
     <h2 class="heading--root">{{ t('Create recipe') }}</h2>
 
     <form class="create" @submit.prevent>
@@ -120,15 +120,10 @@ async function onPreview() {
         @input="fitTextareaHeight"
       ></textarea>
 
-      <ButtonMulti
-        :icon="PreviewIcon"
-        :desc="t('Preview & quick-correct')"
-        showDesc
-        @click="onPreview"
-      />
+      <ButtonMulti :icon="PreviewIcon" :desc="t('Check & correct')" showDesc @click="onPreview" />
     </form>
   </div>
-  <PreviewQuickCorrect v-else v-model:data="data" v-model:previewing="previewing" />
+  <PreviewQuickCorrect v-else v-model:data="data" v-model:checking="checking" />
 </template>
 
 <style scoped>

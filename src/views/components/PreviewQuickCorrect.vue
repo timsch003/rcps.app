@@ -16,7 +16,7 @@ import { v7 as uuidv7 } from 'uuid'
 import type { RecipeRaw, RecipeLocal, UUID } from '@/types'
 
 const data = defineModel<RecipeRaw>('data')
-const previewing = defineModel<boolean>('previewing')
+const checking = defineModel<boolean>('checking')
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsInfoVisible = ref(false)
 const isValidating = ref(false)
@@ -28,7 +28,7 @@ const router = useRouter()
 
 onMounted(() => {
   ingredientsInfoElement.value = document.querySelector(
-    'div.preview__ingredients-info--overlay',
+    'div.checkcorrect__ingredients-info--overlay',
   ) as HTMLDivElement
 
   addEventListener('click', (e) => {
@@ -56,11 +56,11 @@ function toggleIngredientsInfo() {
 
 function setQuantityUnit(e: Event, ingredientIndex: number, partIndex: number) {
   const span = e.target as HTMLSpanElement
-  const className = 'preview__ingredient-quantity-unit--selected'
+  const className = 'checkcorrect__ingredient-quantity-unit--selected'
 
   span
     .closest('li')
-    ?.querySelectorAll('span.preview__ingredient-quantity-unit')
+    ?.querySelectorAll('span.checkcorrect__ingredient-quantity-unit')
     ?.forEach((s) => s.classList.remove(className))
   span.classList.add(className)
 
@@ -80,7 +80,7 @@ function setQuantityUnit(e: Event, ingredientIndex: number, partIndex: number) {
 }
 
 function onBackToEditing() {
-  previewing.value = false
+  checking.value = false
   // Only keep raw ingredients string
   if (data?.value?.matchedIngredients) data.value.matchedIngredients = []
 }
@@ -152,8 +152,8 @@ async function onCreate() {
     showDesc
     @click="onBackToEditing"
   />
-  <div class="preview">
-    <h2 class="heading--root">{{ t('Preview & quick-correct') }}</h2>
+  <div class="checkcorrect">
+    <h2 class="heading--root">{{ t('Check & correct') }}</h2>
 
     <h3 class="heading--muted">{{ t('Name') }}</h3>
     <p>{{ data?.name }}</p>
@@ -179,10 +179,10 @@ async function onCreate() {
         @click="toggleIngredientsInfo"
       />
     </h3>
-    <div class="preview__ingredients-info">
-      <div class="preview__ingredients-info--overlay">
+    <div class="checkcorrect__ingredients-info">
+      <div class="checkcorrect__ingredients-info--overlay">
         <p>
-          {{ t('preview.ingredients_info') }}
+          {{ t('checkcorrect.ingredients_info') }}
         </p>
       </div>
     </div>
@@ -191,7 +191,7 @@ async function onCreate() {
         <span v-if="typeof ing === 'string'">{{ ing }}</span>
 
         <span v-else-if="ing.length === 1">
-          <span v-if="ing[0]!.quantity" class="preview__ingredient-quantity-unit--single">
+          <span v-if="ing[0]!.quantity" class="checkcorrect__ingredient-quantity-unit--single">
             {{ limitDecimals(ing[0]!.quantity) }} {{ ing[0]!.knownUnit }}</span
           >
           <span v-if="ing[0]!.textAfterQuantity">{{ ing[0]!.textAfterQuantity }}</span>
@@ -202,8 +202,8 @@ async function onCreate() {
             v-if="part.quantity"
             :class="
               part.selected
-                ? 'preview__ingredient-quantity-unit--selected'
-                : 'preview__ingredient-quantity-unit'
+                ? 'checkcorrect__ingredient-quantity-unit--selected'
+                : 'checkcorrect__ingredient-quantity-unit'
             "
             @click="setQuantityUnit($event, ingIndex, partIndex)"
           >
@@ -234,7 +234,7 @@ async function onCreate() {
 </template>
 
 <style scoped>
-div.preview {
+div.checkcorrect {
   margin-top: calc(var(--inner-spacing) * 1.5);
   margin-bottom: calc(var(--inner-spacing) * 2);
 }
@@ -255,10 +255,10 @@ ul {
   padding-bottom: var(--inner-spacing);
 }
 
-div.preview__ingredients-info {
+div.checkcorrect__ingredients-info {
   position: relative;
 
-  div.preview__ingredients-info--overlay {
+  div.checkcorrect__ingredients-info--overlay {
     position: absolute;
     z-index: 7;
     clip-path: inset(0px 0px 100% 0px);
@@ -281,25 +281,25 @@ li {
   margin-bottom: var(--ing-spacing);
 }
 
-.preview__ingredient-quantity-unit,
-.preview__ingredient-quantity-unit--selected,
-.preview__ingredient-quantity-unit--single {
+.checkcorrect__ingredient-quantity-unit,
+.checkcorrect__ingredient-quantity-unit--selected,
+.checkcorrect__ingredient-quantity-unit--single {
   padding: 2px 1px;
   font-weight: 600;
   cursor: pointer;
   border-radius: var(--border-radius);
 }
 
-.preview__ingredient-quantity-unit--single {
+.checkcorrect__ingredient-quantity-unit--single {
   cursor: unset;
 }
 
-.preview__ingredient-quantity-unit {
+.checkcorrect__ingredient-quantity-unit {
   border-bottom: 2px solid transparent;
   text-decoration: underline;
 }
 
-.preview__ingredient-quantity-unit--selected {
+.checkcorrect__ingredient-quantity-unit--selected {
   border-bottom: 2px solid var(--accent);
   text-decoration: none;
 }

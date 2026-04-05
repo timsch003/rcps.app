@@ -8,7 +8,7 @@
     "Favorites": "Favorites",
     "Add recipe": "Add recipe",
     "Create recipe": "Create recipe",
-    "Preview & quick-correct": "Preview & quick-correct",
+    "Check & correct": "Check & correct",
     "Back to editing": "Back to editing",
     "Quantity": "Quantity",
     "Name": "Name",
@@ -56,7 +56,7 @@
     "email.email_change.subject": "Confirm your new email address",
     "email.email_change.please_confirm": "please confirm your new email address by clicking the following link.",
     "email.email_change.ignore": "If you did not request to change your email address, you can ignore this email.",
-    "preview.ingredients_info": "If multiple quantities (with or without units) are detected, select the one that should be adjusted automatically based on servings."
+    "checkcorrect.ingredients_info": "If multiple quantities (with or without units) are detected, select the one that should be adjusted automatically based on servings."
   },
   "de": {
     "Tags": "Tags",
@@ -67,7 +67,7 @@
     "Favorites": "Favoriten",
     "Add recipe": "Rezept hinzufügen",
     "Create recipe": "Rezept erstellen",
-    "Preview & quick-correct": "Vorschau & Schnellkorrektur",
+    "Check & correct": "Prüfen & korrigieren",
     "Back to editing": "Zurück zur Bearbeitung",
     "Quantity": "Menge",
     "Quantity and unit": "Menge und Einheit",
@@ -116,6 +116,6 @@
     "email.email_change.subject": "Bestätige deine neue E-Mail-Adresse",
     "email.email_change.please_confirm": "bitte bestätige deine neue E-Mail-Adresse, indem du auf den folgenden Link klickst.",
     "email.email_change.ignore": "Wenn du keine Änderung deiner E-Mail-Adresse angefordert hast, kannst du diese E-Mail ignorieren.",
-    "preview.ingredients_info": "Wenn mehrere Mengen (mit oder ohne Einheiten) erkannt werden, wähle diejenige aus, die automatisch basierend auf den Portionen angepasst werden soll."
+    "checkcorrect.ingredients_info": "Wenn mehrere Mengen (mit oder ohne Einheiten) erkannt werden, wähle diejenige aus, die automatisch basierend auf den Portionen angepasst werden soll."
   }
 }
