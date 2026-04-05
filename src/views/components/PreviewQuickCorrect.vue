@@ -184,6 +184,22 @@ async function onCreate() {
         <p>
           {{ t('checkcorrect.ingredients_info') }}
         </p>
+        <p>
+          {{ t('checkcorrect.ingredients_info_legend') }}
+        </p>
+        <p class="checkcorrect__ingredients-info--overlay-legend">
+          <span class="checkcorrect__ingredient-quantity-unit--selected">
+            {{ t('checkcorrect.ingredients_info_selected') }}
+          </span>
+          &nbsp;
+          <span class="checkcorrect__ingredient-quantity-unit--ignored">
+            {{ t('checkcorrect.ingredients_info_ignored') }}
+          </span>
+          &nbsp;
+          <span class="checkcorrect__ingredient-quantity-unit--single">{{
+            t('checkcorrect.ingredients_info_detected')
+          }}</span>
+        </p>
       </div>
     </div>
     <ul v-if="data?.matchedIngredients?.length">
@@ -203,7 +219,7 @@ async function onCreate() {
             :class="
               part.selected
                 ? 'checkcorrect__ingredient-quantity-unit--selected'
-                : 'checkcorrect__ingredient-quantity-unit'
+                : 'checkcorrect__ingredient-quantity-unit--ignored'
             "
             @click="setQuantityUnit($event, ingIndex, partIndex)"
           >
@@ -235,6 +251,8 @@ async function onCreate() {
 
 <style scoped>
 div.checkcorrect {
+  --ingredient-line-height: 2;
+
   margin-top: calc(var(--inner-spacing) * 1.5);
   margin-bottom: calc(var(--inner-spacing) * 2);
 }
@@ -275,32 +293,57 @@ ul {
 }
 
 li {
-  line-height: 1.5;
   padding-bottom: var(--ing-spacing);
   border-bottom: 1px solid var(--decor);
   margin-bottom: var(--ing-spacing);
 }
 
-.checkcorrect__ingredient-quantity-unit,
+li,
+p.checkcorrect__ingredients-info--overlay-legend {
+  /* Taller line height to make sure highlighting doesn't overlap */
+  line-height: var(--ingredient-line-height);
+}
+
+.checkcorrect__ingredient-quantity-unit--ignored,
 .checkcorrect__ingredient-quantity-unit--selected,
 .checkcorrect__ingredient-quantity-unit--single {
-  padding: 2px 1px;
+  --color-selected: var(--accent);
+  --color-ignored: var(--decor-light);
+  --border-width: 3px;
+  --padding-selected: 1px;
+  --padding-ignored: 3px;
+
   font-weight: 600;
-  cursor: pointer;
   border-radius: var(--border-radius);
+  padding-inline: 2px;
+  padding-block: 2px;
+  cursor: pointer;
+  transition:
+    padding var(--transition-duration),
+    border-color var(--transition-duration);
 }
 
 .checkcorrect__ingredient-quantity-unit--single {
+  color: var(--text);
   cursor: unset;
 }
 
-.checkcorrect__ingredient-quantity-unit {
-  border-bottom: 2px solid transparent;
-  text-decoration: underline;
+.checkcorrect__ingredient-quantity-unit--ignored {
+  border-top: var(--border-width) solid var(--color-ignored);
+  border-bottom: var(--border-width) solid var(--color-ignored);
+  padding-block: var(--padding-ignored);
 }
 
 .checkcorrect__ingredient-quantity-unit--selected {
-  border-bottom: 2px solid var(--accent);
-  text-decoration: none;
+  border-top: var(--border-width) solid var(--color-selected);
+  border-bottom: var(--border-width) solid var(--color-selected);
+  padding-block: var(--padding-selected);
+}
+
+div.checkcorrect__ingredients-info--overlay {
+  .checkcorrect__ingredient-quantity-unit--ignored,
+  .checkcorrect__ingredient-quantity-unit--selected {
+    cursor: unset;
+  }
 }
 </style>

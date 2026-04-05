@@ -1,14 +1,15 @@
 :root {
   /* Colors
 
-    For sufficient contrast ratios, when styling text content
-    only ever use --text or --accent on --bg(-*)
+    For sufficient contrast ratios, when styling text
+    only ever use --text or --accent on --bg colors.
 
     */
   --bg: #0a0a0a;
   --bg-light: #141414;
   --bg-lighter: #1f1f1f;
   --decor: #474747;
+  --decor-light: #5a5a5a;
   --text: #f5f5f5;
   --accent: #cba4c1;
 
