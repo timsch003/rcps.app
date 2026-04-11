@@ -7,7 +7,8 @@ import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import ButtonMulti from './ButtonMulti.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '../icons/IconSpinner.vue'
-import { limitDecimals, floatToFraction } from '@/utils/conversion'
+import { limitDecimals } from '@/utils/conversion'
+import { dashes } from '@/utils/fixed_values'
 import { recipesManager } from '@/services/recipes_manager'
 import type { RecipeRaw } from '@/types'
 
@@ -155,7 +156,10 @@ async function onCreate() {
 
         <span v-else-if="mi.length === 1">
           <span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
-            {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity)) }}
+            {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity))
+            }}{{
+              mi[0].quantityUpper ? dashes[1]! + limitDecimals(Number(mi[0].quantityUpper)) : ''
+            }}
             {{ mi[0].knownUnit && mi[0].knownUnit }}</span
           >
           <span v-if="mi[0]!.textAfterQuantity">{{ mi[0]!.textAfterQuantity }}</span>
@@ -172,7 +176,8 @@ async function onCreate() {
             "
             @click="selectQuantityUnit($event, ingIndex, index)"
           >
-            {{ part.quantity && limitDecimals(Number(part.quantity)) }}
+            {{ part.quantity && limitDecimals(Number(part.quantity))
+            }}{{ part.quantityUpper ? dashes[1]! + limitDecimals(Number(part.quantityUpper)) : '' }}
             {{ part.knownUnit && part.knownUnit }}</span
           >
           <span v-if="part.textAfterQuantity">{{ part.textAfterQuantity }}</span>

@@ -23,6 +23,7 @@ export type RecipeIngredient = {
   recipeId: UUID
   ingredientId: UUID
   quantity?: number
+  quantityUpper?: number
   unitId?: UUID
   quantityUnitPosition?: number
   sortOrder?: number
@@ -34,6 +35,7 @@ export type QuantityUnitText = {
   trimmedLine: string
   textBeforeFirstMatch?: string
   quantity?: number
+  quantityUpper?: number
   knownUnit?: string
   textAfterQuantity?: string
   selected?: boolean

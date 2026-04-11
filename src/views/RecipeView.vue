@@ -6,6 +6,7 @@ import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
 import { unitsManager } from '@/services/units_manager'
 import { limitDecimals } from '@/utils/conversion'
+import { dashes } from '@/utils/fixed_values'
 import { t } from '@/lang/i18n'
 import ButtonMulti from './components/ButtonMulti.vue'
 import type { RecipeLocal, RecipeIngredient, Tag } from '@/types'
@@ -50,16 +51,18 @@ async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined
     if (!ingredientName) return undefined
     if (!ri.quantity) return [ingredientName]
     if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
+
     const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
+    const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
     const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
 
     if (ri.unitId)
       return [
         stringBefore,
-        `${String(limitDecimals(ri.quantity))} ${String(unitsManager.getNameById(ri.unitId))}`,
+        `${quantityString} ${String(unitsManager.getNameById(ri.unitId))}`,
         stringAfter,
       ]
-    else return [stringBefore, String(limitDecimals(ri.quantity)), stringAfter]
+    else return [stringBefore, quantityString, stringAfter]
   } catch (err) {
     error = (err as Error).message
     return undefined
@@ -97,7 +100,7 @@ function onServingsIncrease() {
       <li v-for="(ingStrings, index) in ingredientsStrings" :key="index">
         <span v-if="ingStrings.length === 1">{{ ingStrings[0] }}</span>
         <div v-else-if="ingStrings.length > 1">
-          <span>{{ ingStrings[0] + '' }}</span>
+          <span>{{ ingStrings[0] }}</span>
           <span class="quantity-unit">{{ ingStrings[1] + ' ' }}</span>
           <span>{{ ingStrings[2] }}</span>
         </div>

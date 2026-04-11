@@ -42,15 +42,34 @@ async function addRecipeIngredient(
     const qut = selectedQut || singleQut
     if (!qut) return undefined
 
-    const quantityUnitStringSpace = `${qut.quantity || ''} ${qut.knownUnit || ''}`
-    const quantityUnitStringNoSpace = `${qut.quantity || ''}${qut.knownUnit || ''}`
-    let quantityUnitString = quantityUnitStringSpace
-    quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
-    if (quantityUnitPosition === -1) {
-      quantityUnitString = quantityUnitStringNoSpace
+    if (qut.quantityUpper !== undefined) {
+      const re = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      const dashPattern = '\\s?[-–—−~〜～\\u2010-\\u2015]\\s?'
+      const unitPattern = qut.knownUnit ? `\\s?${re(qut.knownUnit)}` : ''
+      const rangeRegex = new RegExp(
+        `${re(String(qut.quantity))}${dashPattern}${re(String(qut.quantityUpper))}${unitPattern}`,
+      )
+      const rangeMatch = qut.trimmedLine.match(rangeRegex)
+      if (rangeMatch?.index !== undefined) {
+        quantityUnitPosition = rangeMatch.index
+        ingredientName = (
+          qut.trimmedLine.slice(0, rangeMatch.index) +
+          qut.trimmedLine.slice(rangeMatch.index + rangeMatch[0].length)
+        ).trim()
+      } else {
+        ingredientName = qut.trimmedLine
+      }
+    } else {
+      const quantityUnitStringSpace = `${qut.quantity || ''} ${qut.knownUnit || ''}`
+      const quantityUnitStringNoSpace = `${qut.quantity || ''}${qut.knownUnit || ''}`
+      let quantityUnitString = quantityUnitStringSpace
       quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
+      if (quantityUnitPosition === -1) {
+        quantityUnitString = quantityUnitStringNoSpace
+        quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
+      }
+      ingredientName = qut.trimmedLine.replace(quantityUnitString, '')
     }
-    ingredientName = qut.trimmedLine.replace(quantityUnitString, '')
   }
 
   const existingIngredient = await db.ingredients.where({ name: ingredientName }).first()
@@ -81,6 +100,7 @@ async function addRecipeIngredient(
     recipeId: recipeId,
     ingredientId: ingredientId,
     quantity: selectedQut?.quantity,
+    quantityUpper: selectedQut?.quantityUpper,
     unitId: unitId,
     quantityUnitPosition: quantityUnitPosition,
   }
@@ -105,7 +125,10 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
   // (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0", plus all of those as a range using various dashes)
   // plus everything that follows until the next quantity
   const quantityUnitTextRegex =
-    /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)\s?[-–—−~〜～\u2010-\u2015]?\s?(?:(?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)?(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
+    /((?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+))(?:\s?[-–—−~〜～\u2010-\u2015]\s?(?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+)))?)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
+  // /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)\s?[-–—−~〜～\u2010-\u2015]?\s?(?:(?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)?(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
+
+  const dashesRegex = /[-–—−~〜～\u2010-\u2015]/gu
 
   if (!ingredients.trim()) return []
 
@@ -131,14 +154,34 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
         })
       }
 
-      const quantityFloat = quantity && fractionToFloat(quantity)
-      const quantityFloatLine = quantityFloat
-        ? trimmedLine.replace(quantity, quantityFloat.toString())
-        : trimmedLine
+      const quantityIsRange = quantity && dashesRegex.test(quantity)
+      const [lower, upper] = quantity?.split(dashesRegex).map((q) => q.trim()) || []
+      let lowerFloat: number = -1
+      let upperFloat: number = -1
+      let floatLine: string = ''
+
+      if (quantityIsRange && lower && upper) {
+        lowerFloat = fractionToFloat(lower)
+        upperFloat = fractionToFloat(upper)
+        floatLine =
+          lowerFloat && upperFloat
+            ? trimmedLine
+                .replace(lower, lowerFloat.toString())
+                .replace(upper, upperFloat.toString())
+            : trimmedLine
+      } else {
+        if (quantity) {
+          lowerFloat = fractionToFloat(quantity)
+          floatLine = lowerFloat
+            ? trimmedLine.replace(quantity, lowerFloat.toString())
+            : trimmedLine
+        }
+      }
 
       parts.push({
-        trimmedLine: quantityFloatLine,
-        quantity: (quantity && quantityFloat) || undefined,
+        trimmedLine: floatLine !== '' ? floatLine : trimmedLine,
+        quantity: lowerFloat !== -1 ? lowerFloat : undefined,
+        quantityUpper: upperFloat !== -1 ? upperFloat : undefined,
         knownUnit: knownUnit || undefined,
         textAfterQuantity: textAfterQuantity || undefined,
         selected: false,

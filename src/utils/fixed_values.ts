@@ -1,3 +1,19 @@
+export const dashes = [
+  '-',
+  '–',
+  '—',
+  '−',
+  '~',
+  '〜',
+  '～',
+  '\u2010',
+  '\u2011',
+  '\u2012',
+  '\u2013',
+  '\u2014',
+  '\u2015',
+]
+
 export const fractionsMap: Record<string, number> = {
   '½': 0.5,
   '⅓': 1 / 3,

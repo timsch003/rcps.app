@@ -126,7 +126,6 @@ npm run lint
 
 ### Data flow
 
-- Add support for ingredient quantity ranges
 - Handle ingredient sorting
 
 ### UI/UX
