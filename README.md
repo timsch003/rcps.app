@@ -5,7 +5,7 @@
 1. [Stack](#stack)
 2. [Setup](#setup)
 3. [Features](#features)
-4. [General TODOs](#general-todos)
+4. [TODOs](#todos)
 5. [Deployment checklist](#deployment-checklist)
 
 ## Stack
@@ -117,10 +117,22 @@ npm run lint
 - Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
 - Ticking ingredients and resetting ticks
 
-## General TODOs
+## TODOs
+
+### General
 
 - Set up multilangual landing page with SEO
 - Research about web dev implications of right-to-left and other language types
+
+### Data flow
+
+- Add support for ingredient quantity ranges
+- Handle ingredient sorting
+
+### UI/UX
+
+- Add transition / animation to nav bottom active indicator (:before)
+- Fix scroll position changing when editing textareas when manually editing
 
 ## Deployment checklist
 

@@ -11,7 +11,7 @@
   --decor: #474747;
   --decor-light: #5a5a5a;
   --text: #f5f5f5;
-  --accent: #cba4c1;
+  --accent: #a5b6ae;
 
   /* Accent variations */
   --linen: #ffede1;
@@ -54,4 +54,7 @@
   --icon-size-s: 1.5rem;
   --icon-size-xs: 1rem;
   --nav-border-width: 2px;
+
+  /* Universal formatting */
+  --quantity-unit-font-weight: 600;
 }

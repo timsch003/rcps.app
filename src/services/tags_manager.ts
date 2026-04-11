@@ -1,28 +1,46 @@
 import { db } from '@/adapters/dexie'
-import type { Tag, UUID } from '@/types'
+import { useTagsStore } from '@/stores/tags'
 import { v7 as uuidv7 } from 'uuid'
+import type { Tag, UUID } from '@/types'
 
-async function getAll(): Promise<Tag[]> {
-  return await db.tags.toArray()
+async function addOrGetExisting(tagName: Tag['name']): Promise<UUID | undefined> {
+  const existingTagInStore = useTagsStore().cached.find((t) => t.name === tagName)
+  if (existingTagInStore) return existingTagInStore.id
+
+  const existingTagInDb = await db.tags.where('name').equals(tagName).first()
+  if (existingTagInDb) return existingTagInDb.id
+
+  const newTag: Tag = {
+    id: uuidv7(),
+    name: tagName,
+  }
+  const newTagId = await db.tags.add(newTag)
+  if (newTagId) cache(newTag)
+  return newTagId
 }
 
-async function add(name: Tag['name'], id?: Tag['id']): Promise<UUID | undefined> {
-  const newItem: Tag = { id: id ?? uuidv7(), name }
+function cache(tag: Tag): void {
+  useTagsStore().cached.push(tag)
+}
 
-  const existsInDb = await db.tags.where('name').equals(name).first()
-  if (existsInDb) return undefined
+async function cacheAll(): Promise<void> {
+  useTagsStore().cached = await db.tags.toArray()
+}
 
-  try {
-    await db.tags.add(newItem)
-  } catch (error) {
-    console.error('Failed to add tag to the local database:', error)
-    return undefined
-  }
-
-  return newItem.id
+function getNames(tagIds: UUID[]): Tag['name'][] {
+  const tagsStore = useTagsStore()
+  return tagIds
+    .map((id) => {
+      const name = tagsStore.getName(id)
+      if (name) return name
+      return undefined
+    })
+    .filter((name): name is Tag['name'] => !!name)
 }
 
 export const tagsManager = {
-  getAll,
-  add,
+  addOrGetExisting,
+  cache,
+  cacheAll,
+  getNames,
 }

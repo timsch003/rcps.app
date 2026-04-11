@@ -20,10 +20,10 @@ export class RcpsAppUserDb extends Dexie {
 
   constructor() {
     super('RcpsAppUserDb')
-    this.version(1).stores({
+    this.version(2).stores({
       ingredients: 'id, &name',
       recipe_ingredients: 'id, [id+recipeId], [recipeId+id]',
-      recipes: '&id, &name, tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      recipes: '&id, &name, *tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
       tags: 'id, &name',
       units: 'id, &name',
       pending_changes: 'id',

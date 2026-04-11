@@ -1,14 +1,14 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { t } from '@/lang/i18n'
-import { useRecipesStore } from '@/stores/recipes'
 import { useRouter } from 'vue-router'
 import CheckIcon from '@/views/icons/IconCheck.vue'
 import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import ButtonMulti from './ButtonMulti.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '../icons/IconSpinner.vue'
-import { limitDecimals } from '@/utils/conversion'
+import { limitDecimals, floatToFraction } from '@/utils/conversion'
+import { recipesManager } from '@/services/recipes_manager'
 import type { RecipeRaw } from '@/types'
 
 const data = defineModel<RecipeRaw>('data')
@@ -16,10 +16,9 @@ const checking = defineModel<boolean>('checking')
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsInfoVisible = ref(false)
 const isValidating = ref(false)
-const recipesStore = useRecipesStore()
 const router = useRouter()
 
-onMounted(() => {
+onMounted(async () => {
   ingredientsInfoElement.value = document.querySelector(
     'div.checkcorrect__ingredients-info--overlay',
   ) as HTMLDivElement
@@ -84,9 +83,9 @@ async function onCreate() {
 
   isValidating.value = true
 
-  const result = await recipesStore.add(data.value!)
+  const newRecipeId = await recipesManager.addNew(data.value!)
 
-  if (result) router.push({ name: 'recipe', params: { id: result } })
+  if (newRecipeId) router.push({ name: 'recipe', params: { id: newRecipeId } })
 
   isValidating.value = false
 }
@@ -149,18 +148,21 @@ async function onCreate() {
         </p>
       </div>
     </div>
-    <ul v-if="data?.matchedIngredients?.length">
-      <li v-for="(ing, ingIndex) in data?.matchedIngredients" :key="ingIndex">
-        <span v-if="typeof ing === 'string'">{{ ing }}</span>
 
-        <span v-else-if="ing.length === 1">
-          <span v-if="ing[0]!.quantity" class="checkcorrect__ingredient-quantity-unit--single">
-            {{ limitDecimals(ing[0]!.quantity) }} {{ ing[0]!.knownUnit }}</span
+    <ul v-if="data?.matchedIngredients?.length">
+      <li v-for="(mi, ingIndex) in data?.matchedIngredients" :key="ingIndex">
+        <span v-if="typeof mi === 'string'">{{ mi }}</span>
+
+        <span v-else-if="mi.length === 1">
+          <span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
+            {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity)) }}
+            {{ mi[0].knownUnit && mi[0].knownUnit }}</span
           >
-          <span v-if="ing[0]!.textAfterQuantity">{{ ing[0]!.textAfterQuantity }}</span>
+          <span v-if="mi[0]!.textAfterQuantity">{{ mi[0]!.textAfterQuantity }}</span>
         </span>
 
-        <span v-else-if="ing.length > 1" v-for="(part, partIndex) in ing" :key="partIndex">
+        <span v-else-if="mi.length > 1" v-for="(part, index) in mi" :key="index">
+          <span v-if="part.textBeforeFirstMatch">{{ part.textBeforeFirstMatch + ' ' }}</span>
           <span
             v-if="part.quantity"
             :class="
@@ -168,9 +170,10 @@ async function onCreate() {
                 ? 'checkcorrect__ingredient-quantity-unit--selected'
                 : 'checkcorrect__ingredient-quantity-unit--ignored'
             "
-            @click="selectQuantityUnit($event, ingIndex, partIndex)"
+            @click="selectQuantityUnit($event, ingIndex, index)"
           >
-            {{ limitDecimals(part.quantity) }} {{ part.knownUnit }}</span
+            {{ part.quantity && limitDecimals(Number(part.quantity)) }}
+            {{ part.knownUnit && part.knownUnit }}</span
           >
           <span v-if="part.textAfterQuantity">{{ part.textAfterQuantity }}</span>
         </span>
@@ -260,7 +263,7 @@ p.checkcorrect__ingredients-info--overlay-legend {
   --padding-selected: 1px;
   --padding-ignored: 3px;
 
-  font-weight: 600;
+  font-weight: var(--quantity-unit-font-weight);
   border-radius: var(--border-radius);
   padding-inline: 2px;
   padding-block: 2px;

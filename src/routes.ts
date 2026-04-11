@@ -11,7 +11,7 @@ import VerifyEmailView from './views/auth/VerifyEmailView.vue'
 import ResetPasswordView from './views/auth/ResetPasswordView.vue'
 import ChangeEmailView from './views/auth/ChangeEmailView.vue'
 import FavoritesView from './views/FavoritesView.vue'
-import CreateView from './views/CreateView.vue'
+import CreateView from './views/CreateFormView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

@@ -1,21 +1,70 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useRecipesStore } from '@/stores/recipes'
-import { useTagsStore } from '@/stores/tags'
-import { useRecipeIngredientsStore } from '@/stores/recipe_ingredients'
-import { useUnitsStore } from '@/stores/units'
+import { recipesManager } from '@/services/recipes_manager'
+import { ingredientsManager } from '@/services/ingredients_manager'
+import { tagsManager } from '@/services/tags_manager'
+import { unitsManager } from '@/services/units_manager'
+import { limitDecimals } from '@/utils/conversion'
 import { t } from '@/lang/i18n'
 import ButtonMulti from './components/ButtonMulti.vue'
+import type { RecipeLocal, RecipeIngredient, Tag } from '@/types'
 
 const route = useRoute()
-const recipesStore = useRecipesStore()
-const tagsStore = useTagsStore()
-const recipeIngredientsStore = useRecipeIngredientsStore()
-const unitsStore = useUnitsStore()
+const loading = ref(false)
+const recipe = ref<RecipeLocal | undefined>(undefined)
+let ingredients: RecipeIngredient[] = []
+let ingredientsStrings: string[][] = []
+let tags: Tag['name'][] = []
+let error: string | null = null
 
-const recipe = recipesStore.get(route.params.id as string)
-const ingredients = recipeIngredientsStore.getIngredientsByRecipeId(route.params.id as string)
-const tags = tagsStore.getNames(recipe?.tagIds || [])
+onMounted(async () => {
+  loading.value = true
+  try {
+    recipe.value = await recipesManager.getById(route.params.id as string)
+
+    if (!recipe.value) throw new Error(t('error.recipe_not_found'))
+
+    if (recipe.value.recipeIngredientIds?.length) {
+      ingredients = await ingredientsManager.getRecipeIngredients(recipe.value.recipeIngredientIds)
+      ingredientsStrings = await Promise.all(
+        ingredients.map(async (ing) => {
+          const ingStrings = await getIngStrings(ing)
+          return ingStrings ? ingStrings : []
+        }),
+      )
+    }
+
+    if (recipe.value.tagIds?.length) tags = await tagsManager.getNames(recipe.value.tagIds)
+  } catch (err) {
+    error = (err as Error).message
+  } finally {
+    loading.value = false
+  }
+})
+
+async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
+  try {
+    const ingredientName = await ingredientsManager.getName(ri)
+
+    if (!ingredientName) return undefined
+    if (!ri.quantity) return [ingredientName]
+    if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
+    const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
+    const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
+
+    if (ri.unitId)
+      return [
+        stringBefore,
+        `${String(limitDecimals(ri.quantity))} ${String(unitsManager.getNameById(ri.unitId))}`,
+        stringAfter,
+      ]
+    else return [stringBefore, String(limitDecimals(ri.quantity)), stringAfter]
+  } catch (err) {
+    error = (err as Error).message
+    return undefined
+  }
+}
 
 function onServingsDecrease() {
   // TODO
@@ -25,36 +74,40 @@ function onServingsIncrease() {
   // TODO
 }
 </script>
-
 <template>
-  <h2 class="heading--root">{{ recipe?.name }}</h2>
+  <p v-if="error" class="error">{{ t('error') }}: {{ error }}</p>
+  <div v-else-if="!loading && recipe">
+    <h2 class="heading--root">{{ recipe!.name }}</h2>
 
-  <div v-if="recipe?.servings" class="servings">
-    <h3>{{ `${t('Servings')}: ${recipe?.servings}` }}</h3>
-    <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
-    <ButtonMulti desc="+" showDesc :aria-label="t('Increase')" @click="onServingsIncrease" />
+    <div v-if="recipe!.servings" class="servings">
+      <h3>{{ `${t('Servings')}: ${recipe!.servings}` }}</h3>
+      <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
+      <ButtonMulti desc="+" showDesc :aria-label="t('Increase')" @click="onServingsIncrease" />
+    </div>
+
+    <h3 v-if="tags.length" class="heading--muted">{{ t('Tags') }}</h3>
+    <p v-if="tags.length">
+      <span v-for="(tag, index) in tags" :key="index"
+        >{{ tag }}{{ index < tags.length - 1 ? ', ' : '' }}</span
+      >
+    </p>
+
+    <h3 v-if="ingredientsStrings.length" class="heading--muted">{{ t('Ingredients') }}</h3>
+    <ul v-if="ingredientsStrings.length">
+      <li v-for="(ingStrings, index) in ingredientsStrings" :key="index">
+        <span v-if="ingStrings.length === 1">{{ ingStrings[0] }}</span>
+        <div v-else-if="ingStrings.length > 1">
+          <span>{{ ingStrings[0] + '' }}</span>
+          <span class="quantity-unit">{{ ingStrings[1] + ' ' }}</span>
+          <span>{{ ingStrings[2] }}</span>
+        </div>
+      </li>
+    </ul>
+    <h3 v-if="recipe?.instructions" class="heading--muted">{{ t('Instructions') }}</h3>
+    <p v-if="recipe?.instructions">{{ recipe?.instructions }}</p>
+    <h3 v-if="recipe?.notes" class="heading--muted">{{ t('Notes') }}</h3>
+    <p v-if="recipe?.notes">{{ recipe?.notes }}</p>
   </div>
-
-  <h3 class="heading--muted">{{ t('Tags') }}</h3>
-  <p>
-    <span v-if="!tags.length">{{ '-' }}</span>
-    <span v-else v-for="(tag, index) in tags" :key="index"
-      >{{ tag }}{{ index < tags.length - 1 ? ', ' : '' }}</span
-    >
-  </p>
-
-  <h3 v-if="ingredients?.length" class="heading--muted">{{ t('Ingredients') }}</h3>
-  <ul v-if="ingredients?.length">
-    <li v-for="ingredient in ingredients" :key="ingredient?.id">
-      <span v-if="ingredient?.quantity">{{ ingredient.quantity }}&nbsp;</span>
-      <span v-if="ingredient?.unitId">{{ unitsStore.getName(ingredient.unitId) }}&nbsp;</span>
-      <span>{{ ingredient?.name }}&nbsp;</span>
-    </li>
-  </ul>
-  <h3 v-if="recipe?.instructions" class="heading--muted">{{ t('Instructions') }}</h3>
-  <p v-if="recipe?.instructions">{{ recipe?.instructions }}</p>
-  <h3 v-if="recipe?.notes" class="heading--muted">{{ t('Notes') }}</h3>
-  <p v-if="recipe?.notes">{{ recipe?.notes }}</p>
 </template>
 
 <style scoped>
@@ -70,5 +123,9 @@ div.servings {
   h3 {
     font-size: 0.9rem;
   }
+}
+
+span.quantity-unit {
+  font-weight: var(--quantity-unit-font-weight);
 }
 </style>

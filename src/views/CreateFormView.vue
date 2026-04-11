@@ -3,8 +3,8 @@ import { ref, reactive } from 'vue'
 import CheckAndCorrect from '@/views/components/CheckAndCorrect.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
-import { matchIngredients } from '@/utils/pattern_matching'
-import { useRecipesStore } from '@/stores/recipes'
+import { recipesManager } from '@/services/recipes_manager'
+import { ingredientsManager } from '@/services/ingredients_manager'
 import PreviewIcon from '@/views/icons/IconPreview.vue'
 import type { RecipeRaw } from '@/types'
 
@@ -18,7 +18,6 @@ const data = reactive<RecipeRaw>({
   notes: '',
 })
 const checking = ref(false)
-const recipesStore = useRecipesStore()
 
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -41,7 +40,7 @@ async function onPreview() {
   if (!data.name) {
     alert(t('create.alert_name_required'))
     return
-  } else if (recipesStore.nameExists(data.name)) {
+  } else if (await recipesManager.nameExists(data.name)) {
     alert(t('create.alert_name_exists'))
     return
   }
@@ -55,7 +54,7 @@ async function onPreview() {
         .map((tag) => tag.trim())
         .filter((tag) => tag !== '')
 
-  if (data.ingredients) data.matchedIngredients = matchIngredients(data.ingredients)
+  if (data.ingredients) data.matchedIngredients = ingredientsManager.match(data.ingredients)
 
   checking.value = true
 

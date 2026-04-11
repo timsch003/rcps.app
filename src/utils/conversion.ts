@@ -1,9 +1,20 @@
 import { fractionsMap } from '@/utils/fixed_values'
 
-export function convertFractionToFloat(quantityStr: string): number {
+export function fractionToFloat(quantityStr: string): number {
   if (quantityStr.trim() === '') return 0
 
   let total = 0
+
+  const parseSlashFraction = (value: string): number | null => {
+    const match = value.match(/^(-?\d+)\/(\d+)$/)
+    if (!match) return null
+
+    const numerator = parseInt(match[1]!, 10)
+    const denominator = parseInt(match[2]!, 10)
+    if (denominator === 0) return null
+
+    return numerator / denominator
+  }
 
   // Split by spaces to handle mixed numbers like "1 ½" or fractions like "½"
   const parts = quantityStr.trim().split(/\s+/)
@@ -12,6 +23,12 @@ export function convertFractionToFloat(quantityStr: string): number {
     if (fractionsMap[part]) {
       total += fractionsMap[part]
     } else {
+      const slashFraction = parseSlashFraction(part)
+      if (slashFraction !== null) {
+        total += slashFraction
+        continue
+      }
+
       const num = parseFloat(part)
       if (!isNaN(num)) {
         total += num
@@ -22,7 +39,7 @@ export function convertFractionToFloat(quantityStr: string): number {
   return total > 0 ? total : 0
 }
 
-export function convertFloatToFraction(value: number): string {
+export function floatToFraction(value: number): string {
   if (value <= 0) return ''
 
   const integerPart = Math.floor(value)

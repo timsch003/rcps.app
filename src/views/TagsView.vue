@@ -7,5 +7,5 @@ const tagsStore = useTagsStore()
 
 <template>
   <h2 class="heading--root">{{ $t('Tags') }}</h2>
-  <CardsGrid :tags="tagsStore.all" />
+  <CardsGrid :tags="tagsStore.cached" />
 </template>

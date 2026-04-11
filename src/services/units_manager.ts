@@ -1,28 +1,42 @@
+import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
-import type { Unit, UUID } from '@/types'
+import { useUnitsStore } from '@/stores/units'
 import { v7 as uuidv7 } from 'uuid'
+import type { Unit, UUID } from '@/types'
 
-async function getAll(): Promise<Unit[]> {
-  return await db.units.toArray()
-}
+const cached = ref<Unit[]>([])
 
-async function add(name: Unit['name'], id?: Unit['id']): Promise<UUID | undefined> {
-  const newItem: Unit = { id: id ?? uuidv7(), name }
+async function addOrGetExisting(unitName: Unit['name']): Promise<UUID | undefined> {
+  const unitsStore = useUnitsStore()
 
-  const existsInDb = await db.units.where('name').equals(name).first()
-  if (existsInDb) return undefined
+  const existingUnitInStore = unitsStore.cached.find((u) => u.name === unitName)
+  if (existingUnitInStore) return existingUnitInStore.id
 
-  try {
-    await db.units.add(newItem)
-  } catch (error) {
-    console.error('Failed to add unit to the local database:', error)
-    return undefined
+  const existingUnitInDb = await db.units.where('name').equals(unitName).first()
+  if (existingUnitInDb) return existingUnitInDb.id
+
+  const newUnit: Unit = {
+    id: uuidv7(),
+    name: unitName,
   }
 
-  return newItem.id
+  const newUnitId = await db.units.add(newUnit)
+  if (newUnitId) unitsStore.cache(newUnit)
+  return newUnitId
+}
+
+async function cacheAll(): Promise<void> {
+  useUnitsStore().cached = await db.units.toArray()
+}
+
+function getNameById(unitId: UUID): Unit['name'] | undefined {
+  const unit = useUnitsStore().cached.find((u) => u.id === unitId)
+  return unit ? unit.name : undefined
 }
 
 export const unitsManager = {
-  getAll,
-  add,
+  cached,
+  addOrGetExisting,
+  cacheAll,
+  getNameById,
 }

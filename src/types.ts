@@ -24,12 +24,15 @@ export type RecipeIngredient = {
   ingredientId: UUID
   quantity?: number
   unitId?: UUID
+  quantityUnitPosition?: number
   sortOrder?: number
 }
 
 export type MatchedIngredient = QuantityUnitText[] | string
 
 export type QuantityUnitText = {
+  trimmedLine: string
+  textBeforeFirstMatch?: string
   quantity?: number
   knownUnit?: string
   textAfterQuantity?: string

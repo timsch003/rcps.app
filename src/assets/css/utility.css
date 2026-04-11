@@ -22,6 +22,17 @@ svg.spinner {
   animation: spin 2s linear infinite;
 }
 
+div.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  svg.spinner {
+    margin-left: 0;
+    margin-top: var(--inner-spacing);
+  }
+}
+
 p.error,
 p.success {
   margin-top: 26px;

@@ -7,7 +7,7 @@ const recipesStore = useRecipesStore()
 
 <template>
   <h2 class="heading--root">{{ $t('Favorites') }}</h2>
-  <CardsGrid :recipes="recipesStore.all" />
+  <CardsGrid :recipes="recipesStore.cached" />
 </template>
 
 <style scoped></style>
