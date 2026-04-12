@@ -26,7 +26,7 @@ export type RecipeIngredient = {
   quantityUpper?: number
   unitId?: UUID
   quantityUnitPosition?: number
-  sortOrder?: number
+  sortOrder: number
 }
 
 export type MatchedIngredient = QuantityUnitText[] | string

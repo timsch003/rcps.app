@@ -13,9 +13,18 @@ import type {
   RecipeLocal,
 } from '@/types'
 
+// Matches integers, decimals, common fractions, fraction characters and mixed numbers
+// (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0", plus all of those as a range using various dashes)
+// plus everything that follows until the next quantity
+const quantityUnitTextRegex =
+  /((?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+))(?:\s?[-–—−~〜～\u2010-\u2015]\s?(?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+)))?)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
+
+const dashesRegex = /\s?[-–—−~〜～\u2010-\u2015]\s?/gu
+
 async function addRecipeIngredient(
   recipeId: RecipeLocal['id'],
   matchedIngredient: MatchedIngredient,
+  index: number,
 ): Promise<RecipeIngredient['id'] | undefined> {
   let ingredientName: string
   let ingredientId: Ingredient['id']
@@ -27,9 +36,6 @@ async function addRecipeIngredient(
   if (typeof matchedIngredient === 'string') {
     ingredientName = matchedIngredient
   } else {
-    // Extract quantity/unit and remove from the ingredient name to ensure compatibility
-    // with dynamic quantities/units not placed at the beginning of the ingredient line string.
-
     let selectedQutIndex = matchedIngredient.findIndex((qut: QuantityUnitText) => qut.selected)
     if (selectedQutIndex === -1) {
       selectedQutIndex = 0
@@ -43,11 +49,8 @@ async function addRecipeIngredient(
     if (!qut) return undefined
 
     if (qut.quantityUpper !== undefined) {
-      const re = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const dashPattern = '\\s?[-–—−~〜～\\u2010-\\u2015]\\s?'
-      const unitPattern = qut.knownUnit ? `\\s?${re(qut.knownUnit)}` : ''
       const rangeRegex = new RegExp(
-        `${re(String(qut.quantity))}${dashPattern}${re(String(qut.quantityUpper))}${unitPattern}`,
+        `${String(qut.quantity)}${dashesRegex}${String(qut.quantityUpper)}${qut.knownUnit}`,
       )
       const rangeMatch = qut.trimmedLine.match(rangeRegex)
       if (rangeMatch?.index !== undefined) {
@@ -103,6 +106,7 @@ async function addRecipeIngredient(
     quantityUpper: selectedQut?.quantityUpper,
     unitId: unitId,
     quantityUnitPosition: quantityUnitPosition,
+    sortOrder: index * 100, // multiply index by 100 to allow for future reordering without needing to update all recipe ingredients
   }
 
   const newRecipeIngredientId = await db.recipe_ingredients.add(newRecipeIngredient)
@@ -121,15 +125,6 @@ async function getName(
 }
 
 export function match(ingredients: string): MatchedIngredient[] | [] {
-  // Matches integers, decimals, common fractions, fraction characters and mixed numbers
-  // (e.g., "1 ½", "1½", "1.5", "1,5", "1/2", "1 1/2", but also "0.0", plus all of those as a range using various dashes)
-  // plus everything that follows until the next quantity
-  const quantityUnitTextRegex =
-    /((?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+))(?:\s?[-–—−~〜～\u2010-\u2015]\s?(?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+)))?)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
-  // /((?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)\s?[-–—−~〜～\u2010-\u2015]?\s?(?:(?:[1-9]+\s)?\d+\/\d+|\d+[,.]{1}\d+|(?:[1-9]+)?\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]{1}|\d+)?(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
-
-  const dashesRegex = /[-–—−~〜～\u2010-\u2015]/gu
-
   if (!ingredients.trim()) return []
 
   const ingredientLines = ingredients.split('\n').filter((line) => line.trim() !== '')

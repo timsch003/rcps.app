@@ -21,8 +21,8 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   }
 
   const recipeIngredientIds: UUID[] = await Promise.all(
-    data.matchedIngredients.map(async (mi) => {
-      return await ingredientsManager.addRecipeIngredient(newRecipeId, mi)
+    data.matchedIngredients.map(async (mi, index) => {
+      return await ingredientsManager.addRecipeIngredient(newRecipeId, mi, index)
     }),
   ).then((ids) => ids.filter((id): id is UUID => !!id))
 
