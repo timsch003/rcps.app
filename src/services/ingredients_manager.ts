@@ -1,7 +1,7 @@
 import { db } from '@/adapters/dexie'
 import { useIngredientsStore } from '@/stores/ingredients'
 import { unitsManager } from './units_manager'
-import { unitsSet } from '@/utils/fixed_values'
+import { unitsSet, dashes } from '@/utils/fixed_values'
 import { fractionToFloat } from '@/utils/conversion'
 import { v7 as uuidv7 } from 'uuid'
 import type {
@@ -29,7 +29,7 @@ async function addRecipeIngredient(
   let ingredientName: string
   let ingredientId: Ingredient['id']
   let unitId: Unit['id'] | undefined = undefined
-  let quantityUnitPosition = 0
+  let quantityUnitPosition: number | undefined = undefined
   let selectedQut: QuantityUnitText | undefined = undefined
   let singleQut: QuantityUnitText | undefined = undefined
 
@@ -48,31 +48,25 @@ async function addRecipeIngredient(
     const qut = selectedQut || singleQut
     if (!qut) return undefined
 
-    if (qut.quantityUpper !== undefined) {
-      const rangeRegex = new RegExp(
-        `${String(qut.quantity)}${dashesRegex}${String(qut.quantityUpper)}${qut.knownUnit}`,
-      )
-      const rangeMatch = qut.trimmedLine.match(rangeRegex)
-      if (rangeMatch?.index !== undefined) {
-        quantityUnitPosition = rangeMatch.index
-        ingredientName = (
-          qut.trimmedLine.slice(0, rangeMatch.index) +
-          qut.trimmedLine.slice(rangeMatch.index + rangeMatch[0].length)
-        ).trim()
-      } else {
-        ingredientName = qut.trimmedLine
-      }
+    let quantityUnitStringSpace: string
+    let quantityUnitStringNoSpace: string
+    let quantityUnitString: string
+
+    if (qut.quantityUpper) {
+      quantityUnitString = `${qut.quantity || ''}${dashes[1]!}${qut.quantityUpper || ''} ${qut.knownUnit || ''}`
     } else {
-      const quantityUnitStringSpace = `${qut.quantity || ''} ${qut.knownUnit || ''}`
-      const quantityUnitStringNoSpace = `${qut.quantity || ''}${qut.knownUnit || ''}`
-      let quantityUnitString = quantityUnitStringSpace
-      quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
+      quantityUnitStringSpace = `${qut.quantity || ''} ${qut.knownUnit || ''}`
+      quantityUnitStringNoSpace = `${qut.quantity || ''}${qut.knownUnit || ''}`
+      quantityUnitString = quantityUnitStringSpace
       if (quantityUnitPosition === -1) {
         quantityUnitString = quantityUnitStringNoSpace
         quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
       }
-      ingredientName = qut.trimmedLine.replace(quantityUnitString, '')
     }
+
+    quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
+    ingredientName = qut.trimmedLine.replace(quantityUnitString, '').trim()
+    console.log(ingredientName)
   }
 
   const existingIngredient = await db.ingredients.where({ name: ingredientName }).first()
@@ -153,28 +147,29 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
       const [lower, upper] = quantity?.split(dashesRegex).map((q) => q.trim()) || []
       let lowerFloat: number = -1
       let upperFloat: number = -1
-      let floatLine: string = ''
+      let normalizedLine: string = ''
 
       if (quantityIsRange && lower && upper) {
         lowerFloat = fractionToFloat(lower)
         upperFloat = fractionToFloat(upper)
-        floatLine =
+        normalizedLine =
           lowerFloat && upperFloat
             ? trimmedLine
                 .replace(lower, lowerFloat.toString())
                 .replace(upper, upperFloat.toString())
             : trimmedLine
+        normalizedLine = normalizedLine.replace(dashesRegex, `${dashes[1]}`)
       } else {
         if (quantity) {
           lowerFloat = fractionToFloat(quantity)
-          floatLine = lowerFloat
+          normalizedLine = lowerFloat
             ? trimmedLine.replace(quantity, lowerFloat.toString())
             : trimmedLine
         }
       }
 
       parts.push({
-        trimmedLine: floatLine !== '' ? floatLine : trimmedLine,
+        trimmedLine: normalizedLine !== '' ? normalizedLine : trimmedLine,
         quantity: lowerFloat !== -1 ? lowerFloat : undefined,
         quantityUpper: upperFloat !== -1 ? upperFloat : undefined,
         knownUnit: knownUnit || undefined,
