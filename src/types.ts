@@ -32,7 +32,7 @@ export type RecipeIngredient = {
 export type MatchedIngredient = QuantityUnitText[] | string
 
 export type QuantityUnitText = {
-  trimmedLine: string
+  normalizedLine: string
   textBeforeFirstMatch?: string
   quantity?: number
   quantityUpper?: number

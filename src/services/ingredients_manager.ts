@@ -1,8 +1,8 @@
 import { db } from '@/adapters/dexie'
 import { useIngredientsStore } from '@/stores/ingredients'
 import { unitsManager } from './units_manager'
-import { unitsSet, dashes } from '@/utils/fixed_values'
-import { fractionToFloat } from '@/utils/conversion'
+import { dashes, unitsSet } from '@/utils/fixed_values'
+import { fractionToFloat, limitDecimals } from '@/utils/conversion'
 import { v7 as uuidv7 } from 'uuid'
 import type {
   Ingredient,
@@ -19,7 +19,7 @@ import type {
 const quantityUnitTextRegex =
   /((?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+))(?:\s?[-–—−~〜～\u2010-\u2015]\s?(?:(?:[1-9]\d*\s+\d+\/\d+)|(?:\d+\/\d+)|(?:\d+[,.]\d+)|(?:[1-9]\d*\s?[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒])|(?:\d+)))?)(\s?[^0-9½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅐⅛⅜⅝⅞⅑⅒]+)?/gu
 
-const dashesRegex = /\s?[-–—−~〜～\u2010-\u2015]\s?/gu
+const dashesRegex = /\s?[-–—−~〜～\u2010-\u2015]\s?/
 
 async function addRecipeIngredient(
   recipeId: RecipeLocal['id'],
@@ -48,25 +48,13 @@ async function addRecipeIngredient(
     const qut = selectedQut || singleQut
     if (!qut) return undefined
 
-    let quantityUnitStringSpace: string
-    let quantityUnitStringNoSpace: string
-    let quantityUnitString: string
-
-    if (qut.quantityUpper) {
-      quantityUnitString = `${qut.quantity || ''}${dashes[1]!}${qut.quantityUpper || ''} ${qut.knownUnit || ''}`
-    } else {
-      quantityUnitStringSpace = `${qut.quantity || ''} ${qut.knownUnit || ''}`
-      quantityUnitStringNoSpace = `${qut.quantity || ''}${qut.knownUnit || ''}`
-      quantityUnitString = quantityUnitStringSpace
-      if (quantityUnitPosition === -1) {
-        quantityUnitString = quantityUnitStringNoSpace
-        quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
-      }
-    }
-
-    quantityUnitPosition = qut.trimmedLine.indexOf(quantityUnitString)
-    ingredientName = qut.trimmedLine.replace(quantityUnitString, '').trim()
-    console.log(ingredientName)
+    const quantityString = `${qut.quantity}${qut.quantityUpper ? dashes[1]! + String(qut.quantityUpper) : ''}`
+    let quantityUnitString = `${quantityString}${qut.knownUnit ? ' ' + qut.knownUnit : ''}`
+    quantityUnitPosition = qut.normalizedLine.indexOf(quantityUnitString)
+    if (quantityUnitPosition === -1)
+      quantityUnitString = `${quantityString}${qut.knownUnit ? qut.knownUnit : ''}`
+    quantityUnitPosition = qut.normalizedLine.indexOf(quantityUnitString)
+    ingredientName = qut.normalizedLine.replace(quantityUnitString, '').trim()
   }
 
   const existingIngredient = await db.ingredients.where({ name: ingredientName }).first()
@@ -130,46 +118,38 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
     let match
 
     while ((match = quantityUnitTextRegex.exec(trimmedLine)) !== null) {
-      const quantity = match[1] && match[1]
-      const potentialUnit = match[2] && match[2]
-      const knownUnit = potentialUnit?.split(' ').find((part) => unitsSet.has(part.toLowerCase()))
-      const textAfterQuantity = knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit
-
-      // check if there is text before the first match and if so add it as the first item in the parts array
-      if (parts.length === 0 && match.index > 0) {
-        parts.push({
-          trimmedLine: trimmedLine,
-          textBeforeFirstMatch: trimmedLine.slice(0, match.index).trim(),
-        })
-      }
+      const quantity = match[1] && match[1].trim()
+      const potentialUnit = match[2] && match[2].trim()
+      const knownUnit = potentialUnit
+        ?.split(' ')
+        .find((part) => unitsSet.has(part.toLowerCase()))
+        ?.trim()
+      const textAfterQuantity = (
+        knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit
+      )?.trim()
 
       const quantityIsRange = quantity && dashesRegex.test(quantity)
       const [lower, upper] = quantity?.split(dashesRegex).map((q) => q.trim()) || []
       let lowerFloat: number = -1
       let upperFloat: number = -1
-      let normalizedLine: string = ''
 
       if (quantityIsRange && lower && upper) {
-        lowerFloat = fractionToFloat(lower)
-        upperFloat = fractionToFloat(upper)
-        normalizedLine =
-          lowerFloat && upperFloat
-            ? trimmedLine
-                .replace(lower, lowerFloat.toString())
-                .replace(upper, upperFloat.toString())
-            : trimmedLine
-        normalizedLine = normalizedLine.replace(dashesRegex, `${dashes[1]}`)
+        lowerFloat = limitDecimals(fractionToFloat(lower))
+        upperFloat = limitDecimals(fractionToFloat(upper))
       } else {
-        if (quantity) {
-          lowerFloat = fractionToFloat(quantity)
-          normalizedLine = lowerFloat
-            ? trimmedLine.replace(quantity, lowerFloat.toString())
-            : trimmedLine
-        }
+        if (quantity) lowerFloat = limitDecimals(fractionToFloat(quantity))
       }
 
+      const normalizedLine = quantityIsRange
+        ? trimmedLine.replace(String(quantity), String(lowerFloat + dashes[1]! + upperFloat))
+        : trimmedLine.replace(String(quantity), String(lowerFloat))
+
       parts.push({
-        trimmedLine: normalizedLine !== '' ? normalizedLine : trimmedLine,
+        textBeforeFirstMatch:
+          parts.length === 0 && match.index > 0
+            ? trimmedLine.slice(0, match.index).trim()
+            : undefined,
+        normalizedLine: normalizedLine,
         quantity: lowerFloat !== -1 ? lowerFloat : undefined,
         quantityUpper: upperFloat !== -1 ? upperFloat : undefined,
         knownUnit: knownUnit || undefined,
