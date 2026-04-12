@@ -3,6 +3,7 @@
   letter-spacing: 1px;
   font-weight: 300;
   opacity: var(--text-secondary-opacity);
+  padding-bottom: 5px;
 }
 
 .heading--root {

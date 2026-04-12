@@ -114,7 +114,7 @@ function onServingsIncrease() {
 </template>
 
 <style scoped>
-h3:not(:first-of-type) {
+h3.heading--muted:not(:first-of-type) {
   margin-top: var(--inner-spacing);
 }
 
@@ -126,6 +126,11 @@ div.servings {
   h3 {
     font-size: 0.9rem;
   }
+}
+
+li {
+  line-height: 1.15;
+  padding-bottom: 9px;
 }
 
 span.quantity-unit {
