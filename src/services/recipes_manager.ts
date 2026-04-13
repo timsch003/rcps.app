@@ -5,8 +5,6 @@ import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
 import type { RecipeLocal, RecipeRaw, Tag, UUID } from '@/types'
 
-const MAX_CACHE_SIZE = 500
-
 async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   const newRecipeId = uuidv7()
 
@@ -38,38 +36,38 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   }
 
   await db.recipes.add(newRecipe)
-  cache(newRecipe)
   return newRecipe.id
 }
 
-function cache(recipe: RecipeLocal): void {
-  useRecipesStore().cache(recipe)
+function cacheViewed(recipe: RecipeLocal): void {
+  if (recipe) useRecipesStore().cacheViewed(recipe)
 }
 
 async function getTagged(tagId: Tag['id']): Promise<RecipeLocal[]> {
-  const cachedRecipesWithTag = useRecipesStore().cached.filter((r) => r.tagIds?.includes(tagId))
-  if (cachedRecipesWithTag.length) return cachedRecipesWithTag
+  const cachedRecipes = useRecipesStore().lastViewed.filter((r) => r.tagIds?.includes(tagId))
+  if (cachedRecipes.length) return cachedRecipes
 
   const recipes = await db.recipes.where('tagIds').equals(tagId).toArray()
-
-  if (maxCacheSizeExceeded()) useRecipesStore().cached = recipes
-  else recipes.forEach((recipe) => cache(recipe))
-
   return recipes
 }
 
-function maxCacheSizeExceeded(): boolean {
-  return useRecipesStore().cached.length > MAX_CACHE_SIZE
-}
-
 async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
-  const cachedRecipe = useRecipesStore().cached.find((r) => r.id === recipeId)
+  const cachedRecipe = useRecipesStore().lastViewed.find((r) => r.id === recipeId)
   if (cachedRecipe) return cachedRecipe
+
   return await db.recipes.get(recipeId)
 }
 
+function getFavorites(): RecipeLocal[] {
+  return useRecipesStore().favorites
+}
+
+function getLastViewed(): RecipeLocal[] {
+  return useRecipesStore().lastViewed
+}
+
 async function nameExists(name: string): Promise<boolean> {
-  const existingRecipeInStore = useRecipesStore().cached.find(
+  const existingRecipeInStore = useRecipesStore().lastViewed.find(
     (r) => r.name.toLowerCase() === name.toLowerCase(),
   )
   if (existingRecipeInStore) return true
@@ -80,8 +78,10 @@ async function nameExists(name: string): Promise<boolean> {
 
 export const recipesManager = {
   addNew,
-  cache,
+  cacheViewed,
   getTagged,
   getById,
+  getLastViewed,
+  getFavorites,
   nameExists,
 }

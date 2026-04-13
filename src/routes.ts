@@ -10,7 +10,6 @@ import RegisterView from './views/auth/RegisterView.vue'
 import VerifyEmailView from './views/auth/VerifyEmailView.vue'
 import ResetPasswordView from './views/auth/ResetPasswordView.vue'
 import ChangeEmailView from './views/auth/ChangeEmailView.vue'
-import FavoritesView from './views/FavoritesView.vue'
 import CreateView from './views/CreateFormView.vue'
 
 const router = createRouter({
@@ -37,9 +36,14 @@ const router = createRouter({
           component: RecipesView,
         },
         {
+          path: '/last',
+          name: 'last',
+          component: RecipesView,
+        },
+        {
           path: '/favorites',
           name: 'favorites',
-          component: FavoritesView,
+          component: RecipesView,
         },
         {
           path: '/recipe/:id',

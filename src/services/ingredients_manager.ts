@@ -119,6 +119,7 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
 
     while ((match = quantityUnitTextRegex.exec(trimmedLine)) !== null) {
       const quantity = match[1] && match[1].trim()
+      const quantityNormalized = quantity && quantity.replace(',', '.')
       const potentialUnit = match[2] && match[2].trim()
       const knownUnit = potentialUnit
         ?.split(' ')
@@ -128,8 +129,8 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
         knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit
       )?.trim()
 
-      const quantityIsRange = quantity && dashesRegex.test(quantity)
-      const [lower, upper] = quantity?.split(dashesRegex).map((q) => q.trim()) || []
+      const quantityIsRange = quantityNormalized && dashesRegex.test(quantityNormalized)
+      const [lower, upper] = quantityNormalized?.split(dashesRegex).map((q) => q.trim()) || []
       let lowerFloat: number = -1
       let upperFloat: number = -1
 
@@ -137,7 +138,7 @@ export function match(ingredients: string): MatchedIngredient[] | [] {
         lowerFloat = limitDecimals(fractionToFloat(lower))
         upperFloat = limitDecimals(fractionToFloat(upper))
       } else {
-        if (quantity) lowerFloat = limitDecimals(fractionToFloat(quantity))
+        if (quantityNormalized) lowerFloat = limitDecimals(fractionToFloat(quantityNormalized))
       }
 
       const normalizedLine = quantityIsRange

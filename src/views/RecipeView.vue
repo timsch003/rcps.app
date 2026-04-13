@@ -23,7 +23,6 @@ onMounted(async () => {
   loading.value = true
   try {
     recipe.value = await recipesManager.getById(route.params.id as string)
-
     if (!recipe.value) throw new Error(t('error.recipe_not_found'))
 
     if (recipe.value.recipeIngredientIds?.length) {
@@ -35,8 +34,9 @@ onMounted(async () => {
         }),
       )
     }
-
     if (recipe.value.tagIds?.length) tags = await tagsManager.getNames(recipe.value.tagIds)
+
+    recipesManager.cacheViewed(recipe.value)
   } catch (err) {
     error = (err as Error).message
   } finally {
