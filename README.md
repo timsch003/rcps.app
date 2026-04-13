@@ -132,6 +132,7 @@ npm run lint
 
 - Add transition / animation to nav bottom active indicator (:before)
 - Fix scroll position changing when editing textareas when manually editing
+- Don't show tags icon in cards when to tags are assigned
 
 ## Deployment checklist
 

@@ -10,7 +10,8 @@ export const useRecipesStore = defineStore('recipes', () => {
   const favorites = ref<RecipeLocal[]>([])
 
   function cacheViewed(recipe: RecipeLocal): void {
-    if (lastViewed.value.some((r) => r.id === recipe.id)) return
+    const existingIndex = lastViewed.value.findIndex((r) => r.id === recipe.id)
+    if (existingIndex !== -1) lastViewed.value.splice(existingIndex, 1)
     lastViewed.value.unshift(recipe)
     handleCacheSize()
   }
