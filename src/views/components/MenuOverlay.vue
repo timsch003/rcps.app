@@ -96,7 +96,7 @@ div.menu {
 }
 
 div.menu__inner h3 {
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -133,9 +133,9 @@ menu.menu__content--account {
 }
 
 menu.menu__content--settings {
-  padding-bottom: calc(var(--inner-spacing) * 2);
+  padding-bottom: var(--inner-spacing-l);
   border-bottom: 1px solid var(--decor);
-  margin-bottom: calc(var(--inner-spacing) * 1.2);
+  margin-bottom: calc(var(--inner-spacing-l) - 1ex);
 }
 
 .fade-enter-active,
