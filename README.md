@@ -4,9 +4,11 @@
 
 1. [Stack](#stack)
 2. [Setup](#setup)
-3. [Features](#features)
-4. [TODOs](#todos)
-5. [Deployment checklist](#deployment-checklist)
+3. [Features](#features)  
+   3.1 [MVP](#mvp)  
+   3.1.1 [TODOs](#todos)  
+   3.2 [Planned](#planned)
+4. [Deployment checklist](#deployment-checklist)
 
 ## Stack
 
@@ -108,31 +110,38 @@ npm run lint
   - Tags (view, add, edit, delete)
   - Language (automatic or manual locale selection)
 
-### Planned (sorted by urgency in relation to complexity)
+#### TODOs
 
-- Favorites filter toggle for card views
-- Alphabetical <-> recent sorting toggle for card views
-- Multiple tags selection mode
-- Bulk importing recipes from exports of other recipe apps / Schema.org / JSON-LD
-- Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
-- Ticking ingredients and resetting ticks
-
-## TODOs
-
-### General
+##### General
 
 - Set up multilangual landing page with SEO
 - Research about web dev implications of right-to-left and other language types
 
-### Data flow
-
-- Handle ingredient sorting
-
-### UI/UX
+##### UI/UX
 
 - Add transition / animation to nav bottom active indicator (:before)
 - Fix scroll position changing when editing textareas when manually editing
 - Don't show tags icon in cards when to tags are assigned
+
+### Planned
+
+(sorted by urgency in relation to complexity)
+
+#### General
+
+- Alphabetical <-> recent sorting toggle for card views
+- Multiple tags selection mode
+- Auto-conversion of known units from/to abbreviations
+- Bulk importing recipes from exports of other recipe apps / Schema.org / JSON-LD
+- Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
+- Ticking ingredients and resetting ticks
+
+#### Settings
+
+- Default view to show on app load
+- Formatting
+  - Spaces in quantities/units
+  - Decimal or fraction quantities
 
 ## Deployment checklist
 
