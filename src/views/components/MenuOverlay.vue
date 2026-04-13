@@ -96,7 +96,7 @@ div.menu {
 }
 
 div.menu__inner h3 {
-  margin-bottom: var(--inner-spacing);
+  margin-bottom: 5px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -113,7 +113,6 @@ div.menu__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-block: 6px;
   margin-bottom: var(--inner-spacing);
 }
 
@@ -121,14 +120,15 @@ menu.menu__content--settings,
 menu.menu__content--account {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
 
   li {
     list-style: none;
   }
 
-  button {
-    font-weight: 400;
+  .btn-button,
+  .btn-link {
+    font-weight: 500;
   }
 }
 

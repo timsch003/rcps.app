@@ -144,10 +144,6 @@ textarea#create__ingredients-input {
 }
 
 div.servings {
-  h3 {
-    margin-right: var(--gap);
-  }
-
   input {
     width: 3em;
     text-align: center;

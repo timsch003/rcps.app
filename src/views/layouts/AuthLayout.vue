@@ -49,7 +49,7 @@ nav.top {
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
   margin-bottom: var(--inner-spacing);
 }
 

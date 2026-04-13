@@ -38,11 +38,6 @@ a.card {
   border-radius: var(--border-radius);
   padding: 8px 14px;
 
-  h2 {
-    font-weight: 600;
-    font-size: var(--heading-font-size);
-  }
-
   .card__section {
     margin-top: 15px;
     font-size: 0.9rem;
@@ -53,10 +48,13 @@ a.card {
 
 a.card--tag {
   text-align: center;
+}
 
+a.card,
+a.card--tag {
   h2 {
-    font-size: var(--heading-font-size);
     font-weight: 600;
+    font-size: var(--heading-secondary-font-size);
   }
 }
 

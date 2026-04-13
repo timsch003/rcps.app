@@ -1,15 +1,15 @@
-.heading--muted {
-  font-size: var(--heading-font-size);
-  letter-spacing: 1px;
-  font-weight: 300;
-  opacity: var(--text-secondary-opacity);
-  padding-bottom: 5px;
-}
-
 .heading--root {
   font-size: var(--heading-font-size);
   padding-bottom: var(--inner-spacing);
-  font-weight: 600;
+  font-weight: 500;
+}
+
+.heading--muted {
+  font-size: var(--heading-secondary-font-size);
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  opacity: var(--text-secondary-opacity);
+  padding-bottom: 2px;
 }
 
 .multiline_text {

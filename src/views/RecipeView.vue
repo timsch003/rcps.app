@@ -83,7 +83,7 @@ function onServingsIncrease() {
     <h2 class="heading--root">{{ recipe!.name }}</h2>
 
     <div v-if="recipe!.servings" class="servings">
-      <h3>{{ `${t('Servings')}: ${recipe!.servings}` }}</h3>
+      <h3 class="heading--muted">{{ `${t('Servings')}: ${recipe!.servings}` }}</h3>
       <ButtonMulti desc="-" showDesc :aria-label="t('Decrease')" @click="onServingsDecrease" />
       <ButtonMulti desc="+" showDesc :aria-label="t('Increase')" @click="onServingsIncrease" />
     </div>
@@ -121,16 +121,16 @@ h3.heading--muted:not(:first-of-type) {
 div.servings {
   display: flex;
   align-items: center;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
 
-  h3 {
-    font-size: 0.9rem;
+  button {
+    margin-bottom: 5px;
   }
 }
 
 li {
   line-height: 1.15;
-  padding-bottom: 9px;
+  padding-bottom: 7px;
 }
 
 span.quantity-unit {

@@ -27,7 +27,13 @@ const menuOverlayOpen = ref(false)
       <RouterView />
     </section>
     <nav class="bottom">
-      <ButtonMulti route="favorites" :icon="FavoritesIcon" :desc="t('Favorites')" accentColor inNavBottom />
+      <ButtonMulti
+        route="favorites"
+        :icon="FavoritesIcon"
+        :desc="t('Favorites')"
+        accentColor
+        inNavBottom
+      />
       <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor inNavBottom />
       <ButtonMulti route="create" :icon="AddIcon" :desc="t('Add recipe')" accentColor inNavBottom />
     </nav>
@@ -37,8 +43,8 @@ const menuOverlayOpen = ref(false)
 <style scoped>
 main {
   min-height: calc(100vh - var(--outer-spacing) * 2);
-  /* compensate nav.bottom overlap */
-  padding-bottom: 75px;
+  /* compensate nav.bottom overlapping content */
+  padding-bottom: 80px;
 }
 
 section {
@@ -50,7 +56,11 @@ nav.top,
 nav.bottom {
   display: flex;
   align-items: center;
-  padding-block: 6px;
+}
+
+header,
+nav.bottom {
+  padding: var(--outer-spacing);
 }
 
 header,
@@ -68,12 +78,11 @@ header {
   position: sticky;
   inset: 0 0 auto 0;
   border-bottom: var(--nav-border-width) solid var(--bg-lighter);
-  padding: var(--outer-spacing) var(--outer-spacing) var(--outer-spacing) var(--outer-spacing);
 }
 
 nav.top {
   justify-content: flex-end;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
   width: 100vw;
 }
 
@@ -82,8 +91,7 @@ nav.bottom {
   inset: auto 0 0 0;
   justify-content: space-around;
   align-items: flex-start;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
   border-top: var(--nav-border-width) solid var(--bg-lighter);
-  padding: var(--inner-spacing) var(--outer-spacing);
 }
 </style>

@@ -11,7 +11,7 @@
   --decor: #474747;
   --decor-light: #5a5a5a;
   --text: #f5f5f5;
-  --accent: #a5b6ae;
+  --accent: #92aedd;
 
   /* Accent variations */
   --linen: #ffede1;
@@ -37,14 +37,14 @@
 
   /* Fonts
     */
-  --heading-font-size: 1.1rem;
+  --heading-font-size: 1.2rem;
+  --heading-secondary-font-size: 1.1rem;
   --text-secondary-opacity: 0.75;
 
   /* Spacings
     */
   --outer-spacing: 10px;
   --inner-spacing: 12px;
-  --gap: 12px;
 
   /* Miscellaneous
     */
@@ -56,5 +56,5 @@
   --nav-border-width: 2px;
 
   /* Universal formatting */
-  --quantity-unit-font-weight: 600;
+  --quantity-unit-font-weight: 700;
 }

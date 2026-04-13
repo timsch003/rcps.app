@@ -54,13 +54,11 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 0.9rem;
-  font-weight: 200;
+  font-weight: 600;
   background-color: var(--bg-light);
   box-shadow: 2px 2px var(--bg-lighter);
   border: none;
   border-radius: 10em;
-  font-weight: 600;
   transform: translate(-1px, -1px);
   padding: 6px 12px;
   cursor: pointer;
@@ -92,7 +90,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
 .btn-link__desc,
 .btn-button__desc {
   opacity: var(--text-secondary-opacity);
-  margin-left: var(--gap);
+  margin-left: var(--inner-spacing);
 }
 
 .btn-link:hover,

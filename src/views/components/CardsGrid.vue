@@ -22,7 +22,7 @@ div {
   --min-card-width: 160px;
 
   display: grid;
-  gap: var(--gap);
+  gap: var(--inner-spacing);
   grid-template-columns: repeat(auto-fill, minmax(min(var(--min-card-width), 100%), 1fr));
 }
 </style>

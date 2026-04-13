@@ -243,7 +243,7 @@ div.checkcorrect__ingredients-info {
 }
 
 ul {
-  --ing-spacing: 10px;
+  --ing-spacing: 5px;
   padding-top: var(--ing-spacing);
 }
 
