@@ -35,8 +35,6 @@ onMounted(async () => {
       )
     }
     if (recipe.value.tagIds?.length) tags = await tagsManager.getNames(recipe.value.tagIds)
-
-    recipesManager.cacheViewed(recipe.value)
   } catch (err) {
     error = (err as Error).message
   } finally {

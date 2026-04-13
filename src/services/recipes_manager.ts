@@ -39,23 +39,23 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   return newRecipe.id
 }
 
+function cacheFavorite(recipe: RecipeLocal): void {
+  if (recipe) useRecipesStore().cacheFavorite(recipe)
+}
+
 function cacheViewed(recipe: RecipeLocal): void {
   if (recipe) useRecipesStore().cacheViewed(recipe)
 }
 
-async function getTagged(tagId: Tag['id']): Promise<RecipeLocal[]> {
-  const cachedRecipes = useRecipesStore().lastViewed.filter((r) => r.tagIds?.includes(tagId))
-  if (cachedRecipes.length) return cachedRecipes
-
-  const recipes = await db.recipes.where('tagIds').equals(tagId).toArray()
-  return recipes
-}
-
 async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
-  const cachedRecipe = useRecipesStore().lastViewed.find((r) => r.id === recipeId)
+  const recipesStore = useRecipesStore()
+
+  const cachedRecipe = recipesStore.lastViewed.find((r) => r.id === recipeId)
   if (cachedRecipe) return cachedRecipe
 
-  return await db.recipes.get(recipeId)
+  const recipe = await db.recipes.get(recipeId)
+  if (recipe) recipesStore.cacheViewed(recipe)
+  return recipe
 }
 
 function getFavorites(): RecipeLocal[] {
@@ -64,6 +64,17 @@ function getFavorites(): RecipeLocal[] {
 
 function getLastViewed(): RecipeLocal[] {
   return useRecipesStore().lastViewed
+}
+
+async function getTagged(tagId: Tag['id']): Promise<RecipeLocal[]> {
+  const recipesStore = useRecipesStore()
+
+  const tagAlreadyCached = recipesStore.tagged[0]?.tagIds?.includes(tagId)
+  if (tagAlreadyCached) return recipesStore.tagged
+
+  const recipes = await db.recipes.where('tagIds').equals(tagId).toArray()
+  recipesStore.cacheTagged(recipes)
+  return recipes
 }
 
 async function nameExists(name: string): Promise<boolean> {
@@ -78,10 +89,11 @@ async function nameExists(name: string): Promise<boolean> {
 
 export const recipesManager = {
   addNew,
+  cacheFavorite,
   cacheViewed,
-  getTagged,
   getById,
-  getLastViewed,
   getFavorites,
+  getLastViewed,
+  getTagged,
   nameExists,
 }
