@@ -69,7 +69,7 @@ export async function upsertRecord(
 }
 
 export async function fetchFullList(collection: string, options?: Record<string, unknown>) {
-  return pb.collection(collection).getFullList({ requestKey: null, ...options })
+  return await pb.collection(collection).getFullList({ requestKey: null, ...options })
 }
 
 export { pb, ClientResponseError }
