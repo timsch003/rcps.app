@@ -130,6 +130,10 @@ npm run lint
 
 ## TODOs
 
+### Dev
+
+- Update pocketbase using `./pocketbase update`, check/update package.json (scripts.dependencies runs after applied changes in node_modules / package.json / package-lock)
+
 ### General
 
 - Set up multilangual landing page with SEO

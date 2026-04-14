@@ -1,0 +1,51 @@
+/// <reference path="../pb_data/types.d.ts" />
+migrate(
+  (app) => {
+    const collection = app.findCollectionByNameOrId('pbc_842702175')
+
+    // update id field to accept UUID format (matching other collections)
+    collection.fields.addAt(
+      0,
+      new Field({
+        autogeneratePattern: '',
+        hidden: false,
+        id: 'text3208210256',
+        max: 36,
+        min: 36,
+        name: 'id',
+        pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+        presentable: false,
+        primaryKey: true,
+        required: true,
+        system: true,
+        type: 'text',
+      }),
+    )
+
+    return app.save(collection)
+  },
+  (app) => {
+    const collection = app.findCollectionByNameOrId('pbc_842702175')
+
+    // revert to original id pattern
+    collection.fields.addAt(
+      0,
+      new Field({
+        autogeneratePattern: '[a-z0-9]{15}',
+        hidden: false,
+        id: 'text3208210256',
+        max: 0,
+        min: 0,
+        name: 'id',
+        pattern: '^[a-z0-9]+$',
+        presentable: false,
+        primaryKey: true,
+        required: true,
+        system: true,
+        type: 'text',
+      }),
+    )
+
+    return app.save(collection)
+  },
+)

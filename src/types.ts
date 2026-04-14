@@ -68,17 +68,7 @@ export type RecipeRaw = {
 }
 
 export type SyncMetadata = {
-  lastSync: number
-  pendingChanges: number
-}
-
-export type SyncState = 'synced' | 'syncing' | 'offline'
-
-export type PendingChangeOperation = 'create' | 'update' | 'delete'
-
-export type PendingChange = {
-  id: UUID
-  operation: PendingChangeOperation
+  type: string
   timestamp: number
-  data: Partial<RecipeLocal>
+  errors: string | null
 }
