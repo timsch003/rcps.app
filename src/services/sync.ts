@@ -20,7 +20,11 @@ interface PbRecipeIngredient {
   }
 }
 
-async function pushLocalChanges(): Promise<{ success: boolean; errors?: string }> {
+async function pushLocalChanges(): Promise<{
+  success: boolean
+  pushedRecipes?: number
+  errors?: string
+}> {
   const authStore = useAuthStore()
   if (!authStore.isAuth || !authStore.user) {
     return { success: false, errors: 'Not authenticated' }
@@ -30,7 +34,7 @@ async function pushLocalChanges(): Promise<{ success: boolean; errors?: string }
   if (!userId) return { success: false, errors: 'No user ID' }
 
   const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
-  if (unsyncedRecipes.length === 0) return { success: true }
+  if (unsyncedRecipes.length === 0) return { success: true, pushedRecipes: 0 }
 
   const errors: string[] = []
 
@@ -102,25 +106,23 @@ async function pushLocalChanges(): Promise<{ success: boolean; errors?: string }
       // 5. Mark as synced locally
       await db.recipes.update(recipe.id, { synced: true })
     } catch (e) {
-      errors.push(`Recipe "${recipe.name}": ${e instanceof Error ? e.message : String(e)}`)
+      errors.push(`${e instanceof Error ? e.name + ': ' + e.message : String(e)}`)
     }
   }
 
-  const allErrors = errors.join('; ')
-
-  await db.sync_metadata.put({
-    type: 'last_push',
-    timestamp: Date.now(),
-    errors: allErrors || null,
-  })
+  const allErrors = errors.join(' | ')
 
   if (errors.length) {
     return { success: false, errors: allErrors }
   }
-  return { success: true }
+  return { success: true, pushedRecipes: unsyncedRecipes.length }
 }
 
-async function pullRemoteData(): Promise<{ success: boolean; error?: string }> {
+async function pullRemoteData(): Promise<{
+  success: boolean
+  pulledRecipes?: number
+  error?: string
+}> {
   const authStore = useAuthStore()
   if (!authStore.isAuth || !authStore.user) {
     return { success: false, error: 'Not authenticated' }
@@ -129,7 +131,7 @@ async function pullRemoteData(): Promise<{ success: boolean; error?: string }> {
   try {
     // 1. Fetch all user recipes (PB rules auto-filter by userId)
     const remoteRecipes = await fetchFullList('recipes', { expand: 'tagIds' })
-    if (!remoteRecipes.length) return { success: true }
+    if (!remoteRecipes.length) return { success: true, pulledRecipes: 0 }
 
     // 2. Store tags from expanded data
     for (const recipe of remoteRecipes) {
@@ -207,13 +209,7 @@ async function pullRemoteData(): Promise<{ success: boolean; error?: string }> {
     await tagsManager.cacheAll()
     await unitsManager.cacheAll()
 
-    await db.sync_metadata.put({
-      type: 'last_pull',
-      timestamp: Date.now(),
-      errors: null,
-    })
-
-    return { success: true }
+    return { success: true, pulledRecipes: remoteRecipes.length }
   } catch (e) {
     return { success: false, error: e instanceof Error ? e.message : String(e) }
   }

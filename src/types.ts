@@ -67,8 +67,10 @@ export type RecipeRaw = {
   notes: string
 }
 
-export type SyncMetadata = {
-  type: string
-  timestamp: number
-  errors: string | null
+export type SyncResult = {
+  success: boolean
+  pushedRecipes?: number
+  pulledRecipes?: number
+  errors?: string
+  error?: string
 }

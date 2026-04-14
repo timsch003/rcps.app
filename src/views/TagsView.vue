@@ -4,14 +4,15 @@ import { useTagsStore } from '@/stores/tags'
 import { sync } from '@/services/sync'
 import { t } from '@/lang/i18n'
 import CardsGrid from '@/views/components/CardsGrid.vue'
+import type { SyncResult } from '@/types'
 
 const tagsStore = useTagsStore()
 
-const pulledData = ref<{ success: boolean; error?: string }>({ success: false })
+const pulledData = ref<SyncResult>({ success: false })
 
 onMounted(async () => {
   pulledData.value = await sync.pullRemoteData()
-  console.log(pulledData.value)
+  console.log('pull data: ', pulledData.value)
 })
 </script>
 
