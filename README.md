@@ -4,11 +4,9 @@
 
 1. [Stack](#stack)
 2. [Setup](#setup)
-3. [Features](#features)  
-   3.1 [MVP](#mvp)  
-   3.1.1 [TODOs](#todos)  
-   3.2 [Planned](#planned)
-4. [Deployment checklist](#deployment-checklist)
+3. [Features](#features)
+4. [TODOs](#todos)
+5. [Deployment checklist](#deployment-checklist)
 
 ## Stack
 
@@ -110,19 +108,6 @@ npm run lint
   - Tags (view, add, edit, delete)
   - Language (automatic or manual locale selection)
 
-#### TODOs
-
-##### General
-
-- Set up multilangual landing page with SEO
-- Research about web dev implications of right-to-left and other language types
-
-##### UI/UX
-
-- Add transition / animation to nav bottom active indicator (:before)
-- Fix scroll position changing when editing textareas when manually editing
-- Don't show tags icon in cards when to tags are assigned
-
 ### Planned
 
 (sorted by urgency in relation to complexity)
@@ -142,6 +127,26 @@ npm run lint
 - Formatting
   - Spaces in quantities/units
   - Decimal or fraction quantities
+
+## TODOs
+
+### General
+
+- Set up multilangual landing page with SEO
+
+### UI/UX
+
+- Add transition / animation to nav bottom active indicator (:before)
+- Fix scroll position changing when editing textareas when manually editing
+- Don't show tags icon in cards when to tags are assigned
+
+### Internationalization
+
+- Change all non-logical CSS rules to logical ones
+- Support mixed-direction content by applying dir="auto" or <bdi> where necessary
+- Flip arrows and back button positions where appropriate
+- Add script to handle <html dir> and fonts when changing language
+- Check if there are numerals that used regexes do not account for
 
 ## Deployment checklist
 
