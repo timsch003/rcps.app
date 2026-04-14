@@ -94,10 +94,10 @@ async function pushLocalChanges(): Promise<{
             id: ri.id,
             recipeId: ri.recipeId,
             ingredientId: ri.ingredientId,
-            quantity: ri.quantity ?? null,
-            quantityUpper: ri.quantityUpper ?? null,
-            unitId: ri.unitId ?? null,
-            quantityUnitPosition: ri.quantityUnitPosition ?? null,
+            quantity: ri.quantity ?? undefined,
+            quantityUpper: ri.quantityUpper ?? undefined,
+            unitId: ri.unitId ?? undefined,
+            quantityUnitPosition: ri.quantityUnitPosition ?? undefined,
             sortOrder: ri.sortOrder,
           })
         }
@@ -208,6 +208,8 @@ async function pullRemoteData(): Promise<{
     // 7. Refresh caches
     await tagsManager.cacheAll()
     await unitsManager.cacheAll()
+
+    console.log(remoteRecipes)
 
     return { success: true, pulledRecipes: remoteRecipes.length }
   } catch (e) {

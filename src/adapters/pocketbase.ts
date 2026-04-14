@@ -1,6 +1,7 @@
 import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
 import { v7 as uuidv7 } from 'uuid'
 import translateError from '@/utils/pb_error_translation'
+import type { IdAndName, Recipe, RecipeIngredient } from '@/types'
 
 const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps-app-auth'))
 
@@ -54,22 +55,31 @@ export function getUserId(): string | undefined {
 
 export async function upsertRecord(
   collection: string,
-  data: Record<string, unknown>,
+  data: IdAndName | Recipe | RecipeIngredient,
 ): Promise<void> {
   try {
-    await pb.collection(collection).create(data, { requestKey: null })
-  } catch (e: unknown) {
-    if (e instanceof ClientResponseError && e.status === 400) {
-      const { id, ...updateData } = data
-      await pb.collection(collection).update(id as string, updateData, { requestKey: null })
+    // Only PocketBase records method that doesn't throw an error
+    // on missing record, so it seems like the best way to check existence:
+    const existingRecord = await pb.collection(collection).getList(1, 1, {
+      filter: `id = "${data.id}"`,
+    })
+
+    if (existingRecord.items.length) {
+      if (!(collection === 'recipes' || collection === 'recipe_ingredients')) return
+
+      const dataWithoutId: Partial<IdAndName | Recipe | RecipeIngredient> = { ...data }
+      delete dataWithoutId.id
+      await pb.collection(collection).update(data.id, dataWithoutId)
     } else {
-      throw e
+      await pb.collection(collection).create(data)
     }
+  } catch (e) {
+    if (e) throw e
   }
 }
 
 export async function fetchFullList(collection: string, options?: Record<string, unknown>) {
-  return await pb.collection(collection).getFullList({ requestKey: null, ...options })
+  return await pb.collection(collection).getFullList({ ...options })
 }
 
 export { pb, ClientResponseError }
