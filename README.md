@@ -89,6 +89,12 @@ npm run lint
 ./pocketbase serve
 ```
 
+#### Update the PocketBase binary
+
+```sh
+./pocketbase update
+```
+
 ## Features
 
 ### MVP
@@ -130,6 +136,10 @@ npm run lint
 
 ## TODOs
 
+### General
+
+- Set up multilangual landing page with SEO
+
 ### Dev
 
 - Update pocketbase using `./pocketbase update`, check/update package.json (scripts.dependencies runs after applied changes in node_modules / package.json / package-lock)
@@ -139,9 +149,9 @@ npm run lint
 - Fix recipe ingredients pulling
 - Check if already present locally and synced when pulling
 
-### General
+## Functionality
 
-- Set up multilangual landing page with SEO
+- Implement displaying untagged recipes
 
 ### UI/UX
 
