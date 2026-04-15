@@ -3,6 +3,7 @@ import { useRecipesStore } from '@/stores/recipes'
 import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
+import { sync } from './sync'
 import type { RecipeLocal, RecipeRaw, Tag, UUID } from '@/types'
 
 async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
@@ -36,6 +37,7 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   }
 
   await db.recipes.add(newRecipe)
+  sync.pushLocalChanges()
   return newRecipe.id
 }
 

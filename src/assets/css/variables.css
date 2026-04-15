@@ -35,6 +35,10 @@
   --sky: #7cb9df;
   --lilac: #cba4c1;
 
+  /* Only used for technical indications */
+  --error: #ee0000;
+  --success: #00c500;
+
   /* Fonts
     */
   --heading-font-size: 1.2rem;

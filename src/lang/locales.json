@@ -68,7 +68,12 @@
     "checkcorrect.ingredients_info_selected": "Selected",
     "checkcorrect.ingredients_info_ignored": "Ignored",
     "recipes_view.no_recently_viewed_recipes": "No recently viewed recipes.",
-    "recipes_view.no_favorite_recipes": "No favorite recipes."
+    "recipes_view.no_favorite_recipes": "No favorite recipes.",
+    "sync.status_offline": "No internet connection",
+    "sync.status_pushing": "Uploading changes...",
+    "sync.status_pulling": "Downloading data from server...",
+    "sync.status_synced": "All changes are synchronized",
+    "sync.status_error": "An error occurred during synchronization"
   },
   "de": {
     "Tags": "Tags",
@@ -136,6 +141,11 @@
     "checkcorrect.ingredients_info_selected": "Ausgewählt",
     "checkcorrect.ingredients_info_ignored": "Ignoriert",
     "recipes_view.no_recently_viewed_recipes": "Keine kürzlich angesehenen Rezepte.",
-    "recipes_view.no_favorite_recipes": "Keine Lieblingsrezepte."
+    "recipes_view.no_favorite_recipes": "Keine Lieblingsrezepte.",
+    "sync.status_offline": "Keine Internetverbindung",
+    "sync.status_pushing": "Änderungen werden hochgeladen...",
+    "sync.status_pulling": "Daten werden vom Server heruntergeladen...",
+    "sync.status_synced": "Alle Änderungen sind synchronisiert",
+    "sync.status_error": "Bei der Synchronisierung ist ein Fehler aufgetreten"
   }
 }

@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import CheckAndCorrect from '@/views/components/CheckAndCorrect.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
 import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
-import { sync } from '@/services/sync'
 import PreviewIcon from '@/views/icons/IconPreview.vue'
 import type { RecipeRaw } from '@/types'
-
-onMounted(async () => {
-  const pushedChanges = await sync.pushLocalChanges()
-  console.log('push data: ', pushedChanges)
-})
 
 const data = reactive<RecipeRaw>({
   name: '',

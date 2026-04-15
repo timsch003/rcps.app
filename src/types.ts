@@ -67,6 +67,8 @@ export type RecipeRaw = {
   notes: string
 }
 
+export type SyncStatus = 'synced' | 'pulling' | 'pushing' | 'offline' | 'error'
+
 export type SyncResult = {
   success: boolean
   pushedRecipes?: number

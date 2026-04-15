@@ -42,13 +42,13 @@ p.success {
 }
 
 p.error {
-  border-top: 2px solid red;
-  border-bottom: 2px solid red;
+  border-top: 2px solid var(--error);
+  border-bottom: 2px solid var(--error);
 }
 
 p.success {
-  border-top: 2px solid green;
-  border-bottom: 2px solid green;
+  border-top: 2px solid var(--success);
+  border-bottom: 2px solid var(--success);
 }
 
 div.submit {

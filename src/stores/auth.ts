@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { pb } from '@/adapters/pocketbase'
+import { sync } from '@/services/sync'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -14,6 +15,8 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = null
     }
     isAuth.value = pb.authStore.isValid && !!user.value && user.value.verified
+
+    if (isAuth.value) sync.init()
   }, true)
 
   return {

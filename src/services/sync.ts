@@ -1,9 +1,10 @@
+import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
 import { getUserId, upsertRecord, fetchFullList } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
-import type { RecipeLocal } from '@/types'
+import type { RecipeLocal, SyncStatus } from '@/types'
 
 interface PbRecipeIngredient {
   id: string
@@ -20,21 +21,46 @@ interface PbRecipeIngredient {
   }
 }
 
+window.addEventListener('offline', () => {
+  status.value = 'offline'
+})
+
+window.addEventListener('online', () => {
+  status.value = 'synced'
+})
+
+const status = ref<SyncStatus>()
+
+async function init(): Promise<void> {
+  status.value = navigator.onLine ? 'synced' : 'offline'
+  console.log(await pushLocalChanges())
+  console.log(await pullRemoteData())
+}
+
 async function pushLocalChanges(): Promise<{
   success: boolean
   pushedRecipes?: number
   errors?: string
 }> {
+  status.value = 'pushing'
+
   const authStore = useAuthStore()
   if (!authStore.isAuth || !authStore.user) {
+    status.value = 'error'
     return { success: false, errors: 'Not authenticated' }
   }
 
   const userId = getUserId()
-  if (!userId) return { success: false, errors: 'No user ID' }
+  if (!userId) {
+    status.value = 'error'
+    return { success: false, errors: 'No user ID' }
+  }
 
   const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
-  if (unsyncedRecipes.length === 0) return { success: true, pushedRecipes: 0 }
+  if (unsyncedRecipes.length === 0) {
+    status.value = 'synced'
+    return { success: true, pushedRecipes: 0 }
+  }
 
   const errors: string[] = []
 
@@ -105,7 +131,9 @@ async function pushLocalChanges(): Promise<{
 
       // 5. Mark as synced locally
       await db.recipes.update(recipe.id, { synced: true })
+      status.value = 'synced'
     } catch (e) {
+      status.value = 'error'
       errors.push(`${e instanceof Error ? e.name + ': ' + e.message : String(e)}`)
     }
   }
@@ -113,8 +141,10 @@ async function pushLocalChanges(): Promise<{
   const allErrors = errors.join(' | ')
 
   if (errors.length) {
+    status.value = 'error'
     return { success: false, errors: allErrors }
   }
+  status.value = 'synced'
   return { success: true, pushedRecipes: unsyncedRecipes.length }
 }
 
@@ -123,15 +153,21 @@ async function pullRemoteData(): Promise<{
   pulledRecipes?: number
   error?: string
 }> {
+  status.value = 'pulling'
+
   const authStore = useAuthStore()
   if (!authStore.isAuth || !authStore.user) {
+    status.value = 'error'
     return { success: false, error: 'Not authenticated' }
   }
 
   try {
     // 1. Fetch all user recipes (PB rules auto-filter by userId)
     const remoteRecipes = await fetchFullList('recipes', { expand: 'tagIds' })
-    if (!remoteRecipes.length) return { success: true, pulledRecipes: 0 }
+    if (!remoteRecipes.length) {
+      status.value = 'synced'
+      return { success: true, pulledRecipes: 0 }
+    }
 
     // 2. Store tags from expanded data
     for (const recipe of remoteRecipes) {
@@ -209,15 +245,17 @@ async function pullRemoteData(): Promise<{
     await tagsManager.cacheAll()
     await unitsManager.cacheAll()
 
-    console.log(remoteRecipes)
-
+    status.value = 'synced'
     return { success: true, pulledRecipes: remoteRecipes.length }
   } catch (e) {
+    status.value = 'error'
     return { success: false, error: e instanceof Error ? e.message : String(e) }
   }
 }
 
 export const sync = {
+  status,
+  init,
   pushLocalChanges,
   pullRemoteData,
 }

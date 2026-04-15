@@ -134,6 +134,11 @@ npm run lint
 
 - Update pocketbase using `./pocketbase update`, check/update package.json (scripts.dependencies runs after applied changes in node_modules / package.json / package-lock)
 
+### Sync
+
+- Fix recipe ingredients pulling
+- Check if already present locally and synced when pulling
+
 ### General
 
 - Set up multilangual landing page with SEO
