@@ -78,7 +78,7 @@ export async function upsertRecord(
   }
 }
 
-export async function fetchFullList(collection: string, options?: Record<string, unknown>) {
+export async function fetchAll(collection: string, options?: Record<string, unknown>) {
   return await pb.collection(collection).getFullList({ ...options })
 }
 

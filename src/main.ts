@@ -8,7 +8,6 @@ import { tagsManager } from './services/tags_manager'
 import { unitsManager } from './services/units_manager'
 import { seedLocalDB } from './utils/local_db_seeding'
 import { i18n } from './lang/i18n'
-import { sync } from './services/sync'
 
 const app = createApp(App)
 const pinia = createPinia()

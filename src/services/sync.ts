@@ -1,25 +1,18 @@
 import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
-import { getUserId, upsertRecord, fetchFullList } from '@/adapters/pocketbase'
+import { getUserId, upsertRecord, fetchAll } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
-import type { RecipeLocal, SyncStatus } from '@/types'
-
-interface PbRecipeIngredient {
-  id: string
-  recipeId: string
-  ingredientId: string
-  quantity?: number
-  quantityUpper?: number
-  unitId?: string
-  quantityUnitPosition?: number
-  sortOrder: number
-  expand?: {
-    ingredientId?: { id: string; name: string }
-    unitId?: { id: string; name: string }
-  }
-}
+import type {
+  RecipeLocal,
+  RecipeIngredient,
+  Ingredient,
+  SyncStatus,
+  Tag,
+  Unit,
+  Recipe,
+} from '@/types'
 
 window.addEventListener('offline', () => {
   status.value = 'offline'
@@ -66,7 +59,7 @@ async function pushLocalChanges(): Promise<{
 
   for (const recipe of unsyncedRecipes) {
     try {
-      // 1. Push tags referenced by this recipe
+      // Push tags referenced by this recipe
       if (recipe.tagIds?.length) {
         const tags = await db.tags.where('id').anyOf(recipe.tagIds).toArray()
         for (const tag of tags) {
@@ -74,7 +67,7 @@ async function pushLocalChanges(): Promise<{
         }
       }
 
-      // 2. Push ingredients and units referenced by recipe ingredients
+      // Push ingredients and units referenced by recipe ingredients
       if (recipe.recipeIngredientIds?.length) {
         const ris = await db.recipe_ingredients
           .where('id')
@@ -96,19 +89,19 @@ async function pushLocalChanges(): Promise<{
         }
       }
 
-      // 3. Push the recipe (before recipe_ingredients so the relation resolves)
-      await upsertRecord('recipes', {
+      // Push the recipe (before recipe_ingredients so the relation resolves)
+      await upsertRecord('recipes', <Recipe>{
         id: recipe.id,
         userId: userId,
         name: recipe.name,
-        tagIds: recipe.tagIds || [],
         servings: recipe.servings,
-        instructions: recipe.instructions || '',
-        notes: recipe.notes || '',
+        tagIds: recipe.tagIds || undefined,
+        instructions: recipe.instructions || undefined,
+        notes: recipe.notes || undefined,
         updated: Date.now(),
       })
 
-      // 4. Push recipe ingredients (after recipe so recipeId relation resolves)
+      // Push recipe ingredients (after recipe so recipeId relation resolves)
       if (recipe.recipeIngredientIds?.length) {
         const ris = await db.recipe_ingredients
           .where('id')
@@ -129,7 +122,7 @@ async function pushLocalChanges(): Promise<{
         }
       }
 
-      // 5. Mark as synced locally
+      // Mark as synced locally
       await db.recipes.update(recipe.id, { synced: true })
       status.value = 'synced'
     } catch (e) {
@@ -162,78 +155,70 @@ async function pullRemoteData(): Promise<{
   }
 
   try {
-    // 1. Fetch all user recipes (PB rules auto-filter by userId)
-    const remoteRecipes = await fetchFullList('recipes', { expand: 'tagIds' })
+    // Fetch user's recipes (PocketBase rules auto-filter by userId)
+    const remoteRecipes = await fetchAll('recipes', {
+      expand: 'tagIds',
+      skipTotal: true,
+    })
     if (!remoteRecipes.length) {
       status.value = 'synced'
       return { success: true, pulledRecipes: 0 }
     }
 
-    // 2. Store tags from expanded data
+    // Store tags from expanded data
     for (const recipe of remoteRecipes) {
       if (recipe.expand?.tagIds) {
-        for (const tag of recipe.expand.tagIds as { id: string; name: string }[]) {
+        for (const tag of recipe.expand.tagIds as Tag[]) {
           await db.tags.put({ id: tag.id, name: tag.name })
         }
       }
     }
 
-    // 3. Fetch recipe_ingredients in batches
-    const recipeIds = remoteRecipes.map((r) => r.id as string)
-    const allRecipeIngredients: PbRecipeIngredient[] = []
-    const batchSize = 50
+    // Fetch user's recipe_ingredients
+    const conditions = remoteRecipes.map((r) => `recipeId = "${r.id}"`).join(' || ')
+    const recipeIngredients = await fetchAll('recipe_ingredients', {
+      filter: conditions,
+      expand: 'ingredientId,unitId',
+      skipTotal: true,
+    })
 
-    for (let i = 0; i < recipeIds.length; i += batchSize) {
-      const batch = recipeIds.slice(i, i + batchSize)
-      const filter = batch.map((id) => `recipeId = "${id}"`).join(' || ')
-      const ris = (await fetchFullList('recipe_ingredients', {
-        filter,
-        expand: 'ingredientId,unitId',
-      })) as unknown as PbRecipeIngredient[]
-      allRecipeIngredients.push(...ris)
-    }
-
-    // 4. Store ingredients and units from expanded data, then recipe_ingredients
-    for (const ri of allRecipeIngredients) {
+    // Store ingredients and units from expanded data, then recipe_ingredients
+    for (const ri of recipeIngredients) {
       if (ri.expand?.ingredientId) {
-        const ing = ri.expand.ingredientId as { id: string; name: string }
+        const ing = ri.expand.ingredientId as Ingredient
         await db.ingredients.put({ id: ing.id, name: ing.name })
       }
       if (ri.expand?.unitId) {
-        const unit = ri.expand.unitId as { id: string; name: string }
+        const unit = ri.expand.unitId as Unit
         await db.units.put({ id: unit.id, name: unit.name })
       }
 
-      await db.recipe_ingredients.put({
+      await db.recipe_ingredients.put(<RecipeIngredient>{
         id: ri.id,
         recipeId: ri.recipeId,
         ingredientId: ri.ingredientId,
-        quantity: ri.quantity || undefined,
-        quantityUpper: ri.quantityUpper || undefined,
-        unitId: ri.unitId || undefined,
-        quantityUnitPosition: ri.quantityUnitPosition || undefined,
-        sortOrder: ri.sortOrder || 0,
+        quantity: ri.quantity,
+        quantityUpper: ri.quantityUpper,
+        unitId: ri.unitId,
+        quantityUnitPosition: ri.quantityUnitPosition,
+        sortOrder: ri.sortOrder,
       })
     }
 
-    // 5. Build recipeIngredientIds lookup
-    const risByRecipe = new Map<string, string[]>()
-    for (const ri of allRecipeIngredients) {
-      if (!risByRecipe.has(ri.recipeId)) risByRecipe.set(ri.recipeId, [])
-      risByRecipe.get(ri.recipeId)!.push(ri.id)
-    }
-
-    // 6. Store recipes in Dexie (skip unsynced local recipes to preserve local changes)
+    // Store recipes in Dexie (skip unsynced local recipes to preserve local changes)
     for (const recipe of remoteRecipes) {
       const existingLocal = await db.recipes.get(recipe.id)
       if (existingLocal && !existingLocal.synced) continue
+
+      const riIds =
+        recipeIngredients.filter((ri) => ri.recipeId === recipe.id).map((ri) => ri.id) || undefined
 
       const localRecipe: RecipeLocal = {
         id: recipe.id,
         name: recipe.name,
         servings: recipe.servings,
-        tagIds: recipe.tagIds || [],
-        recipeIngredientIds: risByRecipe.get(recipe.id) || [],
+        tagIds: recipe.tagIds || undefined,
+        recipeIngredientIds: riIds,
         instructions: recipe.instructions || undefined,
         notes: recipe.notes || undefined,
         synced: true,
@@ -241,7 +226,7 @@ async function pullRemoteData(): Promise<{
       await db.recipes.put(localRecipe)
     }
 
-    // 7. Refresh caches
+    // Refresh caches
     await tagsManager.cacheAll()
     await unitsManager.cacheAll()
 
