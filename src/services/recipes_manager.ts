@@ -29,6 +29,7 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
     id: newRecipeId,
     name: data.name!,
     tagIds: tagIds,
+    favorite: data.favorite,
     servings: data.servings || 1,
     recipeIngredientIds: recipeIngredientIds,
     instructions: data.instructions,
@@ -41,8 +42,8 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   return newRecipe.id
 }
 
-function cacheFavorite(recipe: RecipeLocal): void {
-  if (recipe) useRecipesStore().cacheFavorite(recipe)
+function cacheFavorites(recipe: RecipeLocal): void {
+  if (recipe) useRecipesStore().cacheFavorites([recipe])
 }
 
 function cacheViewed(recipe: RecipeLocal): void {
@@ -60,8 +61,12 @@ async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
   return recipe
 }
 
-function getFavorites(): RecipeLocal[] {
-  return useRecipesStore().favorites
+async function getFavorites(): Promise<RecipeLocal[]> {
+  const recipesStore = useRecipesStore()
+
+  const favorites = await db.recipes.filter((r) => r.favorite).toArray()
+  recipesStore.cacheFavorites(favorites)
+  return favorites
 }
 
 function getLastViewed(): RecipeLocal[] {
@@ -91,7 +96,7 @@ async function nameExists(name: string): Promise<boolean> {
 
 export const recipesManager = {
   addNew,
-  cacheFavorite,
+  cacheFavorites,
   cacheViewed,
   getById,
   getFavorites,

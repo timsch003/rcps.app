@@ -46,7 +46,8 @@ export type Recipe = {
   userId: UUID
   name: string
   servings: number
-  tagIds?: UUID[]
+  tagIds: UUID[]
+  favorite: boolean
   recipeIngredientIds?: UUID[]
   instructions?: string
   notes?: string
@@ -60,6 +61,7 @@ export type RecipeLocal = Omit<Recipe, 'userId' | 'updated'> & {
 export type RecipeRaw = {
   name: string
   tags: string | string[]
+  favorite: boolean
   servings: number | undefined
   ingredients: string
   matchedIngredients: MatchedIngredient[] | []

@@ -121,6 +121,7 @@ const normalizeLikeCreateForm = (data: RecipeRaw): RecipeRaw => {
     ...data,
     servings: data.servings || 1,
     tags: normalizedTags,
+    favorite: data.favorite,
     matchedIngredients:
       data.matchedIngredients.length > 0
         ? data.matchedIngredients.map((matchedIngredient) =>
@@ -144,6 +145,7 @@ const buildRandomRecipe = (index: number): RecipeRaw => {
   return {
     name: buildRecipeName(index),
     tags: tags.join(', '),
+    favorite: Math.random() < 0.5,
     servings: pick(servingValues),
     ingredients: ingredientLines.join('\n'),
     matchedIngredients,

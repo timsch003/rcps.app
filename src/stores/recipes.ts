@@ -23,10 +23,9 @@ export const useRecipesStore = defineStore('recipes', () => {
     lastViewed.value.unshift(recipe)
   }
 
-  function cacheFavorite(recipe: RecipeLocal): void {
-    if (favorites.value.some((r) => r.id === recipe.id)) return
-    if (getRemainingCacheSize() <= 0) return
-    favorites.value.unshift(recipe)
+  function cacheFavorites(recipes: RecipeLocal[]): void {
+    if (getRemainingCacheSize() < recipes.length) return
+    favorites.value = recipes
   }
 
   function cacheTagged(recipes: RecipeLocal[]): void {
@@ -43,7 +42,7 @@ export const useRecipesStore = defineStore('recipes', () => {
     favorites,
     lastViewed,
     tagged,
-    cacheFavorite,
+    cacheFavorites,
     cacheTagged,
     cacheViewed,
     getRemainingCacheSize,

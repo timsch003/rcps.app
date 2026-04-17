@@ -4,15 +4,7 @@ import { getUserId, upsertRecord, fetchAll } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
-import type {
-  RecipeLocal,
-  RecipeIngredient,
-  Ingredient,
-  SyncStatus,
-  Tag,
-  Unit,
-  Recipe,
-} from '@/types'
+import type { RecipeLocal, Ingredient, SyncStatus, Tag, Unit, Recipe } from '@/types'
 
 window.addEventListener('offline', () => {
   status.value = 'offline'
@@ -88,18 +80,19 @@ async function pushLocalChanges(): Promise<{
           }
         }
       }
-
       // Push the recipe (before recipe_ingredients so the relation resolves)
-      await upsertRecord('recipes', <Recipe>{
+      const r: Recipe = {
         id: recipe.id,
         userId: userId,
         name: recipe.name,
         servings: recipe.servings,
         tagIds: recipe.tagIds || undefined,
+        favorite: recipe.favorite,
         instructions: recipe.instructions || undefined,
         notes: recipe.notes || undefined,
         updated: Date.now(),
-      })
+      }
+      await upsertRecord('recipes', r)
 
       // Push recipe ingredients (after recipe so recipeId relation resolves)
       if (recipe.recipeIngredientIds?.length) {
@@ -193,7 +186,7 @@ async function pullRemoteData(): Promise<{
         await db.units.put({ id: unit.id, name: unit.name })
       }
 
-      await db.recipe_ingredients.put(<RecipeIngredient>{
+      await db.recipe_ingredients.put({
         id: ri.id,
         recipeId: ri.recipeId,
         ingredientId: ri.ingredientId,
@@ -218,6 +211,7 @@ async function pullRemoteData(): Promise<{
         name: recipe.name,
         servings: recipe.servings,
         tagIds: recipe.tagIds || undefined,
+        favorite: recipe.favorite,
         recipeIngredientIds: riIds,
         instructions: recipe.instructions || undefined,
         notes: recipe.notes || undefined,

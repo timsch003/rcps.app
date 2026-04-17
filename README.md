@@ -146,15 +146,16 @@ npm run lint
 
 - Check if already present locally and synced when pulling
 
-## Functionality
+### Functionality
 
-- Implement displaying untagged recipes
+- Check caching logic when size limit exceeds
+- Add recipe editing
+- Persist last viewed in PocketBase
 
 ### UI/UX
 
 - Add transition / animation to nav bottom active indicator (:before)
 - Fix scroll position changing when editing textareas when manually editing
-- Don't show tags icon in cards when to tags are assigned
 
 ### Internationalization
 

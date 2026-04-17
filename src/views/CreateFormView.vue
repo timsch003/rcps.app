@@ -11,6 +11,7 @@ import type { RecipeRaw } from '@/types'
 const data = reactive<RecipeRaw>({
   name: '',
   tags: [],
+  favorite: false,
   servings: undefined,
   ingredients: '',
   matchedIngredients: [],
@@ -44,6 +45,10 @@ async function onPreview() {
     alert(t('create.alert_name_exists'))
     return
   }
+  if (!data.tags.length || (typeof data.tags === 'string' && !data.tags.trim())) {
+    alert(t('create.alert_tags_required'))
+    return
+  }
 
   data.servings = data.servings ? data.servings : 1
 
@@ -70,7 +75,7 @@ async function onPreview() {
       <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
       <input type="text" id="create__name-input" v-model.trim="data.name" />
 
-      <div class="servings">
+      <div class="create__servings">
         <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
         <input
           type="number"
@@ -85,6 +90,9 @@ async function onPreview() {
         {{ t('Tags') }} {{ t('create.tags_hint') }}
       </label>
       <input type="text" id="create__tags-input" v-model="data.tags" />
+
+      <label for="create__favorite-input" class="heading--muted">{{ t('create.favorite') }}</label>
+      <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
 
       <label
         for="create__ingredients-input"
@@ -143,17 +151,15 @@ textarea#create__ingredients-input {
   overflow-x: auto;
 }
 
-div.servings {
-  input {
-    width: 3em;
-    text-align: center;
-  }
+.create__servings input {
+  width: 3em;
+  text-align: center;
+}
 
-  h3,
-  input {
-    display: inline-block;
-    max-width: max-content;
-  }
+h3,
+input {
+  display: inline-block;
+  max-width: max-content;
 }
 
 /* Hide input controls */

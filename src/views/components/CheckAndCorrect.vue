@@ -116,6 +116,9 @@ async function onCreate() {
       >
     </p>
 
+    <h3 class="heading--muted">{{ t('Favorite') }}</h3>
+    <p>{{ data?.favorite ? t('Yes') : t('No') }}</p>
+
     <h3 class="heading--muted heading--with-icon">
       {{ t('Ingredients') }}
       <ButtonMulti

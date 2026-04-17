@@ -13,7 +13,8 @@ export class RcpsAppUserDb extends Dexie {
     this.version(1).stores({
       ingredients: 'id, &name',
       recipe_ingredients: 'id, [id+recipeId], [recipeId+id]',
-      recipes: '&id, &name, *tagIds, recipeIngredientIds, instructions, notes, synced, pendingSync',
+      recipes:
+        '&id, &name, *tagIds, favorite, recipeIngredientIds, instructions, notes, synced, pendingSync',
       tags: 'id, &name',
       units: 'id, &name',
     })
