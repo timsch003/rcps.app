@@ -12,7 +12,7 @@ const menuOverlayOpen = reactive({ value: false })
   <MenuOverlay v-model="menuOverlayOpen.value" />
   <main>
     <header>
-      <AppLogo />
+      <AppLogo omitAnimation />
       <NavTop v-model:menuOverlayOpen="menuOverlayOpen.value" />
     </header>
     <section>

@@ -25,11 +25,21 @@ const syncMap = {
 
 <template>
   <nav class="top">
-    <ButtonMulti
+    <div
+      :class="['sync-indicator', `sync--${syncStatus}`]"
       :icon="syncMap[syncStatus].icon"
-      :desc="syncMap[syncStatus].desc"
-      @click="sync.init()"
-    />
+      :aria-label="syncMap[syncStatus].desc"
+      tabindex="0"
+      @click="
+        syncStatus === 'offline' || syncStatus === 'error' || syncStatus === 'synced'
+          ? sync.init()
+          : null
+      "
+    >
+      <Transition name="status-change" mode="out-in">
+        <component :is="syncMap[syncStatus].icon" />
+      </Transition>
+    </div>
     <ButtonMulti :icon="SearchIcon" :desc="t('Search')" />
     <ButtonMulti :icon="MenuIcon" :desc="t('Menu')" @click="menuOverlayOpen = true" />
   </nav>
@@ -45,16 +55,56 @@ nav.top {
   gap: var(--inner-spacing);
 }
 
-:deep(svg[class*='sync--']) {
+.sync-indicator {
+  margin: 0 auto;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  --anim-scale-factor: 1.6;
+
+  .sync--pulling,
+  .sync--pushing {
+    animation: pulse 1s ease-in-out var(--transition-duration) infinite;
+  }
+}
+
+.status-change-enter-active,
+.status-change-leave-active {
+  transition:
+    opacity var(--transition-duration),
+    transform var(--transition-duration);
+}
+.status-change-enter-from,
+.status-change-leave-to {
+  opacity: 0;
+  transform: scale(var(--anim-scale-factor));
+}
+
+svg[class*='sync--'] {
   stroke: var(--text);
 }
-:deep(svg.sync--synced) {
+svg.sync--synced {
   stroke: var(--accent);
 }
-:deep(svg.sync--offline) {
+svg.sync--offline {
   stroke: var(--error);
 }
-:deep(svg.sync--error) {
+svg.sync--error {
   stroke: var(--error);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(var(--anim-scale-factor));
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style>
