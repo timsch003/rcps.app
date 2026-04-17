@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { useRoute } from 'vue-router'
 import AppLogo from '@/views/components/AppLogo.vue'
 import MenuOverlay from '@/views/components/MenuOverlay.vue'
 import NavTop from '@/views/components/NavTop.vue'
 import NavBottom from '@/views/components/NavBottom.vue'
+import NavRecipe from '@/views/components/NavRecipe.vue'
 
 const menuOverlayOpen = reactive({ value: false })
 </script>
@@ -11,14 +13,15 @@ const menuOverlayOpen = reactive({ value: false })
 <template>
   <MenuOverlay v-model="menuOverlayOpen.value" />
   <main>
-    <header>
+    <header v-if="$route.name !== 'recipe'">
       <AppLogo omitAnimation />
       <NavTop v-model:menuOverlayOpen="menuOverlayOpen.value" />
     </header>
     <section>
       <RouterView :key="$route.name" />
     </section>
-    <NavBottom />
+    <NavBottom v-if="$route.name !== 'recipe'" />
+    <NavRecipe v-else />
   </main>
 </template>
 

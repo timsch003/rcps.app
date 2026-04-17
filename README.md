@@ -151,6 +151,7 @@ npm run lint
 - Check caching logic when size limit exceeds
 - Add recipe editing
 - Persist last viewed in PocketBase
+- Keep screen on in recipe view
 
 ### UI/UX
 
