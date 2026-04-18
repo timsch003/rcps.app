@@ -151,7 +151,7 @@ npm run lint
 ### UI/UX
 
 - Add transition / animation to nav bottom active indicator (:before)
-- Fix scroll position changing when editing textareas when manually editing
+- Fix scroll position changing when editing textareas when manually editing (try VueUse's implementation)
 
 ### Internationalization
 
