@@ -7,6 +7,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { tagsManager } from './services/tags_manager'
 import { unitsManager } from './services/units_manager'
 import { seedLocalDB } from './utils/local_db_seeding'
+import { resetTestData } from './adapters/pocketbase'
 import { i18n } from './lang/i18n'
 
 const app = createApp(App)
@@ -15,7 +16,10 @@ const pinia = createPinia()
 app.use(pinia)
 pinia.use(piniaPluginPersistedstate)
 
-if (import.meta.env.DEV && !localStorage.getItem('seeded')) await seedLocalDB()
+if (import.meta.env.DEV && !localStorage.getItem('seeded')) {
+  await resetTestData()
+  await seedLocalDB()
+}
 
 await tagsManager.cacheAll()
 await unitsManager.cacheAll()

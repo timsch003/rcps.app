@@ -82,4 +82,15 @@ export async function fetchAll(collection: string, options?: Record<string, unkn
   return await pb.collection(collection).getFullList({ ...options })
 }
 
+// Only for testing purposes, not used in the app
+export async function resetTestData(): Promise<void> {
+  await pb.collection('_superusers').authWithPassword('superuser@example.com', 'password')
+  await pb.collections.truncate('recipes')
+  await pb.collections.truncate('recipe_ingredients')
+  await pb.collections.truncate('ingredients')
+  await pb.collections.truncate('tags')
+  await pb.collections.truncate('units')
+  await pb.authStore.clear()
+}
+
 export { pb, ClientResponseError }

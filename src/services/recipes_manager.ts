@@ -38,31 +38,26 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   }
 
   await db.recipes.add(newRecipe)
+  updateCaches(newRecipe)
   sync.pushLocalChanges()
   return newRecipe.id
-}
-
-function cacheFavorites(recipe: RecipeLocal): void {
-  if (recipe) useRecipesStore().cacheFavorites([recipe])
-}
-
-function cacheViewed(recipe: RecipeLocal): void {
-  if (recipe) useRecipesStore().cacheViewed(recipe)
 }
 
 async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
   const recipesStore = useRecipesStore()
 
-  const cachedRecipe = recipesStore.lastViewed.find((r) => r.id === recipeId)
-  if (cachedRecipe) return cachedRecipe
+  let cached = recipesStore.favorites.find((r) => r.id === recipeId)
+  if (!cached) cached = recipesStore.tagged.find((r) => r.id === recipeId)
 
-  const recipe = await db.recipes.get(recipeId)
-  if (recipe) recipesStore.cacheViewed(recipe)
+  const recipe = cached ? cached : await db.recipes.get(recipeId)
+  if (recipe) recipesStore.updateLastViewed(recipe)
   return recipe
 }
 
 async function getFavorites(): Promise<RecipeLocal[]> {
   const recipesStore = useRecipesStore()
+
+  if (recipesStore.favorites.length > 0) return recipesStore.favorites
 
   const favorites = await db.recipes.filter((r) => r.favorite).toArray()
   recipesStore.cacheFavorites(favorites)
@@ -76,31 +71,44 @@ function getLastViewed(): RecipeLocal[] {
 async function getTagged(tagId: Tag['id']): Promise<RecipeLocal[]> {
   const recipesStore = useRecipesStore()
 
-  const tagAlreadyCached = recipesStore.tagged[0]?.tagIds?.includes(tagId)
-  if (tagAlreadyCached) return recipesStore.tagged
+  const cached = recipesStore.tagged[0]?.tagIds?.includes(tagId)
+  if (cached) return recipesStore.tagged
 
   const recipes = await db.recipes.where('tagIds').equals(tagId).toArray()
-  recipesStore.cacheTagged(recipes)
+  recipesStore.cacheTagged(tagId, recipes)
   return recipes
 }
 
 async function nameExists(name: string): Promise<boolean> {
-  const existingRecipeInStore = useRecipesStore().lastViewed.find(
+  const existingCached = useRecipesStore().lastViewed.find(
     (r) => r.name.toLowerCase() === name.toLowerCase(),
   )
-  if (existingRecipeInStore) return true
+  if (existingCached) return true
 
-  const existingRecipeInDb = await db.recipes.where('name').equalsIgnoreCase(name).first()
-  return !!existingRecipeInDb
+  const existingDb = await db.recipes.where('name').equalsIgnoreCase(name).first()
+  return !!existingDb
+}
+
+async function updateCaches(newOrEdited: RecipeLocal): Promise<void> {
+  const recipesStore = useRecipesStore()
+
+  if (newOrEdited.tagIds.includes(recipesStore.cachedTagId)) {
+    recipesStore.tagged.push(newOrEdited)
+    recipesStore.tagged = recipesStore.sortByName(recipesStore.tagged)
+  }
+
+  if (newOrEdited.favorite) {
+    recipesStore.favorites.push(newOrEdited)
+    recipesStore.favorites = recipesStore.sortByCreated(recipesStore.favorites)
+  }
 }
 
 export const recipesManager = {
   addNew,
-  cacheFavorites,
-  cacheViewed,
   getById,
   getFavorites,
   getLastViewed,
   getTagged,
   nameExists,
+  updateCaches,
 }
