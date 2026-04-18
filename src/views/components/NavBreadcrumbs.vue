@@ -10,12 +10,12 @@ const props = defineProps<{
 const route = useRoute()
 const tagsStore = useTagsStore()
 
-const isTagsView = props.viewType === 'tags'
+const isTagsView = props.viewType === 'tag'
 const tagId = route.params.id as string
 
 let viewName: string
 switch (props.viewType) {
-  case 'tags':
+  case 'tag':
     viewName = 'Tags'
     break
   case 'last':
@@ -31,11 +31,11 @@ switch (props.viewType) {
 
 <template>
   <nav class="breadcrumbs">
-    <RouterLink v-if="isTagsView" :to="{ name: 'tags' }">
-      {{ t(viewName) }}
-    </RouterLink>
-    <span v-if="isTagsView" aria-hidden="true">→</span>
-    <h2 class="heading--root">{{ isTagsView ? tagsStore.getName(tagId) : t(viewName) }}</h2>
+    <h2 class="heading--root">
+      <RouterLink v-if="isTagsView" :to="{ name: 'tags' }"> {{ t(viewName) }}&nbsp;</RouterLink>
+      <span v-if="isTagsView" aria-hidden="true">→</span>
+      {{ isTagsView ? tagsStore.getName(tagId) : t(viewName) }}
+    </h2>
   </nav>
 </template>
 
@@ -43,6 +43,10 @@ switch (props.viewType) {
 nav {
   h2.heading--root {
     padding-bottom: 0;
+
+    span {
+      margin-inline: 5px;
+    }
   }
 
   display: flex;
@@ -50,12 +54,5 @@ nav {
   flex-wrap: wrap;
   gap: 0.75ch;
   padding-bottom: var(--inner-spacing);
-
-  a:hover,
-  a:active,
-  a:focus {
-    text-decoration: underline;
-    flex-shrink: 0;
-  }
 }
 </style>
