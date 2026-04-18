@@ -106,7 +106,7 @@ async function getName(
   return ingredient?.name
 }
 
-export function match(ingredients: string): MatchedIngredient[] | [] {
+export function matchAndNormalize(ingredients: string): MatchedIngredient[] | [] {
   if (!ingredients.trim()) return []
 
   const ingredientLines = ingredients.split('\n').filter((line) => line.trim() !== '')
@@ -171,5 +171,5 @@ export const ingredientsManager = {
   addRecipeIngredient,
   getRecipeIngredients,
   getName,
-  match,
+  matchAndNormalize,
 }

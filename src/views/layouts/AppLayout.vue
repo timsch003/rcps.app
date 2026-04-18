@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { useRoute } from 'vue-router'
 import AppLogo from '@/views/components/AppLogo.vue'
 import MenuOverlay from '@/views/components/MenuOverlay.vue'
 import NavTop from '@/views/components/NavTop.vue'

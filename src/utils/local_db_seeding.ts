@@ -99,7 +99,7 @@ const ensureSelectedQuantity = (matchedIngredient: MatchedIngredient): MatchedIn
 }
 
 const buildMatchedIngredient = (ingredientLine: string): MatchedIngredient => {
-  const matchedIngredient = ingredientsManager.match(ingredientLine)[0]
+  const matchedIngredient = ingredientsManager.matchAndNormalize(ingredientLine)[0]
 
   if (!matchedIngredient) return ingredientLine
   return ensureSelectedQuantity(matchedIngredient)
@@ -128,7 +128,7 @@ const normalizeLikeCreateForm = (data: RecipeRaw): RecipeRaw => {
             ensureSelectedQuantity(matchedIngredient),
           )
         : data.ingredients
-          ? ingredientsManager.match(data.ingredients)
+          ? ingredientsManager.matchAndNormalize(data.ingredients)
           : [],
   }
 }

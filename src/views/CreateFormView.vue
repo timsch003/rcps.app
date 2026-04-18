@@ -59,7 +59,8 @@ async function onPreview() {
         .map((tag) => tag.trim())
         .filter((tag) => tag !== '')
 
-  if (data.ingredients) data.matchedIngredients = ingredientsManager.match(data.ingredients)
+  if (data.ingredients)
+    data.matchedIngredients = ingredientsManager.matchAndNormalize(data.ingredients)
 
   checking.value = true
 
