@@ -153,13 +153,23 @@ async function pullRemoteData(): Promise<{
       expand: 'tagIds',
       skipTotal: true,
     })
-    if (!remoteRecipes.length) {
+
+    // Check if any remote recipes already exist locally as synced
+    const localMatches = await db.recipes
+      .where('id')
+      .anyOf(remoteRecipes.map((r) => r.id))
+      .toArray()
+
+    const syncedLocalIds = new Set(localMatches.filter((r) => r.synced).map((r) => r.id))
+    const recipesToPull = remoteRecipes.filter((r) => !syncedLocalIds.has(r.id))
+
+    if (!recipesToPull.length) {
       status.value = 'synced'
       return { success: true, pulledRecipes: 0 }
     }
 
     // Store tags from expanded data
-    for (const recipe of remoteRecipes) {
+    for (const recipe of recipesToPull) {
       if (recipe.expand?.tagIds) {
         for (const tag of recipe.expand.tagIds as Tag[]) {
           await db.tags.put({ id: tag.id, name: tag.name })
@@ -168,7 +178,7 @@ async function pullRemoteData(): Promise<{
     }
 
     // Fetch user's recipe_ingredients
-    const conditions = remoteRecipes.map((r) => `recipeId = "${r.id}"`).join(' || ')
+    const conditions = recipesToPull.map((r) => `recipeId = "${r.id}"`).join(' || ')
     const recipeIngredients = await fetchAll('recipe_ingredients', {
       filter: conditions,
       expand: 'ingredientId,unitId',
@@ -198,11 +208,8 @@ async function pullRemoteData(): Promise<{
       })
     }
 
-    // Store recipes in Dexie (skip unsynced local recipes to preserve local changes)
-    for (const recipe of remoteRecipes) {
-      const existingLocal = await db.recipes.get(recipe.id)
-      if (existingLocal && !existingLocal.synced) continue
-
+    // Store recipes in local db
+    for (const recipe of recipesToPull) {
       const riIds =
         recipeIngredients.filter((ri) => ri.recipeId === recipe.id).map((ri) => ri.id) || undefined
 
@@ -225,7 +232,7 @@ async function pullRemoteData(): Promise<{
     await unitsManager.cacheAll()
 
     status.value = 'synced'
-    return { success: true, pulledRecipes: remoteRecipes.length }
+    return { success: true, pulledRecipes: recipesToPull.length }
   } catch (e) {
     status.value = 'error'
     return { success: false, error: e instanceof Error ? e.message : String(e) }

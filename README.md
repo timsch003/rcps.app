@@ -142,10 +142,6 @@ npm run lint
 
 - Set up multilangual landing page with SEO
 
-### Sync
-
-- Check if already present locally and synced when pulling
-
 ### Functionality
 
 - Add recipe editing
