@@ -91,11 +91,13 @@ npm run lint
 
 #### Update the PocketBase binary
 
-**(Please update current version manually in package.json under dependencies.)**
+Note that 'pocketbase' in package.json refers to the JS SDK.
 
 ```sh
 ./pocketbase update
 ```
+
+**Current binary version: 0.36.9**
 
 ## Features
 
