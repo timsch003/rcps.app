@@ -28,7 +28,6 @@ const validateServingsInput = (e: Event) => {
 
 const fitTextareaHeight = (e: Event) => {
   const textarea = e.target as HTMLTextAreaElement
-  textarea.style.height = 'auto'
   textarea.style.height = `${textarea.scrollHeight}px`
 }
 
