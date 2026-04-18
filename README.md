@@ -148,7 +148,6 @@ Note that 'pocketbase' in package.json refers to the JS SDK.
 
 - Add recipe editing
 - Persist user data (settings, last viewed) in PocketBase
-- Keep screen on in recipe view
 
 ### UI/UX
 

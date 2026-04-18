@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { useWakeLock } from '@vueuse/core'
+import { useSettingsStore } from '@/stores/settings'
 import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
@@ -19,6 +21,9 @@ let ingredientsStrings: string[][] = []
 let tags: Tag['name'][] = []
 let error: string | null = null
 
+const settingsStore = useSettingsStore()
+const wakeLock = useWakeLock()
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -34,12 +39,19 @@ onMounted(async () => {
         }),
       )
     }
+
     if (recipe.value.tagIds?.length) tags = await tagsManager.getNames(recipe.value.tagIds)
+
+    if (settingsStore.keepScreenOn && wakeLock.isSupported.value) await wakeLock.request('screen')
   } catch (err) {
     error = (err as Error).message
   } finally {
     loading.value = false
   }
+})
+
+onUnmounted(() => {
+  wakeLock.release()
 })
 
 async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
