@@ -8,6 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:lan": "LAN_IP=$(grep '^LAN_IP=' .env.development | cut -d= -f2) && VITE_PB_URL=http://$LAN_IP:8090 vite --host 0.0.0.0 --port 5173",
+    "pb:lan": "./pocketbase serve --http 0.0.0.0:8090 --origins http://$(grep '^LAN_IP=' .env.development | cut -d= -f2):5173",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",

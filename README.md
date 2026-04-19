@@ -91,13 +91,18 @@ npm run lint
 
 #### Update the PocketBase binary
 
-Note that 'pocketbase' in package.json refers to the JS SDK.
+_Note that 'pocketbase' in package.json refers to the JS SDK._  
+Current binary version: **0.36.9**
 
 ```sh
 ./pocketbase update
 ```
 
-**Current binary version: 0.36.9**
+#### Access dev servers via local network
+
+1. Set the local IP of the device you want to use in _.env.development_
+2. Start PocketBase using `npm run pb:lan`
+3. Start Vite using `npm run dev:lan`
 
 ## Features
 
@@ -148,6 +153,7 @@ Note that 'pocketbase' in package.json refers to the JS SDK.
 
 - Add recipe editing
 - Persist user data (settings, last viewed) in PocketBase
+- Test ScreenWakeLock with SSL
 
 ### UI/UX
 
@@ -163,6 +169,12 @@ Note that 'pocketbase' in package.json refers to the JS SDK.
 
 ## Deployment checklist
 
+### Before
+
 - [PocketBase docs "Going to production"](https://pocketbase.io/docs/going-to-production)
 - Email translations import endpoint deleted from pb_hooks?
 - All API Rules safe?
+
+### After
+
+- Check if ScreenWakeLock is working (needs SSL)
