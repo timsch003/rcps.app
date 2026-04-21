@@ -158,6 +158,7 @@ Current binary version: **0.36.9**
 ### UI/UX
 
 - Add transition / animation to nav bottom active indicator (:before)
+- Refactor sync status icons and animations (in-out only?)
 
 ### Internationalization
 
