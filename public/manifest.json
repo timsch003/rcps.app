@@ -1,0 +1,14 @@
+{
+  "name": "rcps.app",
+  "icons": [
+    { "src": "android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "background_color": "#0a0a0a",
+  "theme_color": "#f5f5f5",
+  "categories": ["food", "recipes", "cooking"],
+  "description": "Conveniently import, view and synchronize your recipes across all your devices.",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/"
+}

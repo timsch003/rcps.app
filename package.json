@@ -19,7 +19,9 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "format": "prettier --write --experimental-cli src/",
+    "deploy:frontend": "rsync -avz -e ssh pb_public root@178.104.238.103:/root/pb/",
+    "deploy:backend": "rsync -avz -e ssh pb_hooks pb_migrations pocketbase root@178.104.238.103:/root/pb/"
   },
   "dependencies": {
     "@vueuse/core": "^14.2.1",

@@ -22,4 +22,8 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['pocketbase'],
   },
+
+  build: {
+    outDir: 'pb_public',
+  },
 })
