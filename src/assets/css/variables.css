@@ -1,58 +1,18 @@
 :root {
-  /* Colors
-
-    For sufficient contrast ratios, when styling text
-    only ever use --text or --accent on --bg colors.
-
-    */
-  --bg: light-dark(#f5f5f5, #0a0a0a);
-  --bg-light: light-dark(#ebebeb, #141414);
-  --bg-lighter: light-dark(#e0e0e0, #1f1f1f);
-  --decor: light-dark(#b8b8b8, #474747);
-  --decor-light: light-dark(#a5a5a5, #5a5a5a);
-  --text: light-dark(#0a0a0a, #f5f5f5);
-  --accent: var(--blush);
-
-  /* Accent variations */
-  --linen: #ffede1;
-  --silver: #adadad;
-  --blush: #edadc7;
-  --candy: #ff8591;
-  --rose: #dda6a8;
-  --bronze: #e09f7d;
-  --khaki: #c3a995;
-  --canary: #f7f052;
-  --gold: #efcb68;
-  --algae: #a5b6ae; /* default */
-  --lime: #ddfcad;
-  --moss: #72c077;
-  --neon: #5aff15;
-  --tea: #c9e4ca;
-  --turquoise: #73eedc;
-  --periwinkle: #acacec;
-  --cornflower: #7aa4ff;
-  --powder: #92aedd;
-  --sky: #7cb9df;
-  --lilac: #cba4c1;
-
-  /* Only used for technical indications */
-  --error: #ee0000;
-  --success: #00c500;
-
   /* Fonts
-    */
+  */
   --heading-font-size: 1.2rem;
   --heading-secondary-font-size: 1.1rem;
   --text-secondary-opacity: 0.75;
 
   /* Spacings
-    */
+  */
   --outer-spacing: 10px;
   --inner-spacing: 12px;
   --inner-spacing-l: 30px;
 
   /* Miscellaneous
-    */
+  */
   --border-radius: 7px;
   --transition-duration: 0.15s;
   --icon-size: 2rem;
@@ -60,6 +20,68 @@
   --icon-size-xs: 1rem;
   --nav-border-width: 2px;
 
-  /* Universal formatting */
+  /* Universal formatting
+  */
   --quantity-unit-font-weight: 700;
+
+  /* Colors
+
+    For sufficient contrast ratios, when styling text
+    only ever use --text or --accent on --bg-* colors.
+  */
+  --bg: light-dark(#f5f5f5, #0a0a0a);
+  --bg-light: light-dark(#ebebeb, #141414);
+  --bg-lighter: light-dark(#e0e0e0, #1f1f1f);
+  --decor: light-dark(#b8b8b8, #474747);
+  --decor-light: light-dark(#a5a5a5, #5a5a5a);
+  --text: light-dark(#0a0a0a, #f5f5f5);
+  --accent: var(--d-algae);
+
+  /* Accent variations for dark mode */
+  --d-linen: #ffede1;
+  --d-silver: #adadad;
+  --d-blush: #edadc7;
+  --d-candy: #ff8591;
+  --d-rose: #dda6a8;
+  --d-bronze: #e09f7d;
+  --d-khaki: #c3a995;
+  --d-canary: #f7f052;
+  --d-gold: #efcb68;
+  --d-algae: #a5b6ae;
+  --d-lime: #ddfcad;
+  --d-moss: #72c077;
+  --d-neon: #5aff15;
+  --d-tea: #c9e4ca;
+  --d-turquoise: #73eedc;
+  --d-periwinkle: #acacec;
+  --d-cornflower: #7aa4ff;
+  --d-powder: #92aedd;
+  --d-sky: #7cb9df;
+  --d-lilac: #cba4c1;
+
+  /* Accent variations for light mode */
+  --l-graphite: #343330;
+  --l-coal: #403d39;
+  --l-plum: #773344;
+  --l-cherry: #991e3d;
+  --l-blood: #9b0808;
+  --l-mauve: #604354;
+  --l-mocha: #3f292b;
+  --l-walnut: #573d1c;
+  --l-pine: #364634;
+  --l-emerald: #245639;
+  --l-olive: #345511;
+  --l-iron: #394e56;
+  --l-navy: #134074;
+  --l-dusk: #304d6d;
+  --l-twilight: #24346a;
+  --l-storm: #1c545f;
+  --l-grape: #4c4b6c;
+  --l-indigo: #610f7f;
+  --l-blackberry: #642b52;
+  --l-velvet: #762c77;
+
+  /* Only used for technical indications */
+  --error: #ee0000;
+  --success: #00c500;
 }
