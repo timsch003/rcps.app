@@ -18,6 +18,11 @@ export type User = {
   settings: UserSetting[]
 }
 
+export type UserSettings = {
+  theme?: string
+  keepScreenOn?: boolean
+}
+
 export type RecipeIngredient = {
   id: UUID
   recipeId: UUID

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { t } from '@/lang/i18n'
-import { logoutUser } from '@/adapters/pocketbase'
+import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { logoutUser } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
+import { t } from '@/lang/i18n'
 import AppLogo from '@/views/components/AppLogo.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import CloseIcon from '@/views/icons/IconClose.vue'
@@ -10,19 +12,34 @@ import LogoutIcon from '@/views/icons/IconLogout.vue'
 import ChangeMailIcon from '@/views/icons/IconChangeMail.vue'
 import ResetPasswordIcon from '@/views/icons/IconResetPassword.vue'
 import ModeLightIcon from '@/views/icons/IconModeLight.vue'
+import ModeDarkIcon from '@/views/icons/IconModeDark.vue'
 import TagsIcon from '@/views/icons/IconTags.vue'
 import LanguageIcon from '@/views/icons/IconLanguage.vue'
 import SettingsIcon from '@/views/icons/IconSettings.vue'
 
 const router = useRouter()
-const authStore = useAuthStore()
 const open = defineModel()
+const authStore = useAuthStore()
+const settingsStore = useSettingsStore()
+const settings = computed(() => settingsStore.settings)
 
-const close = () => {
+watch(
+  () => settings.value.theme,
+  (theme) => {
+    if (theme) document.documentElement.setAttribute('data-theme', theme)
+  },
+  { immediate: true },
+)
+
+function toggleTheme() {
+  settingsStore.update({ theme: settings.value.theme === 'light' ? 'dark' : 'light' })
+}
+
+function close() {
   open.value = false
 }
 
-const logout = async () => {
+function logout() {
   logoutUser()
   router.push({ name: 'login' })
 }
@@ -42,7 +59,12 @@ const logout = async () => {
             <ButtonMulti :icon="TagsIcon" :desc="t('Tags')" showDesc />
           </li>
           <li>
-            <ButtonMulti :icon="ModeLightIcon" :desc="t('Colors')" showDesc />
+            <ButtonMulti
+              :icon="settings.theme === 'light' ? ModeLightIcon : ModeDarkIcon"
+              :desc="t('Appearance')"
+              showDesc
+              @click="toggleTheme"
+            />
           </li>
           <li>
             <ButtonMulti :icon="SettingsIcon" :desc="t('User interface')" showDesc />

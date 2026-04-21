@@ -20,9 +20,7 @@ const router = createRouter({
       path: '/app',
       component: AppLayout,
       beforeEnter: () => {
-        if (!useAuthStore().isAuth) {
-          return { name: 'login' }
-        }
+        if (!useAuthStore().isAuth) return { name: 'login' }
       },
       children: [
         {

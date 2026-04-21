@@ -5,13 +5,13 @@
     only ever use --text or --accent on --bg colors.
 
     */
-  --bg: #0a0a0a;
-  --bg-light: #141414;
-  --bg-lighter: #1f1f1f;
-  --decor: #474747;
-  --decor-light: #5a5a5a;
-  --text: #f5f5f5;
-  --accent: #92aedd;
+  --bg: light-dark(#f5f5f5, #0a0a0a);
+  --bg-light: light-dark(#ebebeb, #141414);
+  --bg-lighter: light-dark(#e0e0e0, #1f1f1f);
+  --decor: light-dark(#b8b8b8, #474747);
+  --decor-light: light-dark(#a5a5a5, #5a5a5a);
+  --text: light-dark(#0a0a0a, #f5f5f5);
+  --accent: var(--blush);
 
   /* Accent variations */
   --linen: #ffede1;

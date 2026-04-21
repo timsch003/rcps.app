@@ -3,7 +3,6 @@ import './assets/css/main.css'
 import router from './routes'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { tagsManager } from './services/tags_manager'
 import { unitsManager } from './services/units_manager'
 import { seedLocalDB } from './utils/local_db_seeding'
@@ -14,7 +13,6 @@ const app = createApp(App)
 const pinia = createPinia()
 
 app.use(pinia)
-pinia.use(piniaPluginPersistedstate)
 
 if (import.meta.env.DEV && !localStorage.getItem('seeded')) {
   await resetTestData()

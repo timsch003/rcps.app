@@ -1,7 +1,7 @@
 import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
 import { v7 as uuidv7 } from 'uuid'
 import translateError from '@/utils/pb_error_translation'
-import type { IdAndName, Recipe, RecipeIngredient } from '@/types'
+import type { IdAndName, Recipe, RecipeIngredient, UserSettings } from '@/types'
 
 const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps-app-auth'))
 
@@ -45,12 +45,31 @@ export async function loginUser(email: string, password: string) {
   }
 }
 
-export async function logoutUser(): Promise<void> {
+export function logoutUser(): void {
   pb.authStore.clear()
 }
 
-export function getUserId(): string | undefined {
-  return pb.authStore.record?.id
+export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
+  if (!userId) return
+
+  try {
+    await pb.collection('users').update(userId, { settings: { ...settings } })
+  } catch (e) {
+    if (e) throw e
+  }
+}
+
+export async function fetchUserSettings(userId: string): Promise<UserSettings | null> {
+  if (!userId) return null
+
+  try {
+    const userData = await pb.collection('users').getOne(userId)
+
+    return userData.settings as UserSettings
+  } catch (e) {
+    if (e) throw e
+    return null
+  }
 }
 
 export async function upsertRecord(

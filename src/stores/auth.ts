@@ -1,22 +1,19 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { pb } from '@/adapters/pocketbase'
 import { sync } from '@/services/sync'
 import type { AuthRecord } from 'pocketbase'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<{ id: string; email: string; verified: boolean } | null>(null)
-  const isAuth = ref(<boolean>false)
+  const user = ref<AuthRecord | null>(null)
+  const isAuth = computed(() => pb.authStore.isValid && !!user.value?.verified)
 
-  pb.authStore.onChange((token, model: AuthRecord) => {
-    if (model) {
-      user.value = { id: model.id, email: model.email, verified: model.verified }
-    } else {
-      user.value = null
-    }
-    isAuth.value = pb.authStore.isValid && !!user.value && user.value.verified
+  pb.authStore.onChange((_token, record: AuthRecord) => {
+    const wasAuth = isAuth.value
 
-    if (isAuth.value) sync.init()
+    user.value = record
+
+    if (!wasAuth && isAuth.value) nextTick(() => sync.init())
   }, true)
 
   return {

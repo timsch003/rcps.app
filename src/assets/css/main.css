@@ -1,3 +1,4 @@
+@import 'theme.css' layer(theme);
 @import 'variables.css' layer(variables);
 @import 'reset.css' layer(reset);
 @import 'utility.css' layer(utility);

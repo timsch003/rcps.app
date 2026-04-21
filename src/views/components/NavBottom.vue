@@ -12,7 +12,7 @@ import { t } from '@/lang/i18n'
     <ButtonMulti
       route="last"
       :icon="LastViewedIcon"
-      :desc="t('Last Viewed')"
+      :desc="t('Last viewed')"
       accentColor
       inNavBottom
     />

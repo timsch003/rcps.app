@@ -1,7 +1,13 @@
 import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
-import { getUserId, upsertRecord, fetchAll } from '@/adapters/pocketbase'
+import {
+  upsertRecord,
+  fetchAll,
+  updateUserSettings,
+  fetchUserSettings,
+} from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
 import type { RecipeLocal, Ingredient, SyncStatus, Tag, Unit, Recipe } from '@/types'
@@ -18,8 +24,8 @@ const status = ref<SyncStatus>()
 
 async function init(): Promise<void> {
   status.value = navigator.onLine ? 'synced' : 'offline'
-  console.log(await pushLocalChanges())
-  console.log(await pullRemoteData())
+  await pushLocalChanges()
+  await pullRemoteData()
 }
 
 async function pushLocalChanges(): Promise<{
@@ -27,20 +33,29 @@ async function pushLocalChanges(): Promise<{
   pushedRecipes?: number
   errors?: string
 }> {
-  status.value = 'pushing'
-
   const authStore = useAuthStore()
+  const userId = authStore.user?.id
+
   if (!authStore.isAuth || !authStore.user) {
     status.value = 'error'
     return { success: false, errors: 'Not authenticated' }
   }
 
-  const userId = getUserId()
   if (!userId) {
     status.value = 'error'
     return { success: false, errors: 'No user ID' }
   }
 
+  status.value = 'pushing'
+
+  // Push user settings first so they get synced if no recipes to push
+  const settingsStore = useSettingsStore()
+  const currentSettings = { ...settingsStore.settings }
+  if (Object.keys(currentSettings).length) {
+    await updateUserSettings(userId, currentSettings)
+  }
+
+  // Gather unsynced recipes to push
   const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
   if (unsyncedRecipes.length === 0) {
     status.value = 'synced'
@@ -117,6 +132,7 @@ async function pushLocalChanges(): Promise<{
 
       // Mark as synced locally
       await db.recipes.update(recipe.id, { synced: true })
+
       status.value = 'synced'
     } catch (e) {
       status.value = 'error'
@@ -142,6 +158,7 @@ async function pullRemoteData(): Promise<{
   status.value = 'pulling'
 
   const authStore = useAuthStore()
+
   if (!authStore.isAuth || !authStore.user) {
     status.value = 'error'
     return { success: false, error: 'Not authenticated' }
@@ -162,6 +179,12 @@ async function pullRemoteData(): Promise<{
 
     const syncedLocalIds = new Set(localMatches.filter((r) => r.synced).map((r) => r.id))
     const recipesToPull = remoteRecipes.filter((r) => !syncedLocalIds.has(r.id))
+
+    // Always pull user settings regardless of whether there are recipes to pull
+    if (authStore.user?.id) {
+      const remoteSettings = await fetchUserSettings(authStore.user.id)
+      if (remoteSettings) useSettingsStore().hydrate(remoteSettings)
+    }
 
     if (!recipesToPull.length) {
       status.value = 'synced'
