@@ -26,9 +26,9 @@ const menuOverlayOpen = reactive({ value: false })
 
 <style scoped>
 main {
-  min-height: calc(100vh - var(--outer-spacing) * 2);
+  min-height: 100vh;
   /* compensate nav.bottom overlapping content */
-  padding-bottom: 80px;
+  padding-bottom: 100px;
 }
 
 section {
