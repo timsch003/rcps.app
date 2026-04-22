@@ -86,7 +86,7 @@ async function onCreate() {
 
   const newRecipeId = await recipesManager.addNew(data.value!)
 
-  if (newRecipeId) router.push({ name: 'recipe', params: { id: newRecipeId } })
+  if (newRecipeId) router.replace({ name: 'recipe', params: { id: newRecipeId } })
 
   isValidating.value = false
 }

@@ -12,15 +12,19 @@ const menuOverlayOpen = reactive({ value: false })
 <template>
   <MenuOverlay v-model="menuOverlayOpen.value" />
   <main>
-    <header v-if="$route.name !== 'recipe'">
-      <AppLogo omitAnimation />
-      <NavTop v-model:menuOverlayOpen="menuOverlayOpen.value" />
-    </header>
+    <Transition name="slide-out-top" mode="out-in">
+      <header v-if="$route.name !== 'recipe'">
+        <AppLogo omitAnimation />
+        <NavTop v-model:menuOverlayOpen="menuOverlayOpen.value" />
+      </header>
+    </Transition>
     <section>
       <RouterView :key="$route.name" />
     </section>
-    <NavBottom v-if="$route.name !== 'recipe'" />
-    <NavRecipe v-else />
+    <Transition name="slide-out-bottom" mode="out-in">
+      <NavBottom v-if="$route.name !== 'recipe'" />
+      <NavRecipe v-else />
+    </Transition>
   </main>
 </template>
 

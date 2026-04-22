@@ -68,69 +68,75 @@ async function onPreview() {
 </script>
 
 <template>
-  <div v-if="!checking">
-    <h2 class="heading--root">{{ t('Create recipe') }}</h2>
+  <Transition name="slide-in-rtl">
+    <div v-if="!checking" key="create-form">
+      <h2 class="heading--root">{{ t('Create recipe') }}</h2>
 
-    <form class="create" @submit.prevent>
-      <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
-      <input type="text" id="create__name-input" v-model.trim="data.name" />
+      <form class="create" @submit.prevent>
+        <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
+        <input type="text" id="create__name-input" v-model.trim="data.name" />
 
-      <div class="create__servings">
-        <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
-        <input
-          type="number"
-          id="create__servings-input"
-          placeholder="1"
-          v-model.number="data.servings"
-          @input="validateServingsInput"
-        />
-      </div>
+        <div class="create__servings">
+          <label for="create__servings-input" class="heading--muted">{{ t('Servings') }}</label>
+          <input
+            type="number"
+            id="create__servings-input"
+            placeholder="1"
+            v-model.number="data.servings"
+            @input="validateServingsInput"
+          />
+        </div>
 
-      <label for="create__tags-input" class="heading--muted">
-        {{ t('Tags') }} {{ t('create.tags_hint') }}
-      </label>
-      <input type="text" id="create__tags-input" v-model="data.tags" />
+        <label for="create__tags-input" class="heading--muted">
+          {{ t('Tags') }} {{ t('create.tags_hint') }}
+        </label>
+        <input type="text" id="create__tags-input" v-model="data.tags" />
 
-      <label for="create__favorite-input" class="heading--muted">{{ t('create.favorite') }}</label>
-      <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
+        <label for="create__favorite-input" class="heading--muted">{{
+          t('create.favorite')
+        }}</label>
+        <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
 
-      <label
-        for="create__ingredients-input"
-        class="heading--muted"
-        id="create__ingredients-heading"
-      >
-        {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
-      </label>
-      <textarea
-        id="create__ingredients-input"
-        v-model.trim="data.ingredients"
-        @focus="fitTextareaHeight"
-        @blur="resetTextareaHeight"
-        @input="fitTextareaHeight"
-      ></textarea>
+        <label
+          for="create__ingredients-input"
+          class="heading--muted"
+          id="create__ingredients-heading"
+        >
+          {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
+        </label>
+        <textarea
+          id="create__ingredients-input"
+          v-model.trim="data.ingredients"
+          @focus="fitTextareaHeight"
+          @blur="resetTextareaHeight"
+          @input="fitTextareaHeight"
+        ></textarea>
 
-      <label for="create__instructions-input" class="heading--muted">{{ t('Instructions') }}</label>
-      <textarea
-        id="create__instructions-input"
-        v-model.trim="data.instructions"
-        @focus="fitTextareaHeight"
-        @blur="resetTextareaHeight"
-        @input="fitTextareaHeight"
-      ></textarea>
+        <label for="create__instructions-input" class="heading--muted">{{
+          t('Instructions')
+        }}</label>
+        <textarea
+          id="create__instructions-input"
+          v-model.trim="data.instructions"
+          @focus="fitTextareaHeight"
+          @blur="resetTextareaHeight"
+          @input="fitTextareaHeight"
+        ></textarea>
 
-      <label for="create__notes-input" class="heading--muted">{{ t('Notes') }}</label>
-      <textarea
-        id="create__notes-input"
-        v-model.trim="data.notes"
-        @focus="fitTextareaHeight"
-        @blur="resetTextareaHeight"
-        @input="fitTextareaHeight"
-      ></textarea>
+        <label for="create__notes-input" class="heading--muted">{{ t('Notes') }}</label>
+        <textarea
+          id="create__notes-input"
+          v-model.trim="data.notes"
+          @focus="fitTextareaHeight"
+          @blur="resetTextareaHeight"
+          @input="fitTextareaHeight"
+        ></textarea>
 
-      <ButtonMulti :icon="PreviewIcon" :desc="t('Check & correct')" showDesc @click="onPreview" />
-    </form>
-  </div>
-  <CheckAndCorrect v-else v-model:data="data" v-model:checking="checking" />
+        <ButtonMulti :icon="PreviewIcon" :desc="t('Check & correct')" showDesc @click="onPreview" />
+      </form>
+    </div>
+    <CheckAndCorrect v-else v-model:data="data" v-model:checking="checking" key="check-correct" />
+  </Transition>
 </template>
 
 <style scoped>

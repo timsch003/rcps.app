@@ -42,10 +42,16 @@ onMounted(async () => {
 </script>
 
 <template>
-  <NavBreadcrumbs :viewType />
-  <CardsGrid v-if="!error && !loading && recipes.length" :recipes="recipes" />
-  <p v-else-if="error" class="error">{{ t('error') }}: {{ error }}</p>
-  <p v-else class="empty_recipes_view">{{ emptyMessage }}</p>
+  <div>
+    <Transition v-if="viewType === 'tag'" name="slide-in-rtl" appear>
+      <NavBreadcrumbs :viewType />
+    </Transition>
+    <Transition v-if="viewType === 'tag'" name="slide-in-rtl" appear>
+      <CardsGrid v-if="!error && !loading && recipes.length" :recipes="recipes" />
+    </Transition>
+    <p v-else-if="error" class="error">{{ t('error') }}: {{ error }}</p>
+    <p v-else class="empty_recipes_view">{{ emptyMessage }}</p>
+  </div>
 </template>
 
 <style scoped></style>

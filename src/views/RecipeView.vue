@@ -89,7 +89,7 @@ function onServingsIncrease() {
 </script>
 <template>
   <p v-if="error" class="error">{{ t('error') }}: {{ error }}</p>
-  <div v-else-if="!loading && recipe">
+  <div class="recipe-view" v-else-if="!loading && recipe">
     <h2 class="heading--root">{{ recipe!.name }}</h2>
 
     <div v-if="recipe!.servings" class="servings">
@@ -124,6 +124,12 @@ function onServingsIncrease() {
 </template>
 
 <style scoped>
+.recipe-view {
+  /* Prevent layout shift when transitioning out top nav */
+  position: absolute;
+  top: var(--inner-spacing);
+}
+
 h3.heading--muted:not(:first-of-type) {
   margin-top: var(--inner-spacing);
 }
