@@ -26,7 +26,7 @@ const syncMap = {
 <template>
   <nav class="top">
     <div
-      :class="['sync-indicator', `sync--${syncStatus}`]"
+      class="sync-indicator"
       :icon="syncMap[syncStatus].icon"
       :aria-label="syncMap[syncStatus].desc"
       tabindex="0"
@@ -36,9 +36,7 @@ const syncMap = {
           : null
       "
     >
-      <Transition name="status-change" mode="out-in">
-        <component :is="syncMap[syncStatus].icon" />
-      </Transition>
+      <component :is="syncMap[syncStatus].icon" :key="syncStatus" />
     </div>
     <ButtonMulti :icon="SearchIcon" :desc="t('Search')" />
     <ButtonMulti :icon="MenuIcon" :desc="t('Menu')" @click="menuOverlayOpen = true" />
@@ -60,28 +58,12 @@ nav.top {
   cursor: pointer;
   padding: 10px;
   border-radius: 50%;
-  --anim-scale-factor: 1.6;
-
-  .sync--pulling,
-  .sync--pushing {
-    animation: pulse 1s ease-in-out var(--transition-duration) infinite;
-  }
-}
-
-.status-change-enter-active,
-.status-change-leave-active {
-  transition:
-    opacity var(--transition-duration),
-    transform var(--transition-duration);
-}
-.status-change-enter-from,
-.status-change-leave-to {
-  opacity: 0;
-  transform: scale(var(--anim-scale-factor));
 }
 
 svg[class*='sync--'] {
   stroke: var(--text);
+  width: 1.65rem;
+  height: 1.65rem;
 }
 svg.sync--synced {
   stroke: var(--accent);
@@ -91,20 +73,5 @@ svg.sync--offline {
 }
 svg.sync--error {
   stroke: var(--error);
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(var(--anim-scale-factor));
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 </style>

@@ -22,7 +22,7 @@ async function onSubmit() {
   if (result.success && authStore.isAuth) {
     router.push({ name: 'tags' })
   } else {
-    errorMessage.value = t('auth.login_failed')
+    errorMessage.value = result.error || t('auth.login_failed')
     isValidating.value = false
   }
 }

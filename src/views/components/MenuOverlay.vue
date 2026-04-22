@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { logoutUser } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
+import { sync } from '@/services/sync'
 import { t } from '@/lang/i18n'
 import AppLogo from '@/views/components/AppLogo.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
@@ -37,6 +38,7 @@ function toggleTheme() {
 
 function close() {
   open.value = false
+  sync.pushLocalChanges()
 }
 
 function logout() {

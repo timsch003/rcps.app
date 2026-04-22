@@ -46,12 +46,11 @@ async function pushLocalChanges(): Promise<{
     return { success: false, errors: 'No user ID' }
   }
 
-  status.value = 'pushing'
-
-  // Push user settings first so they get synced if no recipes to push
+  // Always push user settings regardless of whether there are recipes to push
   const settingsStore = useSettingsStore()
   const currentSettings = { ...settingsStore.settings }
   if (Object.keys(currentSettings).length) {
+    status.value = 'pushing'
     await updateUserSettings(userId, currentSettings)
   }
 
@@ -61,6 +60,8 @@ async function pushLocalChanges(): Promise<{
     status.value = 'synced'
     return { success: true, pushedRecipes: 0 }
   }
+
+  status.value = 'pushing'
 
   const errors: string[] = []
 
@@ -155,8 +156,6 @@ async function pullRemoteData(): Promise<{
   pulledRecipes?: number
   error?: string
 }> {
-  status.value = 'pulling'
-
   const authStore = useAuthStore()
 
   if (!authStore.isAuth || !authStore.user) {
@@ -164,7 +163,15 @@ async function pullRemoteData(): Promise<{
     return { success: false, error: 'Not authenticated' }
   }
 
+  status.value = 'pulling'
+
   try {
+    // Always pull user settings regardless of whether there are recipes to pull
+    if (authStore.user?.id) {
+      const remoteSettings = await fetchUserSettings(authStore.user.id)
+      if (remoteSettings) useSettingsStore().hydrate(remoteSettings)
+    }
+
     // Fetch user's recipes (PocketBase rules auto-filter by userId)
     const remoteRecipes = await fetchAll('recipes', {
       expand: 'tagIds',
@@ -179,12 +186,6 @@ async function pullRemoteData(): Promise<{
 
     const syncedLocalIds = new Set(localMatches.filter((r) => r.synced).map((r) => r.id))
     const recipesToPull = remoteRecipes.filter((r) => !syncedLocalIds.has(r.id))
-
-    // Always pull user settings regardless of whether there are recipes to pull
-    if (authStore.user?.id) {
-      const remoteSettings = await fetchUserSettings(authStore.user.id)
-      if (remoteSettings) useSettingsStore().hydrate(remoteSettings)
-    }
 
     if (!recipesToPull.length) {
       status.value = 'synced'
