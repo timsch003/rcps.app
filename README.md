@@ -152,8 +152,8 @@ Current binary version: **0.36.9**
 ### Functionality
 
 - Add recipe editing
-- Persist user data (settings, last viewed) in PocketBase
-- Test ScreenWakeLock with SSL
+- Persist last viewed in user settings
+- Refactor error handling to improve retraceability
 
 ### UI/UX
 
