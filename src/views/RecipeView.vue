@@ -2,11 +2,11 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { useWakeLock } from '@vueuse/core'
-import { useAuthStore } from '@/stores/auth'
 import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
 import { unitsManager } from '@/services/units_manager'
+import { useSettingsStore } from '@/stores/settings'
 import { limitDecimals } from '@/utils/conversion'
 import { dashes } from '@/utils/fixed_values'
 import { t } from '@/lang/i18n'
@@ -21,7 +21,7 @@ let ingredientsStrings: string[][] = []
 let tags: Tag['name'][] = []
 let error: string | null = null
 
-const settings = useAuthStore().user?.settings
+const settings = useSettingsStore().settings
 const wakeLock = useWakeLock()
 
 onMounted(async () => {
