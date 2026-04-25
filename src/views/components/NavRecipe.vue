@@ -25,4 +25,14 @@ nav.recipe {
   padding: var(--outer-spacing);
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
+
+button {
+  opacity: 0.8;
+  transition: opacity var(--transition-duration);
+}
+button:hover,
+button:focus,
+button:active {
+  opacity: 1;
+}
 </style>
