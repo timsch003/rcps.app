@@ -1,5 +1,6 @@
 @import 'themes.css' layer(themes);
 @import 'variables.css' layer(variables);
+@import 'fonts.css' layer(fonts);
 @import 'resets.css' layer(resets);
 @import 'utilities.css' layer(utilities);
 @import 'forms.css' layer(forms);

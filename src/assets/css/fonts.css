@@ -1,0 +1,8 @@
+@font-face {
+  font-family: NotoSansDisplay;
+  src: url(../fonts/NotoSansDisplay-Variable.ttf) format('truetype');
+}
+
+body {
+  font-family: NotoSansDisplay, sans-serif;
+}
