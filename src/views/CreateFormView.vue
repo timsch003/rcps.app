@@ -140,7 +140,7 @@ async function onPreview() {
 </template>
 
 <style scoped>
-input,
+input:not([type='checkbox']),
 textarea {
   width: 100%;
   border-radius: var(--border-radius);
@@ -166,17 +166,5 @@ h3,
 input {
   display: inline-block;
   max-width: max-content;
-}
-
-/* Hide input controls */
-input[type='number'] {
-  -webkit-appearance: textfield;
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
-  -webkit-appearance: none;
 }
 </style>

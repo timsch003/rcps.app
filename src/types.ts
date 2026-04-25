@@ -20,6 +20,7 @@ export type User = {
 
 export type UserSettings = {
   theme?: string
+  accent?: string
   keepScreenOn?: boolean
 }
 

@@ -142,6 +142,8 @@ Current binary version: **0.37.3**
 - Formatting
   - Spaces in quantities/units
   - Decimal or fraction quantities
+- Accessibility
+  - Disable animations
 
 ## TODOs
 
@@ -154,6 +156,7 @@ Current binary version: **0.37.3**
 - Add recipe editing
 - Persist last viewed in user settings
 - Refactor error handling to improve retraceability
+- Refactor CheckAndCorrect view to use @click or VueUse instead of EventListener
 
 ### UI/UX
 

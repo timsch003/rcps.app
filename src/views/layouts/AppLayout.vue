@@ -23,7 +23,9 @@ const menuOverlayOpen = reactive({ value: false })
     </section>
     <Transition name="slide-out-bottom" mode="out-in">
       <NavBottom v-if="$route.name !== 'recipe'" />
-      <NavRecipe v-else />
+    </Transition>
+    <Transition name="slide-out-bottom" mode="out-in">
+      <NavRecipe v-if="$route.name === 'recipe'" />
     </Transition>
   </main>
 </template>

@@ -79,12 +79,10 @@ div.centered {
 }
 
 .slide-out-top-enter-active,
-.slide-out-top-leave-active {
-  transition: transform calc(var(--transition-duration) * 2);
-}
+.slide-out-top-leave-active,
 .slide-out-bottom-enter-active,
 .slide-out-bottom-leave-active {
-  transition: transform var(--transition-duration);
+  transition: transform calc(var(--transition-duration) * 2);
 }
 .slide-out-top-enter-from,
 .slide-out-top-leave-to {

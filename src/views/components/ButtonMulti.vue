@@ -119,7 +119,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
 .btn-link--nav-bottom.active::before {
   content: '';
   position: absolute;
-  top: -15px;
+  top: -13px;
   z-index: 11;
   width: 100%;
   border-top: 2px solid var(--accent);

@@ -6,7 +6,7 @@ form {
     color: var(--text);
     border: none;
     padding: 4px 8px;
-    margin-bottom: 18px;
+    margin-block-end: 18px;
   }
 
   label {
@@ -26,21 +26,28 @@ form {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
+    padding: 0.25rem;
+    margin: 0;
+    margin-block-end: 18px;
     cursor: pointer;
+    background-color: var(--bg-lighter);
+    border-radius: var(--border-radius);
   }
 
   input[type='checkbox']::before {
-    content: '';
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: var(--border-radius);
-    background-color: var(--bg-light);
+    content: '\00a0'; /* Prevent layout shift when adding checkmark */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+    background-color: var(--bg-lighter);
+    color: var(--text);
   }
 
   input[type='checkbox']:checked::before {
-    background-color: var(--text);
-    opacity: var(--text-secondary-opacity);
+    content: '✓';
   }
 
   button {
@@ -62,5 +69,16 @@ form {
 
   button[type='submit'] {
     margin-top: 8px;
+  }
+
+  /* Hide input controls */
+  input[type='number'] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
   }
 }

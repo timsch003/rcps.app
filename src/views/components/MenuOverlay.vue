@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { logoutUser } from '@/adapters/pocketbase'
 import { useAuthStore } from '@/stores/auth'
@@ -8,36 +8,53 @@ import { sync } from '@/services/sync'
 import { t } from '@/lang/i18n'
 import AppLogo from '@/views/components/AppLogo.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
+import MenuOverlaySetting from '@/views/components/MenuOverlaySetting.vue'
 import CloseIcon from '@/views/icons/IconClose.vue'
 import LogoutIcon from '@/views/icons/IconLogout.vue'
 import ChangeMailIcon from '@/views/icons/IconChangeMail.vue'
 import ResetPasswordIcon from '@/views/icons/IconResetPassword.vue'
 import ModeLightIcon from '@/views/icons/IconModeLight.vue'
 import ModeDarkIcon from '@/views/icons/IconModeDark.vue'
-import TagsIcon from '@/views/icons/IconTags.vue'
 import LanguageIcon from '@/views/icons/IconLanguage.vue'
-import SettingsIcon from '@/views/icons/IconSettings.vue'
+import UiIcon from '@/views/icons/IconUI.vue'
+
+type SettingView = 'appearance' | 'ui' | null
 
 const router = useRouter()
 const open = defineModel()
 const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const settings = computed(() => settingsStore.settings)
+const activeSetting = ref<SettingView>(null)
+const settingsTransition = ref<'slide-in-rtl' | 'slide-in-ltr'>('slide-in-rtl')
 
-watch(
-  () => settings.value.theme,
-  (theme) => {
-    if (theme) document.documentElement.setAttribute('data-theme', theme)
-  },
-  { immediate: true },
+const activeTheme = computed<'light' | 'dark'>(() =>
+  settings.value.theme === 'light' ? 'light' : 'dark',
 )
 
-function toggleTheme() {
-  settingsStore.update({ theme: settings.value.theme === 'light' ? 'dark' : 'light' })
+watch(
+  () => open.value,
+  (isOpen) => {
+    if (!isOpen) {
+      activeSetting.value = null
+      settingsTransition.value = 'slide-in-rtl'
+    }
+  },
+)
+
+function openSetting(setting: Exclude<SettingView, null>) {
+  settingsTransition.value = 'slide-in-rtl'
+  activeSetting.value = setting
+}
+
+function closeSetting() {
+  settingsTransition.value = 'slide-in-ltr'
+  activeSetting.value = null
 }
 
 function close() {
   open.value = false
+  activeSetting.value = null
   sync.pushLocalChanges()
 }
 
@@ -55,50 +72,70 @@ function logout() {
           <AppLogo omitAnimation />
           <ButtonMulti :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
         </div>
-        <h3 class="heading--muted">{{ t('Settings') }}</h3>
-        <menu class="menu__content--settings">
-          <li>
-            <ButtonMulti :icon="TagsIcon" :desc="t('Tags')" showDesc />
-          </li>
-          <li>
-            <ButtonMulti
-              :icon="settings.theme === 'light' ? ModeLightIcon : ModeDarkIcon"
-              :desc="t('Appearance')"
-              showDesc
-              @click="toggleTheme"
-            />
-          </li>
-          <li>
-            <ButtonMulti :icon="SettingsIcon" :desc="t('User interface')" showDesc />
-          </li>
-          <li>
-            <ButtonMulti :icon="LanguageIcon" :desc="t('Language')" showDesc />
-          </li>
-        </menu>
-        <h3 class="heading--muted">
-          {{ t('User account') }} <span>{{ authStore.user?.email }}</span>
-        </h3>
-        <menu class="menu__content--account">
-          <li>
-            <ButtonMulti :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
-          </li>
-          <li>
-            <ButtonMulti
-              route="reset"
-              :icon="ResetPasswordIcon"
-              :desc="t('auth.reset_password')"
-              showDesc
-            />
-          </li>
-          <li>
-            <ButtonMulti
-              route="change"
-              :icon="ChangeMailIcon"
-              :desc="t('auth.change_email')"
-              showDesc
-            />
-          </li>
-        </menu>
+        <Transition :name="settingsTransition" mode="out-in">
+          <div v-if="!activeSetting" key="menu-overview">
+            <h3 class="heading--muted">{{ t('Settings') }}</h3>
+            <menu class="menu__content--settings">
+              <li>
+                <ButtonMulti
+                  :icon="activeTheme === 'light' ? ModeLightIcon : ModeDarkIcon"
+                  :desc="t('settings.appearance')"
+                  showDesc
+                  @click="openSetting('appearance')"
+                />
+              </li>
+              <li>
+                <ButtonMulti
+                  :icon="UiIcon"
+                  :desc="t('settings.user_interface')"
+                  showDesc
+                  @click="openSetting('ui')"
+                />
+              </li>
+              <li>
+                <ButtonMulti :icon="LanguageIcon" :desc="t('settings.language')" showDesc />
+              </li>
+            </menu>
+            <h3 class="heading--muted">
+              {{ t('settings.user_account') }} <span>{{ authStore.user?.email }}</span>
+            </h3>
+            <menu class="menu__content--account">
+              <li>
+                <ButtonMulti :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
+              </li>
+              <li>
+                <ButtonMulti
+                  route="reset"
+                  :icon="ResetPasswordIcon"
+                  :desc="t('auth.reset_password')"
+                  showDesc
+                />
+              </li>
+              <li>
+                <ButtonMulti
+                  route="change"
+                  :icon="ChangeMailIcon"
+                  :desc="t('auth.change_email')"
+                  showDesc
+                />
+              </li>
+            </menu>
+          </div>
+
+          <MenuOverlaySetting
+            v-else-if="activeSetting === 'appearance'"
+            key="menu-appearance"
+            setting="appearance"
+            @back="closeSetting"
+          />
+
+          <MenuOverlaySetting
+            v-else-if="activeSetting === 'ui'"
+            key="menu-ui"
+            setting="ui"
+            @back="closeSetting"
+          />
+        </Transition>
       </div>
     </div>
   </Transition>
@@ -119,7 +156,7 @@ div.menu {
   }
 }
 
-div.menu__inner h3 {
+div.menu__inner h3.heading--muted {
   margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
