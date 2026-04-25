@@ -15,6 +15,9 @@ const accentClass = !!accentColor ? 'btn--accent' : ''
 let modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
 if (!inNavBottom && inline) modifierClass = 'btn-button--inline'
 const link = baseElem === 'RouterLink' ? { name: route } : null
+
+// Prevent buttons from submitting forms when used inside them
+const buttonType = baseElem === 'button' ? 'button' : undefined
 </script>
 
 <template>
@@ -22,6 +25,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
     :is="baseElem"
     v-if="icon && showDesc"
     :to="link"
+    :type="buttonType"
     :class="`${baseClass} ${accentClass} btn--icon-desc`"
   >
     <component :is="icon" />
@@ -31,6 +35,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
     :is="baseElem"
     v-else-if="icon && !showDesc"
     :to="link"
+    :type="buttonType"
     :class="`${baseClass} ${accentClass} ${modifierClass}`"
     :aria-label="desc"
   >
@@ -40,6 +45,7 @@ const link = baseElem === 'RouterLink' ? { name: route } : null
     :is="baseElem"
     v-else
     :to="link"
+    :type="buttonType"
     :class="`${baseClass} ${accentClass}`"
     :aria-label="desc"
   >
