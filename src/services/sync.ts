@@ -2,6 +2,7 @@ import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
 import {
   upsertRecord,
+  deleteRecord,
   fetchAll,
   updateUserSettings,
   fetchUserSettings,
@@ -131,8 +132,17 @@ async function pushLocalChanges(): Promise<{
         }
       }
 
+      if (recipe.deletedRecipeIngredientIds?.length) {
+        for (const deletedId of recipe.deletedRecipeIngredientIds) {
+          await deleteRecord('recipe_ingredients', deletedId)
+        }
+      }
+
       // Mark as synced locally
-      await db.recipes.update(recipe.id, { synced: true })
+      await db.recipes.update(recipe.id, {
+        synced: true,
+        deletedRecipeIngredientIds: [],
+      })
 
       status.value = 'synced'
     } catch (e) {
@@ -246,6 +256,7 @@ async function pullRemoteData(): Promise<{
         recipeIngredientIds: riIds,
         instructions: recipe.instructions || undefined,
         notes: recipe.notes || undefined,
+        deletedRecipeIngredientIds: [],
         synced: true,
       }
       await db.recipes.put(localRecipe)

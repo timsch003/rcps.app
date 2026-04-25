@@ -88,7 +88,7 @@ async function onPreview() {
         </div>
 
         <label for="create__tags-input" class="heading--muted">
-          {{ t('Tags') }} {{ t('create.tags_hint') }}
+          {{ t('Tags') }} {{ t('tags_hint') }}
         </label>
         <input type="text" id="create__tags-input" v-model="data.tags" />
 

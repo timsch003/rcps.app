@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useScroll } from '@vueuse/core'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import ArrowLeftIcon from '@/views/icons/IconArrowLeft.vue'
 import EditIcon from '@/views/icons/IconEdit.vue'
 import { t } from '@/lang/i18n'
 
+const route = useRoute()
 const router = useRouter()
 const { isScrolling } = useScroll(window)
 
-function edit() {}
+function edit() {
+  router.replace({ name: 'editRecipe', params: { id: route.params.id } })
+}
 </script>
 
 <template>
@@ -33,7 +36,7 @@ nav.recipe {
 }
 
 nav {
-  opacity: 0.8;
+  opacity: var(--over-text-button-opacity);
   transition: opacity var(--transition-duration);
 }
 nav:hover,

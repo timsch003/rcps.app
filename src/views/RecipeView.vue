@@ -65,14 +65,16 @@ async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined
     const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
     const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
     const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
+    const leadingSpace = stringBefore ? ' ' : ''
+    const trailingSpace = stringAfter ? ' ' : ''
 
     if (ri.unitId)
       return [
         stringBefore,
-        `${quantityString} ${String(unitsManager.getNameById(ri.unitId))}`,
+        `${leadingSpace}${quantityString} ${String(unitsManager.getNameById(ri.unitId))}${trailingSpace}`,
         stringAfter,
       ]
-    else return [stringBefore, quantityString, stringAfter]
+    else return [stringBefore, `${leadingSpace}${quantityString}${trailingSpace}`, stringAfter]
   } catch (err) {
     error = (err as Error).message
     return undefined
@@ -111,7 +113,7 @@ function onServingsIncrease() {
         <span v-if="ingStrings.length === 1">{{ ingStrings[0] }}</span>
         <div v-else-if="ingStrings.length > 1">
           <span>{{ ingStrings[0] }}</span>
-          <span class="quantity-unit">{{ ingStrings[1] + ' ' }}</span>
+          <span class="quantity-unit">{{ ingStrings[1] }}</span>
           <span>{{ ingStrings[2] }}</span>
         </div>
       </li>

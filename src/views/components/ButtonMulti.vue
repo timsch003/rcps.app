@@ -30,7 +30,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
     :is="baseElem"
     :to="link"
     :type="buttonType"
-    :class="`${baseClass} ${accentClass}`"
+    :class="`${baseClass} ${accentClass} ${modifierClass}`"
   >
     <component :is="icon" />
     <span :class="`${baseClass}__desc`">{{ desc }}</span>

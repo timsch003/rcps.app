@@ -61,6 +61,7 @@ export type Recipe = {
 }
 
 export type RecipeLocal = Omit<Recipe, 'userId' | 'updated'> & {
+  deletedRecipeIngredientIds?: UUID[]
   synced: boolean
 }
 
@@ -71,6 +72,25 @@ export type RecipeRaw = {
   servings: number | undefined
   ingredients: string
   matchedIngredients: MatchedIngredient[] | []
+  instructions: string
+  notes: string
+}
+
+export type EditableRecipeIngredient = {
+  textBefore: string
+  quantity: string
+  hasRange: boolean
+  quantityUpper: string
+  unit: string
+  textAfter: string
+}
+
+export type RecipeEdit = {
+  name: string
+  tags: string | string[]
+  favorite: boolean
+  servings: number | undefined
+  ingredients: EditableRecipeIngredient[]
   instructions: string
   notes: string
 }

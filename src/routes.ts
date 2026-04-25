@@ -11,6 +11,7 @@ import VerifyEmailView from './views/auth/VerifyEmailView.vue'
 import ResetPasswordView from './views/auth/ResetPasswordView.vue'
 import ChangeEmailView from './views/auth/ChangeEmailView.vue'
 import CreateView from './views/CreateFormView.vue'
+import EditRecipeView from './views/EditRecipeView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,6 +48,11 @@ const router = createRouter({
           path: '/recipe/:id',
           name: 'recipe',
           component: RecipeView,
+        },
+        {
+          path: '/recipe/:id/edit',
+          name: 'editRecipe',
+          component: EditRecipeView,
         },
         { path: '/create', name: 'create', component: CreateView },
       ],

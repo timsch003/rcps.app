@@ -101,6 +101,15 @@ export async function fetchAll(collection: string, options?: Record<string, unkn
   return await pb.collection(collection).getFullList({ ...options })
 }
 
+export async function deleteRecord(collection: string, id: string): Promise<void> {
+  try {
+    await pb.collection(collection).delete(id)
+  } catch (e) {
+    if (e instanceof ClientResponseError && e.status === 404) return
+    if (e) throw e
+  }
+}
+
 // Only for testing purposes, not used in the app
 export async function resetTestData(): Promise<void> {
   await pb.collection('_superusers').authWithPassword('superuser@example.com', 'password')
