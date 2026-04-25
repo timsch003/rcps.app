@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { route, accentColor, inNavBottom, inline } = defineProps<{
+const { route, desc, icon, showDesc, accentColor, inNavBottom, inline, small } = defineProps<{
   route?: string
   desc: string
   icon?: object
@@ -7,13 +7,17 @@ const { route, accentColor, inNavBottom, inline } = defineProps<{
   accentColor?: boolean | false
   inNavBottom?: boolean | false
   inline?: boolean | false
+  small?: boolean | false
 }>()
 
 const baseElem = !!route ? 'RouterLink' : 'button'
 const baseClass = !!route ? 'btn-link' : 'btn-button'
 const accentClass = !!accentColor ? 'btn--accent' : ''
+
 let modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
 if (!inNavBottom && inline) modifierClass = 'btn-button--inline'
+if (small || (icon && showDesc)) modifierClass += ' btn--small'
+
 const link = baseElem === 'RouterLink' ? { name: route } : null
 
 // Prevent buttons from submitting forms when used inside them
@@ -22,18 +26,18 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 
 <template>
   <component
-    :is="baseElem"
     v-if="icon && showDesc"
+    :is="baseElem"
     :to="link"
     :type="buttonType"
-    :class="`${baseClass} ${accentClass} btn--icon-desc`"
+    :class="`${baseClass} ${accentClass}`"
   >
     <component :is="icon" />
     <span :class="`${baseClass}__desc`">{{ desc }}</span>
   </component>
   <component
-    :is="baseElem"
     v-else-if="icon && !showDesc"
+    :is="baseElem"
     :to="link"
     :type="buttonType"
     :class="`${baseClass} ${accentClass} ${modifierClass}`"
@@ -42,8 +46,8 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
     <component :is="icon" />
   </component>
   <component
-    :is="baseElem"
     v-else
+    :is="baseElem"
     :to="link"
     :type="buttonType"
     :class="`${baseClass} ${accentClass}`"
@@ -85,7 +89,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
   color: var(--accent);
 }
 
-.btn--icon-desc,
+.btn--small,
 .btn-button--inline {
   svg {
     width: var(--icon-size-s);

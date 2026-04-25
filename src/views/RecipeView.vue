@@ -127,7 +127,7 @@ function onServingsIncrease() {
 .recipe-view {
   /* Prevent layout shift when transitioning out top nav */
   position: absolute;
-  top: var(--inner-spacing);
+  inset: var(--inner-spacing);
 }
 
 h3.heading--muted:not(:first-of-type) {

@@ -61,23 +61,35 @@ div.centered {
   opacity: 0;
 }
 
+/* Horizontal slides for switching sub views */
 .slide-in-ltr-enter-active,
 .slide-in-ltr-leave-active,
 .slide-in-rtl-enter-active,
 .slide-in-rtl-leave-active {
   transition: all var(--transition-duration);
 }
+.slide-in-ltr-out-in-enter-active,
+.slide-in-ltr-out-in-leave-active,
+.slide-in-rtl-out-in-enter-active,
+.slide-in-rtl-out-in-leave-active {
+  transition: all calc(var(--transition-duration) * 0.5);
+}
 .slide-in-ltr-enter-from,
-.slide-in-rtl-leave-to {
+.slide-in-rtl-leave-to,
+.slide-in-rtl-out-in-enter-from,
+.slide-in-ltr-out-in-leave-to {
   opacity: 0;
   transform: translateX(-25%);
 }
 .slide-in-rtl-enter-from,
-.slide-in-ltr-leave-to {
+.slide-in-ltr-leave-to,
+.slide-in-rtl-out-in-enter-from,
+.slide-in-ltr-out-in-leave-to {
   opacity: 0;
   transform: translateX(25%);
 }
 
+/* Vertical out-of-view slides for hiding UI elements */
 .slide-out-top-enter-active,
 .slide-out-top-leave-active,
 .slide-out-bottom-enter-active,

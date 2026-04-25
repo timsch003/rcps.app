@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useScroll } from '@vueuse/core'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import ArrowLeftIcon from '@/views/icons/IconArrowLeft.vue'
+import EditIcon from '@/views/icons/IconEdit.vue'
 import { t } from '@/lang/i18n'
 
 const router = useRouter()
+const { isScrolling } = useScroll(window)
+
+function edit() {}
 </script>
 
 <template>
-  <nav class="recipe">
-    <ButtonMulti @click="router.back()" :icon="ArrowLeftIcon" :desc="t('Back')" accentColor />
+  <nav class="recipe" :class="{ scrolling: isScrolling }">
+    <ButtonMulti @click="router.back()" :icon="ArrowLeftIcon" :desc="t('Back')" accentColor small />
+    <ButtonMulti @click="edit()" :icon="EditIcon" :desc="t('Edit recipe')" accentColor small />
   </nav>
 </template>
 
@@ -20,19 +26,20 @@ nav.recipe {
   position: fixed;
   inset: auto 0 0 auto;
 
-  z-index: 10;
+  z-index: 9;
   gap: var(--inner-spacing);
   padding: var(--outer-spacing);
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
-button {
+nav {
   opacity: 0.8;
   transition: opacity var(--transition-duration);
 }
-button:hover,
-button:focus,
-button:active {
+nav:hover,
+nav:focus,
+nav:active,
+nav.scrolling {
   opacity: 1;
 }
 </style>
