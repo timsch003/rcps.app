@@ -8,7 +8,7 @@ import { t } from '@/lang/i18n'
 
 const route = useRoute()
 const router = useRouter()
-const { isScrolling } = useScroll(window)
+const { isScrolling } = useScroll(window, { behavior: 'smooth' })
 
 function edit() {
   router.replace({ name: 'editRecipe', params: { id: route.params.id } })
@@ -25,9 +25,10 @@ function edit() {
 <style scoped>
 nav.recipe {
   display: flex;
+  flex-direction: column;
 
   position: fixed;
-  inset: auto 0 0 auto;
+  inset: 0 0 auto auto;
 
   z-index: 9;
   gap: var(--inner-spacing);
@@ -35,14 +36,14 @@ nav.recipe {
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
-nav {
-  opacity: var(--over-text-button-opacity);
-  transition: opacity var(--transition-duration);
+nav.recipe {
+  opacity: 0.8;
+  transition: all var(--transition-duration);
 }
-nav:hover,
-nav:focus,
-nav:active,
-nav.scrolling {
+nav.recipe:hover,
+nav.recipe:focus,
+nav.recipe:active,
+nav.recipe.scrolling {
   opacity: 1;
 }
 </style>
