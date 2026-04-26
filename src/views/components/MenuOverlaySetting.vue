@@ -1,8 +1,14 @@
 <script lang="ts" setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { t } from '@/lang/i18n'
-import { DEFAULT_ACCENT_BY_THEME, resolveTheme } from '@/utils/theme_settings'
+import {
+  getAvailableAccents,
+  resolveNextThemeSelection,
+  resolveSelectedAccent,
+  resolveTheme,
+  THEME_ACCENTS,
+} from '@/utils/theme_settings'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import IconArrowLeft from '@/views/icons/IconArrowLeft.vue'
 import ModeLightIcon from '@/views/icons/IconModeLight.vue'
@@ -18,61 +24,30 @@ const emit = defineEmits<{
 
 const settingsStore = useSettingsStore()
 const settings = computed(() => settingsStore.settings)
-const darkAccents = ref<string[]>([])
-const lightAccents = ref<string[]>([])
 
 const activeTheme = computed<'light' | 'dark'>(() => resolveTheme(settings.value.theme))
 const keepScreenOn = computed({
   get: () => settings.value.keepScreenOn ?? true,
   set: (value: boolean) => settingsStore.update({ keepScreenOn: value }),
 })
-const availableAccents = computed(() =>
-  activeTheme.value === 'dark' ? darkAccents.value : lightAccents.value,
+const availableAccents = computed(() => getAvailableAccents(activeTheme.value, THEME_ACCENTS))
+const selectedAccent = computed(() =>
+  resolveSelectedAccent(activeTheme.value, settings.value.accent, availableAccents.value),
 )
-const selectedAccent = computed(() => {
-  const savedAccent = settings.value.accent
-
-  if (savedAccent && availableAccents.value.includes(savedAccent)) return savedAccent
-
-  return DEFAULT_ACCENT_BY_THEME[activeTheme.value]
-})
-
-function loadAccentVariables() {
-  const style = getComputedStyle(document.documentElement)
-  const dark: string[] = []
-  const light: string[] = []
-
-  for (let i = 0; i < style.length; i += 1) {
-    const variableName = style.item(i)
-
-    if (variableName.startsWith('--d-')) dark.push(variableName)
-    if (variableName.startsWith('--l-')) light.push(variableName)
-  }
-
-  darkAccents.value = dark
-  lightAccents.value = light
-}
 
 function toggleTheme() {
-  const nextTheme = activeTheme.value === 'light' ? 'dark' : 'light'
-  const nextThemeAccents = nextTheme === 'dark' ? darkAccents.value : lightAccents.value
-  const fallbackAccent = DEFAULT_ACCENT_BY_THEME[nextTheme]
-  const nextAccent =
-    settings.value.accent && nextThemeAccents.includes(settings.value.accent)
-      ? settings.value.accent
-      : fallbackAccent
-
-  settingsStore.update({ theme: nextTheme, accent: nextAccent })
+  const nextThemeSelection = resolveNextThemeSelection(
+    activeTheme.value,
+    settings.value.accent,
+    THEME_ACCENTS,
+  )
+  settingsStore.update(nextThemeSelection)
 }
 
 function setAccent(accent: string) {
   if (!availableAccents.value.includes(accent)) return
   settingsStore.update({ accent })
 }
-
-onMounted(() => {
-  loadAccentVariables()
-})
 </script>
 
 <template>

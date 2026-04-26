@@ -13,49 +13,34 @@
   --accent: var(--d-algae);
 
   /* Accent variations for dark mode
+
+    Changes to these variable names need to be
+    applied in /src/utils/theme_settings.ts as well.
   */
-  --d-linen: #ffede1;
-  --d-silver: #adadad;
-  --d-blush: #edadc7;
   --d-candy: #ff8591;
+  --d-grapefruit: #fe7173;
   --d-rose: #dda6a8;
   --d-bronze: #e09f7d;
-  --d-khaki: #c3a995;
   --d-canary: #f7f052;
   --d-gold: #efcb68;
-  --d-algae: #a5b6ae;
   --d-lime: #ddfcad;
   --d-moss: #72c077;
-  --d-neon: #5aff15;
-  --d-tea: #c9e4ca;
-  --d-turquoise: #73eedc;
-  --d-periwinkle: #acacec;
-  --d-cornflower: #7aa4ff;
-  --d-powder: #92aedd;
   --d-sky: #7cb9df;
-  --d-lilac: #cba4c1;
+  --d-cornflower: #7aa4ff;
+  --d-turquoise: #73eedc;
+  --d-mauve: #c879ff;
+  --d-periwinkle: #acacec;
 
   /* Accent variations for light mode
+
+    Changes to these variable names need to be
+    applied in /src/utils/theme_settings.ts as well.
   */
-  --l-graphite: #343330;
-  --l-coal: #403d39;
-  --l-plum: #773344;
-  --l-cherry: #991e3d;
-  --l-blood: #9b0808;
-  --l-mauve: #604354;
-  --l-mocha: #3f292b;
-  --l-walnut: #573d1c;
-  --l-pine: #364634;
-  --l-emerald: #245639;
+  --l-crimson: #9e1a1a;
+  --l-brandy: #772f1a;
   --l-olive: #345511;
-  --l-iron: #394e56;
-  --l-navy: #134074;
-  --l-dusk: #304d6d;
-  --l-twilight: #24346a;
-  --l-storm: #1c545f;
-  --l-grape: #4c4b6c;
+  --l-grape: #514686;
   --l-indigo: #610f7f;
-  --l-blackberry: #642b52;
   --l-velvet: #762c77;
 
   /* Use only for technical indications
