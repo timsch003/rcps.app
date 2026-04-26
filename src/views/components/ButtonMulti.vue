@@ -124,6 +124,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 /* .active is added by RouterLink when the route is active */
 .btn-link--nav-bottom.active {
   transition: none;
+  transform: translate(0, 0);
 }
 
 .btn-link--nav-bottom.active::before {

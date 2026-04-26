@@ -153,7 +153,10 @@ div.menu-setting__accent {
   gap: var(--inner-spacing);
 }
 
-button.menu-setting__accent-btn {
+button.menu-setting__accent-btn,
+button.menu-setting__accent-btn:hover,
+button.menu-setting__accent-btn:focus,
+button.menu-setting__accent-btn:active {
   --btn-size: 3.5rem;
   box-shadow: none;
   width: var(--btn-size);
@@ -162,6 +165,7 @@ button.menu-setting__accent-btn {
   border-radius: var(--border-radius);
   border: calc(var(--btn-size) / 7) solid var(--bg);
   cursor: pointer;
+  transform: none;
 }
 
 button.menu-setting__accent-btn.menu-setting__accent--selected {
