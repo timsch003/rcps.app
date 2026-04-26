@@ -34,7 +34,7 @@ onMounted(async () => {
       ingredients = await ingredientsManager.getRecipeIngredients(recipe.value.recipeIngredientIds)
       ingredientsStrings = await Promise.all(
         ingredients.map(async (ing) => {
-          const ingStrings = await getIngStrings(ing)
+          const ingStrings = await recipesManager.getIngStrings(ing)
           return ingStrings ? ingStrings : []
         }),
       )
@@ -54,32 +54,6 @@ onUnmounted(() => {
   wakeLock.release()
 })
 
-async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
-  try {
-    const ingredientName = await ingredientsManager.getName(ri)
-
-    if (!ingredientName) return undefined
-    if (!ri.quantity) return [ingredientName]
-    if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
-
-    const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
-    const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
-    const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
-    const leadingSpace = stringBefore ? ' ' : ''
-    const trailingSpace = stringAfter ? ' ' : ''
-
-    if (ri.unitId)
-      return [
-        stringBefore,
-        `${leadingSpace}${quantityString} ${String(unitsManager.getNameById(ri.unitId))}${trailingSpace}`,
-        stringAfter,
-      ]
-    else return [stringBefore, `${leadingSpace}${quantityString}${trailingSpace}`, stringAfter]
-  } catch (err) {
-    error = (err as Error).message
-    return undefined
-  }
-}
 
 function onServingsDecrease() {
   // TODO

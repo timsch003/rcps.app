@@ -11,7 +11,7 @@ const router = useRouter()
 const { isScrolling } = useScroll(window, { behavior: 'smooth' })
 
 function edit() {
-  router.replace({ name: 'editRecipe', params: { id: route.params.id } })
+  router.push({ name: 'create', query: { edit: route.params.id } })
 }
 </script>
 

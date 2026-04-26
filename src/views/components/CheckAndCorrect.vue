@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useSortable } from '@vueuse/integrations/useSortable'
 import { t } from '@/lang/i18n'
 import { useRouter } from 'vue-router'
 import CheckIcon from '@/views/icons/IconCheck.vue'
@@ -7,10 +8,12 @@ import IconArrowLeft from '../icons/IconArrowLeft.vue'
 import ButtonMulti from './ButtonMulti.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '../icons/IconSpinner.vue'
-import { limitDecimals } from '@/utils/conversion'
+import { getCssCustomPropertyDurationMs, limitDecimals } from '@/utils/conversion'
 import { dashes } from '@/utils/fixed_values'
 import { recipesManager } from '@/services/recipes_manager'
 import type { RecipeRaw } from '@/types'
+import type { RecipeLocal } from '@/types'
+import type { Options as SortableOptions } from 'sortablejs'
 
 const data = defineModel<RecipeRaw>('data')
 const checking = defineModel<boolean>('checking')
@@ -18,6 +21,28 @@ const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsInfoVisible = ref(false)
 const isValidating = ref(false)
 const router = useRouter()
+const props = defineProps<{
+  editingRecipeId?: RecipeLocal['id'] | null
+}>()
+
+const sortableIngredients = computed<RecipeRaw['matchedIngredients']>({
+  get: () => data.value?.matchedIngredients || [],
+  set: (ingredients) => {
+    if (data.value) data.value.matchedIngredients = ingredients
+  },
+})
+
+const sortableOptions: SortableOptions = {
+  animation: getCssCustomPropertyDurationMs('--transition-duration', 150),
+  filter:
+    '.checkcorrect__ingredient-quantity-unit--selected, .checkcorrect__ingredient-quantity-unit--ignored',
+  preventOnFilter: false,
+  forceFallback: true,
+  fallbackOnBody: true,
+  fallbackClass: 'checkcorrect__sortable-fallback',
+}
+
+useSortable('.checkcorrect__ingredients-list', sortableIngredients, sortableOptions)
 
 onMounted(async () => {
   ingredientsInfoElement.value = document.querySelector(
@@ -84,126 +109,145 @@ async function onCreate() {
 
   isValidating.value = true
 
-  const newRecipeId = await recipesManager.addNew(data.value!)
+  let recipeId: RecipeLocal['id'] | undefined
 
-  if (newRecipeId) router.replace({ name: 'recipe', params: { id: newRecipeId } })
+  if (props.editingRecipeId) {
+    recipeId = await recipesManager.editExisting(props.editingRecipeId, data.value!)
+  } else {
+    recipeId = await recipesManager.addNew(data.value!)
+  }
+
+  if (recipeId) router.replace({ name: 'recipe', params: { id: recipeId } })
 
   isValidating.value = false
 }
 </script>
 
 <template>
-  <ButtonMulti
-    :icon="IconArrowLeft"
-    :desc="t('Back to editing')"
-    showDesc
-    @click="onBackToEditing"
-  />
-  <div class="checkcorrect">
-    <h2 class="heading--root">{{ t('Check & correct') }}</h2>
-
-    <h3 class="heading--muted">{{ t('Name') }}</h3>
-    <p>{{ data?.name }}</p>
-
-    <h3 class="heading--muted">{{ t('Servings') }}</h3>
-    <p>{{ data?.servings }}</p>
-
-    <h3 class="heading--muted">{{ t('Tags') }}</h3>
-    <p>
-      <span v-if="!data?.tags.length">{{ '-' }}</span>
-      <span v-else v-for="(tag, index) in data?.tags" :key="index"
-        >{{ tag }}{{ index < data.tags.length - 1 ? ', ' : '' }}</span
-      >
-    </p>
-
-    <h3 class="heading--muted">{{ t('Favorite') }}</h3>
-    <p>{{ data?.favorite ? t('Yes') : t('No') }}</p>
-
-    <h3 class="heading--muted heading--with-icon">
-      {{ t('Ingredients') }}
-      <ButtonMulti
-        v-if="data?.matchedIngredients?.length"
-        :icon="InfoIcon"
-        :desc="t('Info')"
-        inline
-        @click="toggleIngredientsInfoOverlay"
-      />
-    </h3>
-    <div class="checkcorrect__ingredients-info">
-      <div class="checkcorrect__ingredients-info--overlay">
-        <p>
-          {{ t('checkcorrect.ingredients_info') }}
-        </p>
-        <p>
-          {{ t('checkcorrect.ingredients_info_legend') }}
-        </p>
-        <p class="checkcorrect__ingredients-info--overlay-legend">
-          <span class="checkcorrect__ingredient-quantity-unit--selected">
-            {{ t('checkcorrect.ingredients_info_selected') }}
-          </span>
-          &nbsp;
-          <span class="checkcorrect__ingredient-quantity-unit--ignored">
-            {{ t('checkcorrect.ingredients_info_ignored') }}
-          </span>
-          &nbsp;
-          <span class="checkcorrect__ingredient-quantity-unit--single">{{
-            t('checkcorrect.ingredients_info_detected')
-          }}</span>
-        </p>
-      </div>
-    </div>
-
-    <ul v-if="data?.matchedIngredients?.length">
-      <li v-for="(mi, ingIndex) in data?.matchedIngredients" :key="ingIndex">
-        <span v-if="typeof mi === 'string'">{{ mi }}</span>
-
-        <span v-else-if="mi.length === 1">
-          <span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
-            {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity))
-            }}{{
-              mi[0].quantityUpper ? dashes[1]! + limitDecimals(Number(mi[0].quantityUpper)) : ''
-            }}
-            {{ mi[0].knownUnit && mi[0].knownUnit }}</span
-          >
-          <span v-if="mi[0]!.textAfterQuantity">{{ mi[0]!.textAfterQuantity }}</span>
-        </span>
-
-        <span v-else-if="mi.length > 1" v-for="(part, index) in mi" :key="index">
-          <span v-if="part.textBeforeFirstMatch">{{ part.textBeforeFirstMatch + ' ' }}</span>
-          <span
-            v-if="part.quantity"
-            :class="
-              part.selected
-                ? 'checkcorrect__ingredient-quantity-unit--selected'
-                : 'checkcorrect__ingredient-quantity-unit--ignored'
-            "
-            @click="selectQuantityUnit($event, ingIndex, index)"
-          >
-            {{ part.quantity && limitDecimals(Number(part.quantity))
-            }}{{ part.quantityUpper ? dashes[1]! + limitDecimals(Number(part.quantityUpper)) : '' }}
-            {{ part.knownUnit && part.knownUnit }}</span
-          >
-          <span v-if="part.textAfterQuantity">{{ part.textAfterQuantity }}</span>
-        </span>
-      </li>
-    </ul>
-    <p v-else>-</p>
-
-    <h3 class="heading--muted">{{ t('Instructions') }}</h3>
-    <p class="multiline_text">{{ data?.instructions || '-' }}</p>
-
-    <h3 class="heading--muted">{{ t('Notes') }}</h3>
-    <p class="multiline_text">{{ data?.notes || '-' }}</p>
-  </div>
-  <div class="submit">
+  <div>
     <ButtonMulti
-      :icon="CheckIcon"
-      :desc="t('Create recipe')"
+      :icon="IconArrowLeft"
+      :desc="t('Back to editing')"
       showDesc
-      @click="onCreate"
-      :disabled="isValidating"
+      @click="onBackToEditing"
     />
-    <SpinnerIcon v-if="isValidating" />
+    <div class="checkcorrect">
+      <h2 class="heading--root">{{ t('Check & correct') }}</h2>
+
+      <h3 class="heading--muted">{{ t('Name') }}</h3>
+      <p>{{ data?.name }}</p>
+
+      <h3 class="heading--muted">{{ t('Servings') }}</h3>
+      <p>{{ data?.servings }}</p>
+
+      <h3 class="heading--muted">{{ t('Tags') }}</h3>
+      <p>
+        <span v-if="!data?.tags.length">{{ '-' }}</span>
+        <span v-else v-for="(tag, index) in data?.tags" :key="index"
+          >{{ tag }}{{ index < data.tags.length - 1 ? ', ' : '' }}</span
+        >
+      </p>
+
+      <h3 class="heading--muted">{{ t('Favorite') }}</h3>
+      <p>{{ data?.favorite ? t('Yes') : t('No') }}</p>
+
+      <h3 class="heading--muted heading--with-icon">
+        {{ t('Ingredients') }}
+        <ButtonMulti
+          v-if="data?.matchedIngredients?.length"
+          :icon="InfoIcon"
+          :desc="t('Info')"
+          inline
+          @click="toggleIngredientsInfoOverlay"
+        />
+      </h3>
+      <div class="checkcorrect__ingredients-info">
+        <div class="checkcorrect__ingredients-info--overlay">
+          <p>
+            {{ t('checkcorrect.ingredients_info') }}
+          </p>
+          <p>
+            {{ t('checkcorrect.ingredients_info_legend') }}
+          </p>
+          <p class="checkcorrect__ingredients-info--overlay-legend">
+            <span class="checkcorrect__ingredient-quantity-unit--selected">
+              {{ t('checkcorrect.ingredients_info_selected') }}
+            </span>
+            &nbsp;
+            <span class="checkcorrect__ingredient-quantity-unit--ignored">
+              {{ t('checkcorrect.ingredients_info_ignored') }}
+            </span>
+            &nbsp;
+            <span class="checkcorrect__ingredient-quantity-unit--single">{{
+              t('checkcorrect.ingredients_info_detected')
+            }}</span>
+          </p>
+          <p>
+            {{ t('checkcorrect.ingredients_info_sort') }}
+          </p>
+        </div>
+      </div>
+
+      <ul v-if="data?.matchedIngredients?.length" class="checkcorrect__ingredients-list">
+        <li v-for="(mi, ingIndex) in data?.matchedIngredients" :key="ingIndex">
+          <span v-if="typeof mi === 'string'">{{ mi }}</span>
+
+          <span v-else-if="mi.length === 1">
+            <span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
+              {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity))
+              }}{{
+                mi[0].quantityUpper ? dashes[1]! + limitDecimals(Number(mi[0].quantityUpper)) : ''
+              }}
+              {{ mi[0].knownUnit && mi[0].knownUnit }}</span
+            >
+            <span v-if="mi[0]!.textAfterQuantity">{{ mi[0]!.textAfterQuantity }}</span>
+          </span>
+
+          <span v-else-if="mi.length > 1" v-for="(part, index) in mi" :key="index">
+            <span v-if="typeof part !== 'string' && part.textBeforeFirstMatch">{{
+              part.textBeforeFirstMatch + ' '
+            }}</span>
+            <span
+              v-if="typeof part !== 'string' && part.quantity"
+              :class="
+                typeof part !== 'string' && part.selected
+                  ? 'checkcorrect__ingredient-quantity-unit--selected'
+                  : 'checkcorrect__ingredient-quantity-unit--ignored'
+              "
+              @click="selectQuantityUnit($event, ingIndex, index)"
+            >
+              {{ typeof part !== 'string' && part.quantity && limitDecimals(Number(part.quantity))
+              }}{{
+                typeof part !== 'string' && part.quantityUpper
+                  ? dashes[1]! + limitDecimals(Number(part.quantityUpper))
+                  : ''
+              }}
+              {{ typeof part !== 'string' && part.knownUnit && part.knownUnit }}</span
+            >
+            <span v-if="typeof part !== 'string' && part.textAfterQuantity">{{
+              part.textAfterQuantity
+            }}</span>
+          </span>
+        </li>
+      </ul>
+      <p v-else>-</p>
+
+      <h3 class="heading--muted">{{ t('Instructions') }}</h3>
+      <p class="multiline_text">{{ data?.instructions || '-' }}</p>
+
+      <h3 class="heading--muted">{{ t('Notes') }}</h3>
+      <p class="multiline_text">{{ data?.notes || '-' }}</p>
+    </div>
+    <div class="submit">
+      <ButtonMulti
+        :icon="CheckIcon"
+        :desc="props.editingRecipeId ? t('Save changes') : t('Create recipe')"
+        showDesc
+        @click="onCreate"
+        :disabled="isValidating"
+      />
+      <SpinnerIcon v-if="isValidating" />
+    </div>
   </div>
 </template>
 
@@ -251,9 +295,20 @@ ul {
 }
 
 li {
+  position: relative;
   padding-bottom: var(--ing-spacing);
   border-bottom: 1px solid var(--decor);
   margin-bottom: var(--ing-spacing);
+  cursor: grab;
+}
+
+li:active {
+  cursor: grabbing;
+}
+
+:global(.checkcorrect__sortable-fallback) {
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 li,

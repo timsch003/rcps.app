@@ -76,25 +76,6 @@ export type RecipeRaw = {
   notes: string
 }
 
-export type EditableRecipeIngredient = {
-  textBefore: string
-  quantity: string
-  hasRange: boolean
-  quantityUpper: string
-  unit: string
-  textAfter: string
-}
-
-export type RecipeEdit = {
-  name: string
-  tags: string | string[]
-  favorite: boolean
-  servings: number | undefined
-  ingredients: EditableRecipeIngredient[]
-  instructions: string
-  notes: string
-}
-
 export type SyncStatus = 'synced' | 'pulling' | 'pushing' | 'offline' | 'error'
 
 export type SyncResult = {

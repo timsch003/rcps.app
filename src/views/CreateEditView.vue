@@ -7,6 +7,10 @@ import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import PreviewIcon from '@/views/icons/IconPreview.vue'
 import type { RecipeRaw } from '@/types'
+import { useRoute } from 'vue-router'
+import { tagsManager } from '@/services/tags_manager'
+import { onMounted } from 'vue'
+import type { RecipeLocal } from '@/types'
 
 const data = reactive<RecipeRaw>({
   name: '',
@@ -19,6 +23,51 @@ const data = reactive<RecipeRaw>({
   notes: '',
 })
 const checking = ref(false)
+const route = useRoute()
+const editingRecipeId = ref<RecipeLocal['id'] | null>(null)
+const loading = ref(false)
+
+onMounted(async () => {
+  const recipeId = route.query.edit as string | undefined
+  if (recipeId) {
+    loading.value = true
+    try {
+      const recipe = await recipesManager.getById(recipeId)
+      if (recipe) {
+        editingRecipeId.value = recipe.id
+        data.name = recipe.name
+        data.favorite = recipe.favorite
+        data.servings = recipe.servings
+        data.instructions = recipe.instructions || ''
+        data.notes = recipe.notes || ''
+
+        if (recipe.tagIds?.length) {
+          const tagNames = await tagsManager.getNames(recipe.tagIds)
+          data.tags = tagNames
+        }
+
+        if (recipe.recipeIngredientIds?.length) {
+          const recipeIngredients = await ingredientsManager.getRecipeIngredients(
+            recipe.recipeIngredientIds,
+          )
+          const ingStrings = await Promise.all(
+            recipeIngredients.map(async (ri) => {
+              return await recipesManager.getIngStrings(ri)
+            }),
+          )
+          data.ingredients = ingStrings
+            .filter((strings) => strings && strings.length > 0)
+            .map((strings) => (strings ? strings.join('') : ''))
+            .join('\n')
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load recipe for editing:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+})
 
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -38,14 +87,25 @@ const resetTextareaHeight = (e: Event) => {
 
 async function onPreview() {
   if (!data.name) {
-    alert(t('create.alert_name_required'))
-    return
-  } else if (await recipesManager.nameExists(data.name)) {
-    alert(t('create.alert_name_exists'))
+    alert(t('create_edit.alert_name_required'))
     return
   }
+  if (editingRecipeId.value) {
+    // When editing, check name uniqueness excluding current recipe
+    if (await recipesManager.nameExistsExcluding(data.name, editingRecipeId.value)) {
+      alert(t('create_edit.alert_name_exists'))
+      return
+    }
+  } else {
+    // When creating, check if name already exists
+    if (await recipesManager.nameExists(data.name)) {
+      alert(t('create_edit.alert_name_exists'))
+      return
+    }
+  }
+
   if (!data.tags.length || (typeof data.tags === 'string' && !data.tags.trim())) {
-    alert(t('create.alert_tags_required'))
+    alert(t('create_edit.alert_tags_required'))
     return
   }
 
@@ -70,9 +130,12 @@ async function onPreview() {
 <template>
   <Transition name="slide-in-rtl">
     <div v-if="!checking" key="create-form">
-      <h2 class="heading--root">{{ t('Create recipe') }}</h2>
+      <h2 v-if="editingRecipeId" class="heading--root">{{ t('Edit recipe') }}</h2>
+      <h2 v-else class="heading--root">{{ t('Create recipe') }}</h2>
 
-      <form class="create" @submit.prevent>
+      <p v-if="loading" class="loading">{{ t('sync.status_pulling') }}</p>
+
+      <form class="create" @submit.prevent v-if="!loading">
         <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
         <input type="text" id="create__name-input" v-model.trim="data.name" />
 
@@ -93,7 +156,7 @@ async function onPreview() {
         <input type="text" id="create__tags-input" v-model="data.tags" />
 
         <label for="create__favorite-input" class="heading--muted">{{
-          t('create.favorite')
+          t('create_edit.favorite')
         }}</label>
         <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
 
@@ -102,7 +165,7 @@ async function onPreview() {
           class="heading--muted"
           id="create__ingredients-heading"
         >
-          {{ t('Ingredients') }} {{ t('create.ingredients_hint') }}
+          {{ t('Ingredients') }} {{ t('create_edit.ingredients_hint') }}
         </label>
         <textarea
           id="create__ingredients-input"
@@ -135,7 +198,13 @@ async function onPreview() {
         <ButtonMulti :icon="PreviewIcon" :desc="t('Check & correct')" showDesc @click="onPreview" />
       </form>
     </div>
-    <CheckAndCorrect v-else v-model:data="data" v-model:checking="checking" key="check-correct" />
+    <CheckAndCorrect
+      v-else
+      v-model:data="data"
+      v-model:checking="checking"
+      :editing-recipe-id="editingRecipeId"
+      key="check-correct"
+    />
   </Transition>
 </template>
 

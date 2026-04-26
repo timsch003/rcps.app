@@ -4,14 +4,11 @@ import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
 import { sync } from './sync'
-import type {
-  EditableRecipeIngredient,
-  RecipeEdit,
-  RecipeLocal,
-  RecipeRaw,
-  Tag,
-  UUID,
-} from '@/types'
+import { unitsManager } from './units_manager'
+import { limitDecimals } from '@/utils/conversion'
+import { dashes } from '@/utils/fixed_values'
+import { t } from '@/lang/i18n'
+import type { RecipeLocal, RecipeRaw, RecipeIngredient, Tag, UUID } from '@/types'
 
 async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
   const newRecipeId = uuidv7()
@@ -52,7 +49,7 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
 
 async function editExisting(
   recipeId: RecipeLocal['id'],
-  data: RecipeEdit,
+  data: RecipeRaw,
 ): Promise<RecipeLocal['id'] | undefined> {
   const existingRecipe = await db.recipes.get(recipeId)
   if (!existingRecipe) return undefined
@@ -61,13 +58,9 @@ async function editExisting(
   const tagIds = await resolveTagIds(normalizedTags)
   const previousRecipeIngredientIds = existingRecipe.recipeIngredientIds || []
 
-  const recipeIngredientIds = await Promise.all(
-    data.ingredients.map(async (ingredient, index) => {
-      const ingredientLine = toIngredientLine(ingredient)
-      const matchedIngredient =
-        ingredientsManager.matchAndNormalize(ingredientLine)[0] || ingredientLine
-
-      return await ingredientsManager.addRecipeIngredient(recipeId, matchedIngredient, index)
+  const recipeIngredientIds: UUID[] = await Promise.all(
+    data.matchedIngredients.map(async (mi, index) => {
+      return await ingredientsManager.addRecipeIngredient(recipeId, mi, index)
     }),
   ).then((ids) => ids.filter((id): id is UUID => !!id))
 
@@ -196,28 +189,30 @@ async function resolveTagIds(tags: string[]): Promise<UUID[]> {
   ).then((ids) => ids.filter((id): id is UUID => !!id))
 }
 
-function toIngredientLine(ingredient: EditableRecipeIngredient): string {
-  const textBefore = ingredient.textBefore.trim()
-  const textAfter = ingredient.textAfter.trim()
-  const quantity = ingredient.quantity.trim()
-  const quantityUpper = ingredient.quantityUpper.trim()
-  const unit = ingredient.unit.trim()
+async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
+  try {
+    const ingredientName = await ingredientsManager.getName(ri)
 
-  if (!quantity)
-    return [textBefore, textAfter]
-      .filter((part) => part !== '')
-      .join(' ')
-      .trim()
+    if (!ingredientName) return undefined
+    if (!ri.quantity) return [ingredientName]
+    if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
 
-  const quantityUnit =
-    ingredient.hasRange && quantityUpper
-      ? `${quantity}-${quantityUpper}${unit ? ` ${unit}` : ''}`
-      : `${quantity}${unit ? ` ${unit}` : ''}`
+    const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
+    const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
+    const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
+    const leadingSpace = stringBefore ? ' ' : ''
+    const trailingSpace = stringAfter ? ' ' : ''
 
-  return [textBefore, quantityUnit, textAfter]
-    .filter((part) => part !== '')
-    .join(' ')
-    .trim()
+    if (ri.unitId)
+      return [
+        stringBefore,
+        `${leadingSpace}${quantityString} ${String(unitsManager.getNameById(ri.unitId))}${trailingSpace}`,
+        stringAfter,
+      ]
+    else return [stringBefore, `${leadingSpace}${quantityString}${trailingSpace}`, stringAfter]
+  } catch (err) {
+    throw err instanceof Error ? err : new Error(String(err))
+  }
 }
 
 export const recipesManager = {
@@ -230,4 +225,5 @@ export const recipesManager = {
   nameExists,
   nameExistsExcluding,
   updateCaches,
+  getIngStrings,
 }

@@ -74,3 +74,25 @@ export function limitDecimals(value: number): number {
   }
   return value
 }
+
+export function parseCssDurationToMs(durationValue: string, fallback = 0): number {
+  const firstDuration = durationValue.split(',')[0]?.trim() || ''
+  const parsed = Number.parseFloat(firstDuration)
+
+  if (Number.isNaN(parsed)) return fallback
+  if (firstDuration.endsWith('ms')) return parsed
+  if (firstDuration.endsWith('s')) return parsed * 1000
+
+  return parsed
+}
+
+export function getCssCustomPropertyDurationMs(
+  propertyName: string,
+  fallback = 0,
+  rootElement: HTMLElement = document.documentElement,
+): number {
+  if (typeof window === 'undefined') return fallback
+
+  const raw = getComputedStyle(rootElement).getPropertyValue(propertyName).trim()
+  return parseCssDurationToMs(raw, fallback)
+}
