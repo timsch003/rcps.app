@@ -167,9 +167,33 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
   })
 }
 
+export function matchedIngredientToEditableLine(matchedIngredient: MatchedIngredient): string {
+  if (typeof matchedIngredient === 'string') return matchedIngredient
+  if (!matchedIngredient.length) return ''
+
+  const selectedPart =
+    matchedIngredient.find((part) => typeof part !== 'string' && part.selected) ||
+    matchedIngredient.find((part) => typeof part !== 'string' && part.quantity !== undefined) ||
+    matchedIngredient[0]
+
+  if (!selectedPart) return ''
+  if (typeof selectedPart === 'string') return selectedPart
+  if (selectedPart.quantity === undefined) return (selectedPart.normalizedLine || '').trim()
+
+  const stringBefore = selectedPart.textBeforeFirstMatch || ''
+  const quantityString = `${String(limitDecimals(selectedPart.quantity))}${selectedPart.quantityUpper ? dashes[1]! + String(limitDecimals(selectedPart.quantityUpper)) : ''}`
+  const unitPart = selectedPart.knownUnit ? ` ${selectedPart.knownUnit}` : ''
+  const stringAfter = selectedPart.textAfterQuantity || ''
+  const leadingSpace = stringBefore ? ' ' : ''
+  const trailingSpace = stringAfter ? ' ' : ''
+
+  return `${stringBefore}${leadingSpace}${quantityString}${unitPart}${trailingSpace}${stringAfter}`
+}
+
 export const ingredientsManager = {
   addRecipeIngredient,
   getRecipeIngredients,
   getName,
   matchAndNormalize,
+  matchedIngredientToEditableLine,
 }

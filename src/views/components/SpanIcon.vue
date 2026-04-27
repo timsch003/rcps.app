@@ -18,6 +18,6 @@ svg {
   height: var(--icon-size-xs);
   display: inline-flex;
   margin-right: 6px;
-  transform: translateY(3px);
+  vertical-align: middle;
 }
 </style>

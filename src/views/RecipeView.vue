@@ -71,20 +71,20 @@ function onServingsIncrease() {
     </div>
 
     <h3 v-if="tags.length" class="heading--muted">{{ t('Tags') }}</h3>
-    <p v-if="tags.length">
-      <span v-for="(tag, index) in tags" :key="index"
-        >{{ tag }}{{ index < tags.length - 1 ? ', ' : '' }}</span
-      >
-    </p>
+    <ul class="tags" v-if="tags.length">
+      <li class="tag" v-for="(tag, index) in tags" :key="index">
+        {{ tag }}
+      </li>
+    </ul>
 
     <h3 v-if="ingredientsStrings.length" class="heading--muted">{{ t('Ingredients') }}</h3>
-    <ul v-if="ingredientsStrings.length">
+    <ul class="recipe-view__ingredients" v-if="ingredientsStrings.length">
       <li v-for="(ingStrings, index) in ingredientsStrings" :key="index">
         <span v-if="ingStrings.length === 1">{{ ingStrings[0] }}</span>
         <div v-else-if="ingStrings.length > 1">
-          <span>{{ ingStrings[0] }}</span>
-          <span class="quantity-unit">{{ ingStrings[1] }}</span>
-          <span>{{ ingStrings[2] }}</span>
+          <span>{{ ingStrings[0] }}</span
+          ><span class="quantity-unit">{{ ingStrings[1] }}</span
+          ><span>{{ ingStrings[2] }}</span>
         </div>
       </li>
     </ul>
@@ -119,7 +119,7 @@ div.servings {
   }
 }
 
-li {
+.recipe-view__ingredients li {
   line-height: 1.15;
   padding-bottom: 7px;
   /* For empty ingredient lines */

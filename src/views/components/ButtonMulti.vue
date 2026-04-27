@@ -138,6 +138,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 
 .btn-button--inline {
   padding: 0;
+  margin: 0;
   box-shadow: none;
   background-color: transparent;
   transform: none;
