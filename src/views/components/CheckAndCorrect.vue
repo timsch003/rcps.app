@@ -4,7 +4,8 @@ import { useSortable } from '@vueuse/integrations/useSortable'
 import { t } from '@/lang/i18n'
 import { useRouter } from 'vue-router'
 import CheckIcon from '@/views/icons/IconCheck.vue'
-import IconArrowLeft from '../icons/IconArrowLeft.vue'
+import ArrowLeftIcon from '../icons/IconArrowLeft.vue'
+import DragHandleIcon from '../icons/IconDragHandle.vue'
 import ButtonMulti from './ButtonMulti.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '../icons/IconSpinner.vue'
@@ -34,6 +35,7 @@ const sortableIngredients = computed<RecipeRaw['matchedIngredients']>({
 
 const sortableOptions: SortableOptions = {
   animation: getCssCustomPropertyDurationMs('--transition-duration', 150),
+  handle: '.drag-handle',
   filter:
     '.checkcorrect__ingredient-quantity-unit--selected, .checkcorrect__ingredient-quantity-unit--ignored',
   preventOnFilter: false,
@@ -126,7 +128,7 @@ async function onCreate() {
 <template>
   <div>
     <ButtonMulti
-      :icon="IconArrowLeft"
+      :icon="ArrowLeftIcon"
       :desc="t('Back to editing')"
       showDesc
       @click="onBackToEditing"
@@ -182,14 +184,17 @@ async function onCreate() {
               t('checkcorrect.ingredients_info_detected')
             }}</span>
           </p>
+          <br />
           <p>
             {{ t('checkcorrect.ingredients_info_sort') }}
+            &nbsp;<span><DragHandleIcon class="drag-handle" /></span>
           </p>
         </div>
       </div>
 
       <ul v-if="data?.matchedIngredients?.length" class="checkcorrect__ingredients-list">
         <li v-for="(mi, ingIndex) in data?.matchedIngredients" :key="ingIndex">
+          <DragHandleIcon class="drag-handle" />
           <span v-if="typeof mi === 'string'">{{ mi }}</span>
 
           <span v-else-if="mi.length === 1">
@@ -203,30 +208,33 @@ async function onCreate() {
             <span v-if="mi[0]!.textAfterQuantity">{{ mi[0]!.textAfterQuantity }}</span>
           </span>
 
-          <span v-else-if="mi.length > 1" v-for="(part, index) in mi" :key="index">
-            <span v-if="typeof part !== 'string' && part.textBeforeFirstMatch">{{
-              part.textBeforeFirstMatch + ' '
-            }}</span>
-            <span
-              v-if="typeof part !== 'string' && part.quantity"
-              :class="
-                typeof part !== 'string' && part.selected
-                  ? 'checkcorrect__ingredient-quantity-unit--selected'
-                  : 'checkcorrect__ingredient-quantity-unit--ignored'
-              "
-              @click="selectQuantityUnit($event, ingIndex, index)"
-            >
-              {{ typeof part !== 'string' && part.quantity && limitDecimals(Number(part.quantity))
-              }}{{
-                typeof part !== 'string' && part.quantityUpper
-                  ? dashes[1]! + limitDecimals(Number(part.quantityUpper))
-                  : ''
-              }}
-              {{ typeof part !== 'string' && part.knownUnit && part.knownUnit }}</span
-            >
-            <span v-if="typeof part !== 'string' && part.textAfterQuantity">{{
-              part.textAfterQuantity
-            }}</span>
+          <span v-else-if="mi.length > 1">
+            <template v-for="(part, index) in mi" :key="index">
+              <span v-if="typeof part !== 'string' && part.textBeforeFirstMatch">{{
+                part.textBeforeFirstMatch + ' '
+              }}</span>
+              <span
+                v-if="typeof part !== 'string' && part.quantity"
+                :class="
+                  typeof part !== 'string' && part.selected
+                    ? 'checkcorrect__ingredient-quantity-unit--selected'
+                    : 'checkcorrect__ingredient-quantity-unit--ignored'
+                "
+                @click="selectQuantityUnit($event, ingIndex, index)"
+              >
+                {{
+                  typeof part !== 'string' && part.quantity && limitDecimals(Number(part.quantity))
+                }}{{
+                  typeof part !== 'string' && part.quantityUpper
+                    ? dashes[1]! + limitDecimals(Number(part.quantityUpper))
+                    : ''
+                }}
+                {{ typeof part !== 'string' && part.knownUnit && part.knownUnit }}</span
+              >
+              <span v-if="typeof part !== 'string' && part.textAfterQuantity">{{
+                part.textAfterQuantity
+              }}</span>
+            </template>
           </span>
         </li>
       </ul>
@@ -296,13 +304,24 @@ ul {
 
 li {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ing-spacing);
   padding-bottom: var(--ing-spacing);
   border-bottom: 1px solid var(--decor);
   margin-bottom: var(--ing-spacing);
-  cursor: grab;
 }
 
-li:active {
+.drag-handle {
+  flex-shrink: 0;
+  width: var(--icon-size-sm);
+  height: var(--icon-size-sm);
+  color: var(--text-muted, var(--decor));
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
   cursor: grabbing;
 }
 
@@ -355,8 +374,14 @@ p.checkcorrect__ingredients-info--overlay-legend {
 
 div.checkcorrect__ingredients-info--overlay {
   .checkcorrect__ingredient-quantity-unit--ignored,
-  .checkcorrect__ingredient-quantity-unit--selected {
+  .checkcorrect__ingredient-quantity-unit--selected,
+  .drag-handle {
     cursor: unset;
   }
+}
+
+span > svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 </style>

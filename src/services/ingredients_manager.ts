@@ -109,7 +109,7 @@ async function getName(
 export function matchAndNormalize(ingredients: string): MatchedIngredient[] | [] {
   if (!ingredients.trim()) return []
 
-  const ingredientLines = ingredients.split('\n').filter((line) => line.trim() !== '')
+  const ingredientLines = ingredients.split('\n')
 
   return ingredientLines.map((line) => {
     const trimmedLine = line.replace(/\s+/g, ' ').trim()

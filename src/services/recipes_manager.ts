@@ -193,7 +193,7 @@ async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined
   try {
     const ingredientName = await ingredientsManager.getName(ri)
 
-    if (!ingredientName) return undefined
+    if (ingredientName === undefined) return undefined
     if (!ri.quantity) return [ingredientName]
     if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
 

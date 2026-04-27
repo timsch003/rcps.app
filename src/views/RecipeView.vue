@@ -5,10 +5,7 @@ import { useWakeLock } from '@vueuse/core'
 import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
-import { unitsManager } from '@/services/units_manager'
 import { useSettingsStore } from '@/stores/settings'
-import { limitDecimals } from '@/utils/conversion'
-import { dashes } from '@/utils/fixed_values'
 import { t } from '@/lang/i18n'
 import ButtonMulti from './components/ButtonMulti.vue'
 import type { RecipeLocal, RecipeIngredient, Tag } from '@/types'
@@ -54,7 +51,6 @@ onUnmounted(() => {
   wakeLock.release()
 })
 
-
 function onServingsDecrease() {
   // TODO
 }
@@ -93,9 +89,9 @@ function onServingsIncrease() {
       </li>
     </ul>
     <h3 v-if="recipe?.instructions" class="heading--muted">{{ t('Instructions') }}</h3>
-    <p v-if="recipe?.instructions">{{ recipe?.instructions }}</p>
+    <p v-if="recipe?.instructions" class="multiline_text">{{ recipe?.instructions }}</p>
     <h3 v-if="recipe?.notes" class="heading--muted">{{ t('Notes') }}</h3>
-    <p v-if="recipe?.notes">{{ recipe?.notes }}</p>
+    <p v-if="recipe?.notes" class="multiline_text">{{ recipe?.notes }}</p>
   </div>
 </template>
 
@@ -103,7 +99,10 @@ function onServingsIncrease() {
 .recipe-view {
   /* Prevent layout shift when transitioning out top nav */
   position: absolute;
-  inset: var(--inner-spacing);
+  inset: var(--inner-spacing) var(--inner-spacing) auto var(--inner-spacing);
+  overflow-y: auto;
+  min-height: max-content;
+  padding-block-end: var(--inner-spacing);
 }
 
 h3.heading--muted:not(:first-of-type) {
@@ -123,6 +122,8 @@ div.servings {
 li {
   line-height: 1.15;
   padding-bottom: 7px;
+  /* For empty ingredient lines */
+  min-height: 1em;
 }
 
 span.quantity-unit {
