@@ -579,6 +579,7 @@ ul.checkcorrect__ingredients-list li {
   margin-bottom: var(--ing-spacing);
 }
 ul.checkcorrect__ingredients-list li:first-child {
+  padding-top: var(--ing-spacing);
   border-top: 1px solid var(--decor);
 }
 ul.checkcorrect__ingredients-list li:last-child {
