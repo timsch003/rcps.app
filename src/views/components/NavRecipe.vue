@@ -11,13 +11,19 @@ const router = useRouter()
 const { isScrolling } = useScroll(window, { behavior: 'smooth' })
 
 function edit() {
-  router.push({ name: 'create', query: { edit: route.params.id } })
+  router.replace({ name: 'create', query: { edit: route.params.id } })
 }
 </script>
 
 <template>
   <nav class="recipe" :class="{ scrolling: isScrolling }">
-    <ButtonMulti @click="router.back()" :icon="ArrowLeftIcon" :desc="t('Back')" accentColor small />
+    <ButtonMulti
+      @click="router.push(route.meta.fromPath || 'tags')"
+      :icon="ArrowLeftIcon"
+      :desc="t('Back')"
+      accentColor
+      small
+    />
     <ButtonMulti @click="edit()" :icon="EditIcon" :desc="t('Edit recipe')" accentColor small />
   </nav>
 </template>

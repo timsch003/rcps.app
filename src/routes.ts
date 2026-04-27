@@ -96,6 +96,8 @@ const router = createRouter({
 
 router.afterEach((to, from) => {
   if (from.name === 'tag') to.meta.transition = 'slide-in-ltr'
+
+  if (to.name === 'recipe') to.meta.fromPath = from.fullPath
 })
 
 export default router
