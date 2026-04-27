@@ -150,18 +150,22 @@ Current binary version: **0.37.3**
 ### General
 
 - Set up multilangual landing page with SEO
+- Check legal implications of storing user email/password and recipe data (no other personal data)
 
 ### Functionality
 
-- Add recipe editing
 - Persist last viewed in user settings
-- Refactor error handling to improve retraceability
-- Refactor CheckAndCorrect view to use @click or VueUse instead of EventListener
+- Refactor error handling to improve retraceability and user feedback (automated emails when errors occur?)
+- Add links to tags in recipe view
 
 ### UI/UX
 
 - Add transition / animation to nav bottom active indicator (:before)
-- Refactor sync status icons and animations (in-out only?)
+- Refactor sync status
+  - Indicate unsynced local changes when offline
+  - Add tick to synced icon
+  - Add info section explaining sync to menu
+    
 
 ### Internationalization
 
@@ -173,12 +177,5 @@ Current binary version: **0.37.3**
 
 ## Deployment checklist
 
-### Before
-
-- [PocketBase docs "Going to production"](https://pocketbase.io/docs/going-to-production)
 - Email translations import endpoint deleted from pb_hooks?
 - All API Rules safe?
-
-### After
-
-- Check if ScreenWakeLock is working (needs SSL)
