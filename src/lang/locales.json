@@ -89,6 +89,7 @@
     "settings.switch_to_dark_mode": "Switch to dark mode",
     "settings.switch_to_light_mode": "Switch to light mode",
     "settings.accent_color": "Accent color",
+    "settings.no_accent_color": "No accent color",
     "settings.keep_screen_on": "Keep screen on while viewing a recipe",
     "settings.language": "Language",
     "settings.user_account": "User account"
@@ -181,6 +182,7 @@
     "settings.switch_to_dark_mode": "Zum dunklen Modus wechseln",
     "settings.switch_to_light_mode": "Zum hellen Modus wechseln",
     "settings.accent_color": "Akzentfarbe",
+    "settings.no_accent_color": "Keine Akzentfarbe",
     "settings.no_accent_colors_available": "Keine Akzentfarben verfügbar.",
     "settings.keep_screen_on": "Bildschirm beim Anzeigen eines Rezepts eingeschaltet lassen",
     "settings.language": "Sprache",

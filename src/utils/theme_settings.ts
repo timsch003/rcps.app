@@ -29,6 +29,8 @@ export const DEFAULT_ACCENT_BY_THEME: Record<ThemeMode, string> = {
   light: '--l-crimson',
 }
 
+export const NO_ACCENT_TOKEN = '--text'
+
 export function resolveTheme(theme?: string): ThemeMode {
   return theme === 'light' ? 'light' : 'dark'
 }
@@ -42,6 +44,7 @@ export function resolveSelectedAccent(
   accent: string | undefined,
   availableAccents: string[],
 ): string {
+  if (accent === NO_ACCENT_TOKEN) return NO_ACCENT_TOKEN
   if (accent && availableAccents.includes(accent)) return accent
 
   const fallbackAccent = DEFAULT_ACCENT_BY_THEME[theme]
@@ -55,6 +58,13 @@ export function resolveNextThemeSelection(
   currentAccent: string | undefined,
   accents: ThemeAccents,
 ): { theme: ThemeMode; accent: string } {
+  if (currentAccent === NO_ACCENT_TOKEN) {
+    return {
+      theme: currentTheme === 'light' ? 'dark' : 'light',
+      accent: NO_ACCENT_TOKEN,
+    }
+  }
+
   const nextTheme: ThemeMode = currentTheme === 'light' ? 'dark' : 'light'
   const nextThemeAccents = getAvailableAccents(nextTheme, accents)
 
@@ -65,6 +75,8 @@ export function resolveNextThemeSelection(
 }
 
 export function resolveAccent(theme: ThemeMode, accent?: string): string {
+  if (accent === NO_ACCENT_TOKEN) return NO_ACCENT_TOKEN
+
   const expectedPrefix = theme === 'dark' ? '--d-' : '--l-'
 
   if (!accent || !accent.startsWith(expectedPrefix)) return DEFAULT_ACCENT_BY_THEME[theme]

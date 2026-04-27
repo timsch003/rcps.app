@@ -4,6 +4,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { t } from '@/lang/i18n'
 import {
   getAvailableAccents,
+  NO_ACCENT_TOKEN,
   resolveNextThemeSelection,
   resolveSelectedAccent,
   resolveTheme,
@@ -13,6 +14,7 @@ import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import IconArrowLeft from '@/views/icons/IconArrowLeft.vue'
 import ModeLightIcon from '@/views/icons/IconModeLight.vue'
 import ModeDarkIcon from '@/views/icons/IconModeDark.vue'
+import CloseIcon from '@/views/icons/IconClose.vue'
 
 defineProps<{
   setting: 'appearance' | 'ui'
@@ -31,6 +33,7 @@ const keepScreenOn = computed({
   set: (value: boolean) => settingsStore.update({ keepScreenOn: value }),
 })
 const availableAccents = computed(() => getAvailableAccents(activeTheme.value, THEME_ACCENTS))
+const accentOptions = computed(() => [NO_ACCENT_TOKEN, ...availableAccents.value])
 const selectedAccent = computed(() =>
   resolveSelectedAccent(activeTheme.value, settings.value.accent, availableAccents.value),
 )
@@ -45,7 +48,7 @@ function toggleTheme() {
 }
 
 function setAccent(accent: string) {
-  if (!availableAccents.value.includes(accent)) return
+  if (accent !== NO_ACCENT_TOKEN && !availableAccents.value.includes(accent)) return
   settingsStore.update({ accent })
 }
 </script>
@@ -86,17 +89,28 @@ function setAccent(accent: string) {
           :aria-label="t('settings.accent_color')"
         >
           <button
-            v-for="accent in availableAccents"
+            v-for="accent in accentOptions"
             :key="accent"
             type="button"
             class="menu-setting__accent-btn"
-            :class="{ 'menu-setting__accent--selected': accent === selectedAccent }"
-            :style="{ backgroundColor: `var(${accent})` }"
-            :aria-label="accent"
+            :class="{
+              'menu-setting__accent--selected': accent === selectedAccent,
+              'menu-setting__accent-btn--none': accent === NO_ACCENT_TOKEN,
+            }"
+            :style="
+              accent === NO_ACCENT_TOKEN
+                ? undefined
+                : {
+                    backgroundColor: `var(${accent})`,
+                  }
+            "
+            :aria-label="accent === NO_ACCENT_TOKEN ? t('settings.no_accent_color') : accent"
             :aria-checked="accent === selectedAccent"
             role="radio"
             @click="setAccent(accent)"
-          />
+          >
+            <CloseIcon v-if="accent === NO_ACCENT_TOKEN" />
+          </button>
         </div>
       </form>
     </div>
@@ -145,5 +159,18 @@ button.menu-setting__accent-btn:active {
 
 button.menu-setting__accent-btn.menu-setting__accent--selected {
   border-color: transparent;
+}
+
+button.menu-setting__accent-btn--none,
+button.menu-setting__accent-btn--none:hover,
+button.menu-setting__accent-btn--none:focus,
+button.menu-setting__accent-btn--none:active {
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  svg {
+    width: var(--icon-size);
+    height: var(--icon-size);
+  }
 }
 </style>
