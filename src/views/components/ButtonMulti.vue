@@ -136,17 +136,14 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
   border-top: 2px solid var(--accent);
 }
 
-.btn-button--inline {
+.btn-button--inline,
+.btn-button--inline:not(:disabled):hover,
+.btn-button--inline:not(:disabled):focus,
+.btn-button--inline:not(:disabled):active {
   padding: 0;
   margin: 0;
   box-shadow: none;
   background-color: transparent;
-  transform: none;
-}
-
-.btn-button--inline:hover,
-.btn-button--inline:focus,
-.btn-button--inline:active {
   transform: none;
   transition: none;
 }

@@ -71,11 +71,11 @@ function onServingsIncrease() {
     </div>
 
     <h3 v-if="tags.length" class="heading--muted">{{ t('Tags') }}</h3>
-    <ul class="tags" v-if="tags.length">
-      <li class="tag" v-for="(tag, index) in tags" :key="index">
-        {{ tag }}
-      </li>
-    </ul>
+    <p v-if="tags.length">
+      <span v-for="(tag, index) in tags" :key="index"
+        >{{ tag }}{{ index < tags.length - 1 ? ', ' : '' }}</span
+      >
+    </p>
 
     <h3 v-if="ingredientsStrings.length" class="heading--muted">{{ t('Ingredients') }}</h3>
     <ul class="recipe-view__ingredients" v-if="ingredientsStrings.length">

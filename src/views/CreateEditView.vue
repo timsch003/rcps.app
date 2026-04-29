@@ -37,11 +37,9 @@ const isValidating = ref(false)
 const ingredientsInfoVisible = ref(false)
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsListElement = ref<HTMLElement | null>(null)
-const tagsInput = ref<HTMLInputElement | null>(null)
 const ingredientsTextarea = ref<HTMLTextAreaElement | null>(null)
 const instructionsTextarea = ref<HTMLTextAreaElement | null>(null)
 const notesTextarea = ref<HTMLTextAreaElement | null>(null)
-const editingTags = ref(true)
 const editingIngredients = ref(true)
 
 const sortableIngredients = computed<RecipeRaw['matchedIngredients']>({
@@ -90,7 +88,6 @@ onMounted(async () => {
         if (recipe.tagIds?.length) {
           const tagNames = await tagsManager.getNames(recipe.tagIds)
           data.tags = tagNames
-          editingTags.value = false
         }
 
         if (recipe.recipeIngredientIds?.length) {
@@ -206,13 +203,6 @@ function normalizeTags() {
         .filter((tag) => tag !== '')
 }
 
-function onTagsBlur() {
-  if (!editingTags.value) return
-
-  normalizeTags()
-  editingTags.value = false
-}
-
 async function onCreate() {
   if (isValidating.value) return
 
@@ -256,17 +246,6 @@ function onEditIngredients() {
   })
 }
 
-function onEditTags() {
-  data.tags = Array.isArray(data.tags) ? data.tags.join(', ') : data.tags
-  editingTags.value = true
-  nextTick(() => tagsInput.value?.focus())
-}
-
-function removeTag(index: number) {
-  if (!Array.isArray(data.tags)) return
-  data.tags.splice(index, 1)
-}
-
 function removeIngredient(index: number) {
   data.matchedIngredients.splice(index, 1)
 }
@@ -279,7 +258,7 @@ function removeIngredient(index: number) {
 
     <p v-if="loading" class="loading">{{ t('sync.status_pulling') }}</p>
 
-    <form class="create" @submit.prevent v-if="!loading">
+    <form v-if="!loading" class="create" @submit.prevent>
       <label for="create__name-input" class="heading--muted">{{ t('Name') }}</label>
       <input type="text" id="create__name-input" v-model.trim="data.name" />
 
@@ -293,34 +272,10 @@ function removeIngredient(index: number) {
         />
       </div>
 
-      <label v-if="editingTags" for="create__tags-input" class="heading--muted">
+      <label for="create__tags-input" class="heading--muted">
         {{ t('Tags') }} {{ t('tags_hint') }}
       </label>
-      <h3 v-else class="heading--muted heading--with-icon">
-        {{ t('Tags') }}
-        <ButtonMulti :icon="EditIcon" :desc="t('Edit')" inline @click="onEditTags" />
-      </h3>
-      <input
-        v-if="editingTags"
-        ref="tagsInput"
-        type="text"
-        id="create__tags-input"
-        v-model="data.tags"
-        @blur="onTagsBlur"
-        @focusout="onTagsBlur"
-      />
-      <ul v-else-if="Array.isArray(data.tags) && data.tags.length" class="tags">
-        <li class="tag" v-for="(tag, tagIndex) in data.tags" :key="tag + tagIndex">
-          {{ tag }}
-          <CloseIcon
-            class="checkcorrect__remove-button"
-            role="button"
-            aria-label="Remove tag"
-            @click="removeTag(tagIndex)"
-          />
-        </li>
-      </ul>
-      <p class="create__empty" v-else>-</p>
+      <input type="text" id="create__tags-input" v-model="data.tags" />
 
       <label for="create__favorite-input" class="heading--muted">{{
         t('create_edit.favorite')
@@ -481,7 +436,7 @@ function removeIngredient(index: number) {
 }
 .create > input,
 .create > textarea,
-.create > ul.tags,
+.create > ul.checkcorrect__tags,
 .create > .checkcorrect__ingredients-container,
 .create > .create__empty,
 .create > .create__servings {

@@ -175,6 +175,7 @@ Current binary version: **0.37.3**
   - Indicate unsynced local changes when offline
   - Add tick to synced icon
   - Add info section explaining sync to menu
+- Show suggestions when typing in tags
 
 ### Internationalization
 
