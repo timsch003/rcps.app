@@ -104,7 +104,7 @@ onMounted(async () => {
             .map((strings) => (strings ? strings.join('') : ''))
             .join('\n')
 
-          if (data.ingredients.trim()) {
+          if (data.ingredients) {
             data.matchedIngredients = ingredientsManager.matchAndNormalize(data.ingredients)
             editingIngredients.value = false
           }
@@ -129,15 +129,13 @@ const validateServingsInput = (e: Event) => {
   if (Number(input.value) <= 0) input.value = '1'
 }
 
-const fitTextareaHeight = (e: Event) => {
-  const textarea = e.target as HTMLTextAreaElement
-  fitTextareaToContent(textarea)
-}
-
-function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
-  if (!textarea) return
-  textarea.style.height = 'auto'
-  textarea.style.height = `${textarea.scrollHeight}px`
+function normalizeTags() {
+  data.tags = Array.isArray(data.tags)
+    ? data.tags
+    : data.tags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter((tag) => tag !== '')
 }
 
 function toggleIngredientsInfoOverlay() {
@@ -150,6 +148,48 @@ function toggleIngredientsInfoOverlay() {
     ingredientsInfoElement.value.style.clipPath = 'inset(0px 0px 0px 0px)'
     ingredientsInfoVisible.value = true
   }
+}
+
+function onIngredientsBlur() {
+  if (!editingIngredients.value) return
+
+  data.matchedIngredients = data.ingredients
+    ? ingredientsManager.matchAndNormalize(data.ingredients)
+    : []
+
+  editingIngredients.value = false
+
+  const headerHeight = document.querySelector('main > header')?.clientHeight || 0
+  const ingAnchor = document.querySelector(
+    '#checkcorrect__ingredients-anchor',
+  ) as HTMLElement | null
+  if (ingAnchor) {
+    ingAnchor.style.scrollMarginTop = `calc(${headerHeight}px + 4px)`
+    ingAnchor.scrollIntoView({
+      behavior: 'smooth',
+    })
+  }
+}
+
+function onEditIngredients() {
+  rebuildIngredientsTextFromMatched()
+  editingIngredients.value = true
+  nextTick(() => {
+    fitTextareaToContent(ingredientsTextarea.value)
+    ingredientsTextarea.value?.focus()
+  })
+}
+
+function rebuildIngredientsTextFromMatched() {
+  if (!data.matchedIngredients.length) return
+
+  data.ingredients = data.matchedIngredients
+    .map((mi) => (typeof mi === 'string' ? mi : mi[0] && mi[0].normalizedLine))
+    .join('\n')
+}
+
+function removeIngredient(index: number) {
+  data.matchedIngredients.splice(index, 1)
 }
 
 function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number) {
@@ -177,30 +217,15 @@ function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number
   data.matchedIngredients[ingredientIndex][partIndex].selected = true
 }
 
-function onIngredientsBlur() {
-  if (!editingIngredients.value) return
-
-  data.matchedIngredients = data.ingredients
-    ? ingredientsManager.matchAndNormalize(data.ingredients)
-    : []
-  editingIngredients.value = false
+const fitTextareaHeight = (e: Event) => {
+  const textarea = e.target as HTMLTextAreaElement
+  fitTextareaToContent(textarea)
 }
 
-function rebuildIngredientsTextFromMatched() {
-  if (!data.matchedIngredients.length) return
-
-  data.ingredients = data.matchedIngredients
-    .map((mi) => (typeof mi === 'string' ? mi : mi[0] && mi[0].normalizedLine))
-    .join('\n')
-}
-
-function normalizeTags() {
-  data.tags = Array.isArray(data.tags)
-    ? data.tags
-    : data.tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag !== '')
+function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
+  if (!textarea) return
+  textarea.style.height = 'auto'
+  textarea.style.height = `${textarea.scrollHeight}px`
 }
 
 async function onCreate() {
@@ -236,19 +261,6 @@ async function onCreate() {
 
   isValidating.value = false
 }
-
-function onEditIngredients() {
-  rebuildIngredientsTextFromMatched()
-  editingIngredients.value = true
-  nextTick(() => {
-    fitTextareaToContent(ingredientsTextarea.value)
-    ingredientsTextarea.value?.focus()
-  })
-}
-
-function removeIngredient(index: number) {
-  data.matchedIngredients.splice(index, 1)
-}
 </script>
 
 <template>
@@ -282,6 +294,7 @@ function removeIngredient(index: number) {
       }}</label>
       <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
 
+      <div id="checkcorrect__ingredients-anchor"></div>
       <label
         v-if="editingIngredients"
         for="create__ingredients-input"
@@ -481,6 +494,10 @@ h3.heading--with-icon {
   color: var(--text);
   opacity: var(--text-secondary-opacity);
   cursor: pointer;
+}
+
+div#checkcorrect__ingredients-anchor {
+  visibility: hidden;
 }
 
 textarea#create__ingredients-input {

@@ -131,7 +131,6 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
       const textAfterQuantity = (knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit)
         ?.trimEnd()
         .replace(/^\s+/g, ' ')
-      console.log(quantity)
 
       const quantityIsRange = quantityNormalized && dashesRegex.test(quantityNormalized)
       const [lower, upper] = quantityNormalized?.split(dashesRegex).map((q) => q.trim()) || []
