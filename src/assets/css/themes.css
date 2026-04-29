@@ -17,17 +17,20 @@
     Changes to these variable names need to be
     applied in /src/utils/theme_settings.ts as well.
   */
+  --d-grey: #aaaaaa;
   --d-candy: #ff8591;
   --d-grapefruit: #fe7173;
+  --d-tangerine: #e77f4b;
   --d-rose: #dda6a8;
   --d-bronze: #e09f7d;
   --d-canary: #f7f052;
   --d-gold: #efcb68;
   --d-lime: #ddfcad;
+  --d-mint: #03fcba;
   --d-moss: #72c077;
+  --d-turquoise: #73eedc;
   --d-sky: #7cb9df;
   --d-cornflower: #7aa4ff;
-  --d-turquoise: #73eedc;
   --d-mauve: #c879ff;
   --d-periwinkle: #acacec;
 
@@ -36,12 +39,22 @@
     Changes to these variable names need to be
     applied in /src/utils/theme_settings.ts as well.
   */
-  --l-crimson: #9e1a1a;
+  --l-grey: #5c5c5c;
+  --l-rust: #ad2e0b;
+  --l-cherry: #c71a34;
+  --l-orange: #f53900;
   --l-brandy: #772f1a;
+  --l-chocolate: #8c4e18;
+  --l-earth: #8d6802;
   --l-olive: #345511;
+  --l-emerald: #1d6515;
+  --l-turf: #097144;
+  --l-turquoise: #0d6d5f;
+  --l-cerulean: #005a7a;
   --l-grape: #514686;
   --l-indigo: #610f7f;
   --l-velvet: #762c77;
+  --l-raspberry: #af0878;
 
   /* Use only for technical indications
   */

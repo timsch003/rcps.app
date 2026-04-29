@@ -7,26 +7,46 @@ export type ThemeAccents = {
 
 export const THEME_ACCENTS: ThemeAccents = {
   dark: [
+    '--d-grey',
     '--d-candy',
     '--d-grapefruit',
+    '--d-tangerine',
     '--d-rose',
     '--d-bronze',
     '--d-canary',
     '--d-gold',
     '--d-lime',
+    '--d-mint',
     '--d-moss',
+    '--d-turquoise',
     '--d-sky',
     '--d-cornflower',
-    '--d-turquoise',
     '--d-mauve',
     '--d-periwinkle',
   ],
-  light: ['--l-crimson', '--l-brandy', '--l-olive', '--l-grape', '--l-indigo', '--l-velvet'],
+  light: [
+    '--l-grey',
+    '--l-rust',
+    '--l-cherry',
+    '--l-orange',
+    '--l-brandy',
+    '--l-chocolate',
+    '--l-earth',
+    '--l-olive',
+    '--l-emerald',
+    '--l-turf',
+    '--l-turquoise',
+    '--l-cerulean',
+    '--l-grape',
+    '--l-indigo',
+    '--l-velvet',
+    '--l-raspberry',
+  ],
 }
 
 export const DEFAULT_ACCENT_BY_THEME: Record<ThemeMode, string> = {
-  dark: '--d-candy',
-  light: '--l-crimson',
+  dark: '--d-grapefruit',
+  light: '--l-cherry',
 }
 
 export const NO_ACCENT_TOKEN = '--text'
