@@ -105,18 +105,15 @@ function onServingsIncrease() {
   padding-block-end: var(--inner-spacing);
 }
 
-h3.heading--muted:not(:first-of-type) {
-  margin-top: var(--inner-spacing);
+h2.heading-root,
+h3.heading--muted {
+  margin-top: var(--inner-spacing-m);
 }
 
 div.servings {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--inner-spacing);
-
-  button {
-    margin-bottom: 5px;
-  }
 }
 
 .recipe-view__ingredients li {

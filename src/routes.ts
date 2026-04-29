@@ -48,6 +48,11 @@ const router = createRouter({
           name: 'recipe',
           component: RecipeView,
         },
+        {
+          path: '/edit/:id',
+          name: 'edit',
+          component: CreateEditView,
+        },
         { path: '/create', name: 'create', component: CreateEditView },
       ],
     },

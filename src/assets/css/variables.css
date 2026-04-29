@@ -3,13 +3,13 @@
   */
   --heading-font-size: 1.2rem;
   --heading-secondary-font-size: 1.1rem;
-  --secondary-opacity: 0.75;
   --quantity-unit-font-weight: 700;
 
   /* Spacings
   */
   --outer-spacing: 10px;
   --inner-spacing: 12px;
+  --inner-spacing-m: 20px;
   --inner-spacing-l: 30px;
 
   /* UI
@@ -20,4 +20,8 @@
   --icon-size-s: 1.5rem;
   --icon-size-xs: 1rem;
   --nav-border-width: 2px;
+
+  /* Misc
+  */
+  --secondary-opacity: 0.75;
 }

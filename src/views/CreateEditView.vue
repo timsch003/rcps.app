@@ -10,6 +10,7 @@ import { tagsManager } from '@/services/tags_manager'
 import { dashes } from '@/utils/fixed_values'
 import { getCssCustomPropertyDurationMs, limitDecimals } from '@/utils/conversion'
 import { t } from '@/lang/i18n'
+import ArrowLeftIcon from '@/views/icons/IconArrowLeft.vue'
 import CheckIcon from '@/views/icons/IconCheck.vue'
 import EditIcon from '@/views/icons/IconEdit.vue'
 import CloseIcon from '@/views/icons/IconClose.vue'
@@ -72,7 +73,8 @@ onClickOutside(
 )
 
 onMounted(async () => {
-  const recipeId = route.query.edit as string | undefined
+  const recipeId = route.params.id as string | undefined
+
   if (recipeId) {
     loading.value = true
     try {
@@ -265,6 +267,15 @@ async function onCreate() {
 
 <template>
   <div>
+    <ButtonMulti
+      v-if="editingRecipeId"
+      class="create_edit__discard-button"
+      :icon="ArrowLeftIcon"
+      :desc="t('create_edit.discard_changes')"
+      showDesc
+      @click="$router.back()"
+    />
+
     <h2 v-if="editingRecipeId" class="heading--root">{{ t('Edit recipe') }}</h2>
     <h2 v-else class="heading--root">{{ t('Create recipe') }}</h2>
 
@@ -333,6 +344,7 @@ async function onCreate() {
             <p>
               {{ t('checkcorrect.ingredients_info_legend') }}
             </p>
+            <br />
             <p class="checkcorrect__ingredients-info--overlay-legend">
               <span class="checkcorrect__ingredient-quantity-unit--selected">
                 {{ t('checkcorrect.ingredients_info_selected') }}
@@ -348,8 +360,12 @@ async function onCreate() {
             </p>
             <br />
             <p>
-              {{ t('checkcorrect.ingredients_info_sort') }}
-              &nbsp;<span><DragHandleIcon class="drag-handle" /></span>
+              {{ t('checkcorrect.ingredients_info_remove-sort1')
+              }}<span><CloseIcon class="checkcorrect__remove-button" /></span>
+            </p>
+            <p>
+              {{ t('checkcorrect.ingredients_info_remove-sort2')
+              }}<span><DragHandleIcon class="drag-handle" /></span>
             </p>
           </div>
         </div>
@@ -447,13 +463,24 @@ async function onCreate() {
 .create textarea {
   margin-block-end: 0;
 }
+h2.heading--root,
+.create_edit__discard-button,
 .create > input,
 .create > textarea,
 .create > ul.checkcorrect__tags,
 .create > .checkcorrect__ingredients-container,
 .create > .create__empty,
 .create > .create__servings {
-  margin-block-end: var(--inner-spacing);
+  margin-block-end: var(--inner-spacing-m);
+}
+
+h2.heading--root {
+  padding: 0;
+}
+
+h3.heading--muted,
+label.heading--muted {
+  max-width: max-content;
 }
 
 input:not([type='checkbox']),
@@ -516,6 +543,12 @@ div.checkcorrect__ingredients-info {
     background-color: var(--bg);
     border: 2px solid var(--decor);
     transition: clip-path var(--transition-duration);
+
+    .drag-handle,
+    .checkcorrect__remove-button {
+      display: inline-block;
+      vertical-align: middle;
+    }
   }
 }
 
