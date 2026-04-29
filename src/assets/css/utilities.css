@@ -11,7 +11,7 @@
   font-size: var(--heading-secondary-font-size);
   font-weight: 300;
   letter-spacing: 0.5px;
-  opacity: var(--text-secondary-opacity);
+  opacity: var(--secondary-opacity);
   padding-bottom: 2px;
 }
 

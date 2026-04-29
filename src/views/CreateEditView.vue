@@ -492,7 +492,7 @@ h3.heading--with-icon {
   margin-inline-start: auto;
   background-color: none;
   color: var(--text);
-  opacity: var(--text-secondary-opacity);
+  opacity: var(--secondary-opacity);
   cursor: pointer;
 }
 
@@ -598,7 +598,7 @@ div.checkcorrect__ingredients-info--overlay {
   width: var(--icon-size-sm);
   height: var(--icon-size-sm);
   color: var(--text);
-  opacity: var(--text-secondary-opacity);
+  opacity: var(--secondary-opacity);
   cursor: grab;
   touch-action: none;
 }

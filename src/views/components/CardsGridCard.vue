@@ -60,7 +60,7 @@ a.card__recipe {
   h2 {
     padding: 3px 9px 6px 9px;
     background-color: var(--bg);
-    opacity: var(--text-secondary-opacity);
+    opacity: var(--secondary-opacity);
   }
 }
 

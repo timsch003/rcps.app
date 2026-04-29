@@ -43,7 +43,7 @@ nav.recipe {
 }
 
 nav.recipe {
-  opacity: 0.8;
+  opacity: var(--secondary-opacity);
   transition: all var(--transition-duration);
 }
 nav.recipe:hover,

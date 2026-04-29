@@ -99,7 +99,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 
 .btn-link__desc,
 .btn-button__desc {
-  opacity: var(--text-secondary-opacity);
+  opacity: var(--secondary-opacity);
   margin-left: var(--inner-spacing);
 }
 

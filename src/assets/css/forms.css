@@ -12,7 +12,7 @@ form {
   label {
     display: block;
     padding-bottom: 2px;
-    opacity: var(--text-secondary-opacity);
+    opacity: var(--secondary-opacity);
   }
 
   input[type='text'],
