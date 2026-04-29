@@ -99,7 +99,7 @@ onMounted(async () => {
           )
           const ingStrings = await Promise.all(
             recipeIngredients.map(async (ri) => {
-              return await recipesManager.getIngStrings(ri)
+              return await ingredientsManager.getIngStrings(ri)
             }),
           )
           data.ingredients = ingStrings
@@ -128,7 +128,8 @@ onMounted(async () => {
 const validateServingsInput = (e: Event) => {
   const input = e.target as HTMLInputElement
   const value = input.value.trim()
-  input.value = /^[1-9]{1,3}$/g.test(value) ? value : ''
+  input.value = /^\d{0,4}$/g.test(value) ? value : '1'
+  if (Number(input.value) <= 0) input.value = '1'
 }
 
 const fitTextareaHeight = (e: Event) => {
@@ -192,7 +193,7 @@ function rebuildIngredientsTextFromMatched() {
   if (!data.matchedIngredients.length) return
 
   data.ingredients = data.matchedIngredients
-    .map((mi) => ingredientsManager.matchedIngredientToEditableLine(mi))
+    .map((mi) => (typeof mi === 'string' ? mi : mi[0] && mi[0].normalizedLine))
     .join('\n')
 }
 
@@ -219,18 +220,10 @@ async function onCreate() {
     alert(t('create_edit.alert_name_required'))
     return
   }
-  if (editingRecipeId.value) {
-    // When editing, check name uniqueness excluding current recipe
-    if (await recipesManager.nameExistsExcluding(data.name, editingRecipeId.value)) {
-      alert(t('create_edit.alert_name_exists'))
-      return
-    }
-  } else {
-    // When creating, check if name already exists
-    if (await recipesManager.nameExists(data.name)) {
-      alert(t('create_edit.alert_name_exists'))
-      return
-    }
+
+  if (!editingRecipeId.value && (await recipesManager.nameExists(data.name))) {
+    alert(t('create_edit.alert_name_exists'))
+    return
   }
 
   if (!data.tags.length || (typeof data.tags === 'string' && !data.tags.trim())) {
@@ -247,13 +240,7 @@ async function onCreate() {
     data.matchedIngredients = ingredientsManager.matchAndNormalize(data.ingredients)
   }
 
-  let recipeId: RecipeLocal['id'] | undefined
-
-  if (editingRecipeId.value) {
-    recipeId = await recipesManager.editExisting(editingRecipeId.value, data)
-  } else {
-    recipeId = await recipesManager.addNew(data)
-  }
+  const recipeId = await recipesManager.createEdit(data, editingRecipeId.value || undefined)
 
   if (recipeId) router.replace({ name: 'recipe', params: { id: recipeId } })
 
@@ -302,7 +289,7 @@ function removeIngredient(index: number) {
           type="number"
           id="create__servings-input"
           v-model.number="data.servings"
-          @input="validateServingsInput"
+          @blur="validateServingsInput"
         />
       </div>
 
@@ -406,48 +393,43 @@ function removeIngredient(index: number) {
         >
           <li v-for="(mi, ingIndex) in data.matchedIngredients" :key="ingIndex">
             <DragHandleIcon class="drag-handle" />
-            <span v-if="typeof mi === 'string'">{{ mi }}</span>
 
-            <span v-else-if="mi.length === 1">
-              <span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
-                {{ mi[0].quantity && limitDecimals(Number(mi[0].quantity))
+            <!-- Keep span elements on the same line to avoid unwanted whitespace -->
+            <span v-if="typeof mi === 'string'">{{ mi }}</span
+            ><span v-else-if="mi.length === 1 && mi[0]"
+              ><span v-if="mi[0].textBeforeFirstMatch">{{ mi[0].textBeforeFirstMatch + ' ' }}</span
+              ><span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
+                {{
+                  mi[0].quantity &&
+                  limitDecimals(Number(mi[0].quantity)) + (mi[0].quantityUpper ? '' : ' ')
                 }}{{
-                  mi[0].quantityUpper ? dashes[1]! + limitDecimals(Number(mi[0].quantityUpper)) : ''
-                }}
-                {{ mi[0].knownUnit && mi[0].knownUnit }}</span
-              >
-              <span v-if="mi[0]!.textAfterQuantity">{{ ' ' + mi[0]!.textAfterQuantity }}</span>
-            </span>
+                  mi[0].quantityUpper
+                    ? dashes[1] && dashes[1] + limitDecimals(Number(mi[0].quantityUpper))
+                    : ''
+                }}{{ mi[0].knownUnit && mi[0].knownUnit }}</span
+              ><span v-if="mi[0].textAfterQuantity">{{ mi[0].textAfterQuantity }}</span></span
+            >
 
-            <span v-else-if="mi.length > 1">
-              <template v-for="(part, index) in mi" :key="index">
-                <span v-if="typeof part !== 'string' && part.textBeforeFirstMatch">{{
-                  part.textBeforeFirstMatch + ' '
-                }}</span>
-                <span
-                  v-if="typeof part !== 'string' && part.quantity"
+            <span v-else-if="mi.length > 1 && mi[0]">
+              <span v-if="mi[0].textBeforeFirstMatch">{{ mi[0].textBeforeFirstMatch }}</span>
+              <template v-for="(qut, index) in mi" :key="index">
+                <!-- Keep span elements on the same line to avoid unwanted whitespace -->
+                <span>{{ index <= mi.length || mi[0].textBeforeFirstMatch ? ' ' : '' }}</span
+                ><span
                   class="checkcorrect__ingredient-quantity-unit"
-                  :class="
-                    typeof part !== 'string' && part.selected
-                      ? 'checkcorrect__ingredient-quantity-unit--selected'
-                      : 'checkcorrect__ingredient-quantity-unit--ignored'
-                  "
+                  :class="{
+                    'checkcorrect__ingredient-quantity-unit--ignored': !qut.selected,
+                    'checkcorrect__ingredient-quantity-unit--selected': qut.selected,
+                  }"
                   @click="selectQuantityUnit($event, ingIndex, index)"
-                >
-                  {{
-                    typeof part !== 'string' &&
-                    part.quantity &&
-                    limitDecimals(Number(part.quantity))
+                  >{{ qut.quantity && limitDecimals(Number(qut.quantity))
                   }}{{
-                    typeof part !== 'string' && part.quantityUpper
-                      ? dashes[1]! + limitDecimals(Number(part.quantityUpper))
+                    qut.quantityUpper
+                      ? dashes[1] && dashes[1] + limitDecimals(Number(qut.quantityUpper))
                       : ''
-                  }}
-                  {{ typeof part !== 'string' && part.knownUnit && part.knownUnit }}</span
-                >
-                <span v-if="typeof part !== 'string' && part.textAfterQuantity">{{
-                  ' ' + part.textAfterQuantity
-                }}</span>
+                  }}{{ qut.quantityUpper || index <= mi.length ? '' : ' '
+                  }}{{ qut.knownUnit && ' ' + qut.knownUnit }}</span
+                ><span v-if="qut.textAfterQuantity">{{ qut.textAfterQuantity }}</span>
               </template>
             </span>
 
@@ -519,7 +501,7 @@ textarea {
 }
 
 .create__servings input {
-  width: 3em;
+  width: 4em;
   text-align: center;
 }
 
@@ -619,12 +601,16 @@ p.checkcorrect__ingredients-info--overlay-legend {
   border-top: var(--border-width) solid var(--color-ignored);
   border-bottom: var(--border-width) solid var(--color-ignored);
   padding-block: var(--padding-ignored);
+  position: relative;
+  z-index: 1;
 }
 
 .checkcorrect__ingredient-quantity-unit--selected {
   border-top: var(--border-width) solid var(--color-selected);
   border-bottom: var(--border-width) solid var(--color-selected);
   padding-block: var(--padding-selected);
+  position: relative;
+  z-index: 2;
 }
 
 div.checkcorrect__ingredients-info--overlay {

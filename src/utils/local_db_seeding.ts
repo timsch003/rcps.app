@@ -166,7 +166,7 @@ export const seedLocalDB = async () => {
   )
 
   for (const recipe of recipesToSeed) {
-    await recipesManager.addNew(recipe)
+    await recipesManager.createEdit(recipe)
   }
 
   localStorage.setItem(SEED_STORAGE_KEY, 'true')

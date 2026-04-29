@@ -152,6 +152,15 @@ Current binary version: **0.37.3**
 - Set up multilangual landing page with SEO
 - Check legal implications of storing user email/password and recipe data (no other personal data)
 
+### Bugs
+
+- Selected ingredient part is not persisted while editing and messes with sorting order
+
+### Refactoring
+
+- Move keys normalizedLine and textBeforeFirstMatch to top level of type MatchedIngredient instead of QuantityUnitText[]
+- Rename IconClose to IconX
+
 ### Functionality
 
 - Persist last viewed in user settings
@@ -160,12 +169,12 @@ Current binary version: **0.37.3**
 
 ### UI/UX
 
+- Keep top and bottom navs hidden when editing recipe
 - Add transition / animation to nav bottom active indicator (:before)
 - Refactor sync status
   - Indicate unsynced local changes when offline
   - Add tick to synced icon
   - Add info section explaining sync to menu
-    
 
 ### Internationalization
 

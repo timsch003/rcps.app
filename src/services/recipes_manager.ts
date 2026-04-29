@@ -4,14 +4,13 @@ import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
 import { sync } from './sync'
-import { unitsManager } from './units_manager'
-import { limitDecimals } from '@/utils/conversion'
-import { dashes } from '@/utils/fixed_values'
-import { t } from '@/lang/i18n'
-import type { RecipeLocal, RecipeRaw, RecipeIngredient, Tag, UUID } from '@/types'
+import type { RecipeLocal, RecipeRaw, Tag, UUID } from '@/types'
 
-async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
-  const newRecipeId = uuidv7()
+async function createEdit(
+  data: RecipeRaw,
+  editingRecipeId?: UUID,
+): Promise<RecipeLocal['id'] | undefined> {
+  const newRecipeId = editingRecipeId || uuidv7()
 
   let tagIds: UUID[] = []
   if (Array.isArray(data.tags)) {
@@ -41,53 +40,10 @@ async function addNew(data: RecipeRaw): Promise<RecipeLocal['id'] | undefined> {
     synced: false,
   }
 
-  await db.recipes.add(newRecipe)
+  await db.recipes.put(newRecipe)
   updateCaches(newRecipe)
   sync.pushLocalChanges()
   return newRecipe.id
-}
-
-async function editExisting(
-  recipeId: RecipeLocal['id'],
-  data: RecipeRaw,
-): Promise<RecipeLocal['id'] | undefined> {
-  const existingRecipe = await db.recipes.get(recipeId)
-  if (!existingRecipe) return undefined
-
-  const normalizedTags = normalizeTags(data.tags)
-  const tagIds = await resolveTagIds(normalizedTags)
-  const previousRecipeIngredientIds = existingRecipe.recipeIngredientIds || []
-
-  const recipeIngredientIds: UUID[] = await Promise.all(
-    data.matchedIngredients.map(async (mi, index) => {
-      return await ingredientsManager.addRecipeIngredient(recipeId, mi, index)
-    }),
-  ).then((ids) => ids.filter((id): id is UUID => !!id))
-
-  if (previousRecipeIngredientIds.length) {
-    await db.recipe_ingredients.bulkDelete(previousRecipeIngredientIds)
-  }
-
-  const updatedRecipe: RecipeLocal = {
-    ...existingRecipe,
-    name: data.name,
-    tagIds,
-    favorite: data.favorite,
-    servings: data.servings || 1,
-    recipeIngredientIds,
-    instructions: data.instructions,
-    notes: data.notes,
-    deletedRecipeIngredientIds: [
-      ...(existingRecipe.deletedRecipeIngredientIds || []),
-      ...previousRecipeIngredientIds,
-    ],
-    synced: false,
-  }
-
-  await db.recipes.put(updatedRecipe)
-  await updateCaches(updatedRecipe)
-  sync.pushLocalChanges()
-  return updatedRecipe.id
 }
 
 async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
@@ -136,11 +92,6 @@ async function nameExists(name: string): Promise<boolean> {
   return !!existingDb
 }
 
-async function nameExistsExcluding(name: string, recipeId: RecipeLocal['id']): Promise<boolean> {
-  const existingDb = await db.recipes.where('name').equalsIgnoreCase(name).first()
-  return !!existingDb && existingDb.id !== recipeId
-}
-
 async function updateCaches(newOrEdited: RecipeLocal): Promise<void> {
   const recipesStore = useRecipesStore()
 
@@ -171,59 +122,12 @@ function replaceRecipe(collection: RecipeLocal[], recipe: RecipeLocal): void {
   else collection.push(recipe)
 }
 
-function normalizeTags(tags: string | string[]): string[] {
-  return Array.isArray(tags)
-    ? tags.map((tag) => tag.trim()).filter((tag) => tag !== '')
-    : tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag !== '')
-}
-
-async function resolveTagIds(tags: string[]): Promise<UUID[]> {
-  return await Promise.all(
-    tags.map(async (tag) => {
-      const id = await tagsManager.addOrGetExisting(tag)
-      return id
-    }),
-  ).then((ids) => ids.filter((id): id is UUID => !!id))
-}
-
-async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
-  try {
-    const ingredientName = await ingredientsManager.getName(ri)
-
-    if (!ingredientName) return undefined
-    if (!ri.quantity) return [ingredientName]
-    if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
-
-    const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
-    const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
-    const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
-    const leadingSpace = stringBefore ? ' ' : ''
-    const trailingSpace = stringAfter ? ' ' : ''
-
-    if (ri.unitId)
-      return [
-        stringBefore,
-        `${leadingSpace}${quantityString} ${String(unitsManager.getNameById(ri.unitId))}${trailingSpace}`,
-        stringAfter,
-      ]
-    else return [stringBefore, `${leadingSpace}${quantityString}${trailingSpace}`, stringAfter]
-  } catch (err) {
-    throw err instanceof Error ? err : new Error(String(err))
-  }
-}
-
 export const recipesManager = {
-  addNew,
-  editExisting,
+  createEdit,
   getById,
   getFavorites,
   getLastViewed,
   getTagged,
   nameExists,
-  nameExistsExcluding,
   updateCaches,
-  getIngStrings,
 }

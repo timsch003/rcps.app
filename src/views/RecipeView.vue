@@ -31,7 +31,7 @@ onMounted(async () => {
       ingredients = await ingredientsManager.getRecipeIngredients(recipe.value.recipeIngredientIds)
       ingredientsStrings = await Promise.all(
         ingredients.map(async (ing) => {
-          const ingStrings = await recipesManager.getIngStrings(ing)
+          const ingStrings = await ingredientsManager.getIngStrings(ing)
           return ingStrings ? ingStrings : []
         }),
       )

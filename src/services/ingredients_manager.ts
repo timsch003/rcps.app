@@ -3,6 +3,7 @@ import { useIngredientsStore } from '@/stores/ingredients'
 import { unitsManager } from './units_manager'
 import { dashes, unitsSet } from '@/utils/fixed_values'
 import { fractionToFloat, limitDecimals } from '@/utils/conversion'
+import { t } from '@/lang/i18n'
 import { v7 as uuidv7 } from 'uuid'
 import type {
   Ingredient,
@@ -120,14 +121,17 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
     while ((match = quantityUnitTextRegex.exec(trimmedLine)) !== null) {
       const quantity = match[1] && match[1].trim()
       const quantityNormalized = quantity && quantity.replace(',', '.')
-      const potentialUnit = match[2] && match[2].trim()
+      const potentialUnit = match[2] && match[2] // Don't trim this yet!
       const knownUnit = potentialUnit
         ?.split(' ')
         .find((part) => unitsSet.has(part.toLowerCase()))
         ?.trim()
-      const textAfterQuantity = (
-        knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit
-      )?.trim()
+
+      // Preserve leading space to ensure sensible spacing when reconstructing the normalized line
+      const textAfterQuantity = (knownUnit ? potentialUnit?.replace(knownUnit, '') : potentialUnit)
+        ?.trimEnd()
+        .replace(/^\s+/g, ' ')
+      console.log(quantity)
 
       const quantityIsRange = quantityNormalized && dashesRegex.test(quantityNormalized)
       const [lower, upper] = quantityNormalized?.split(dashesRegex).map((q) => q.trim()) || []
@@ -167,33 +171,36 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
   })
 }
 
-export function matchedIngredientToEditableLine(matchedIngredient: MatchedIngredient): string {
-  if (typeof matchedIngredient === 'string') return matchedIngredient
-  if (!matchedIngredient.length) return ''
+async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined> {
+  try {
+    const ingredientName = await getName(ri)
 
-  const selectedPart =
-    matchedIngredient.find((part) => typeof part !== 'string' && part.selected) ||
-    matchedIngredient.find((part) => typeof part !== 'string' && part.quantity !== undefined) ||
-    matchedIngredient[0]
+    if (!ingredientName) return undefined
+    if (!ri.quantity) return [ingredientName]
+    if (ri.quantityUnitPosition === undefined) throw new Error(t('error.no_quantity_position'))
 
-  if (!selectedPart) return ''
-  if (typeof selectedPart === 'string') return selectedPart
-  if (selectedPart.quantity === undefined) return (selectedPart.normalizedLine || '').trim()
+    const stringBefore = ingredientName.substring(0, ri.quantityUnitPosition)
+    const quantityString = `${String(limitDecimals(ri.quantity))}${ri.quantityUpper ? dashes[1]! + String(limitDecimals(ri.quantityUpper)) : ''}`
+    const stringAfter = ingredientName.substring(ri.quantityUnitPosition)
+    const leadingSpace = stringBefore ? ' ' : ''
+    const trailingSpace = stringAfter ? ' ' : ''
 
-  const stringBefore = selectedPart.textBeforeFirstMatch || ''
-  const quantityString = `${String(limitDecimals(selectedPart.quantity))}${selectedPart.quantityUpper ? dashes[1]! + String(limitDecimals(selectedPart.quantityUpper)) : ''}`
-  const unitPart = selectedPart.knownUnit ? ` ${selectedPart.knownUnit}` : ''
-  const stringAfter = selectedPart.textAfterQuantity || ''
-  const leadingSpace = stringBefore ? ' ' : ''
-  const trailingSpace = stringAfter ? ' ' : ''
-
-  return `${stringBefore}${leadingSpace}${quantityString}${unitPart}${trailingSpace}${stringAfter}`
+    if (ri.unitId)
+      return [
+        stringBefore,
+        `${leadingSpace}${quantityString} ${String(unitsManager.getNameById(ri.unitId))}${trailingSpace}`,
+        stringAfter,
+      ]
+    else return [stringBefore, `${leadingSpace}${quantityString}${trailingSpace}`, stringAfter]
+  } catch (err) {
+    throw err instanceof Error ? err : new Error(String(err))
+  }
 }
 
 export const ingredientsManager = {
   addRecipeIngredient,
   getRecipeIngredients,
   getName,
+  getIngStrings,
   matchAndNormalize,
-  matchedIngredientToEditableLine,
 }
