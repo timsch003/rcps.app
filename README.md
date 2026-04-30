@@ -125,11 +125,9 @@ Current binary version: **0.37.3**
 
 ### Planned
 
-(sorted by urgency in relation to complexity)
-
 #### General
 
-- Alphabetical <-> recent sorting toggle for card views
+- Alphabetical <-> last edited sorting toggle for card views
 - Multiple tags selection mode
 - Auto-conversion of known units from/to abbreviations
 - Bulk importing recipes from exports of other recipe apps / Schema.org / JSON-LD
@@ -138,12 +136,16 @@ Current binary version: **0.37.3**
 
 #### Settings
 
-- Default view to show on app load
+- UX
+  - Default view to show on app load
+  - Categorize favorites by tags
 - Formatting
-  - Spaces in quantities/units
+  - Spaces between quantity & unit and inside quantity ranges
+  - Quantity range character selection
   - Decimal or fraction quantities
 - Accessibility
   - Disable animations
+  - Left-handed mode
 
 ## TODOs
 
@@ -155,6 +157,7 @@ Current binary version: **0.37.3**
 ### Bugs
 
 - Selected ingredient part is not persisted while editing and messes with sorting order
+- When editing ingredients changing selected part isn't restored and conflicts with sorting
 
 ### Refactoring
 
@@ -169,13 +172,19 @@ Current binary version: **0.37.3**
 
 ### UI/UX
 
-- Keep top and bottom navs hidden when editing recipe
-- Add transition / animation to nav bottom active indicator (:before)
-- Refactor sync status
+- Sync status
   - Indicate unsynced local changes when offline
   - Add tick to synced icon
   - Add info section explaining sync to menu
-- Show suggestions when typing in tags
+- Navs
+  - Add transition / animation to nav bottom active indicator (:before)
+  - Fix tags in bottom nav not being active when navigated to tag view
+- Create/View/Edit
+  - Move ingredient drag handle to right side
+  - Add commas when populating tags edit input
+  - Show suggestions when typing in tags
+- Settings
+  - Add breadcrumbs sub-views
 
 ### Internationalization
 

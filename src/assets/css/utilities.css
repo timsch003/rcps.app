@@ -140,3 +140,11 @@ button:disabled {
   opacity: 0.75;
   cursor: not-allowed;
 }
+
+.transition-navs-out-view {
+  /* Prevent layout shift when transitioning out top nav */
+  position: absolute;
+  inset: var(--inner-spacing) var(--inner-spacing) auto var(--inner-spacing);
+  min-height: max-content;
+  padding-block-end: var(--inner-spacing);
+}

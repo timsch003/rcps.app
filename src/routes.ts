@@ -27,6 +27,9 @@ const router = createRouter({
           path: '/',
           name: 'tags',
           component: TagsView,
+          beforeEnter: (to, from) => {
+            if (from.name === 'tag') to.meta.transition = 'slide-in-ltr'
+          },
         },
         {
           path: '/tag/:id',
@@ -47,13 +50,29 @@ const router = createRouter({
           path: '/recipe/:id',
           name: 'recipe',
           component: RecipeView,
+          beforeEnter: (to, from) => {
+            // meta.fromPath is used to handle creating, viewing
+            // and editing a recipe as one single router history entry.
+            if (from.name !== 'edit' && from.name !== 'create') to.meta.fromPath = from.fullPath
+            else to.meta.fromPath = from.meta.fromPath
+          },
         },
         {
           path: '/edit/:id',
           name: 'edit',
           component: CreateEditView,
+          beforeEnter: (to, from) => {
+            to.meta.fromPath = from.meta.fromPath
+          },
         },
-        { path: '/create', name: 'create', component: CreateEditView },
+        {
+          path: '/create',
+          name: 'create',
+          component: CreateEditView,
+          beforeEnter: (to, from) => {
+            to.meta.fromPath = from.fullPath
+          },
+        },
       ],
     },
     {
@@ -97,12 +116,6 @@ const router = createRouter({
       ],
     },
   ],
-})
-
-router.afterEach((to, from) => {
-  if (from.name === 'tag') to.meta.transition = 'slide-in-ltr'
-
-  if (to.name === 'recipe') to.meta.fromPath = from.fullPath
 })
 
 export default router

@@ -73,12 +73,15 @@ onClickOutside(
 )
 
 onMounted(async () => {
+  scrollTo(0, 0)
+
   const recipeId = route.params.id as string | undefined
 
   if (recipeId) {
     loading.value = true
     try {
       const recipe = await recipesManager.getById(recipeId)
+
       if (recipe) {
         editingRecipeId.value = recipe.id
         data.name = recipe.name
@@ -230,19 +233,17 @@ function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
   textarea.style.height = `${textarea.scrollHeight}px`
 }
 
-async function onCreate() {
+async function onCreateEdit() {
   if (isValidating.value) return
 
   if (!data.name) {
     alert(t('create_edit.alert_name_required'))
     return
   }
-
   if (!editingRecipeId.value && (await recipesManager.nameExists(data.name))) {
     alert(t('create_edit.alert_name_exists'))
     return
   }
-
   if (!data.tags.length || (typeof data.tags === 'string' && !data.tags.trim())) {
     alert(t('create_edit.alert_tags_required'))
     return
@@ -251,6 +252,7 @@ async function onCreate() {
   isValidating.value = true
 
   data.servings = data.servings || 1
+
   normalizeTags()
 
   if (data.ingredients && !data.matchedIngredients.length) {
@@ -258,7 +260,6 @@ async function onCreate() {
   }
 
   const recipeId = await recipesManager.createEdit(data, editingRecipeId.value || undefined)
-
   if (recipeId) router.replace({ name: 'recipe', params: { id: recipeId } })
 
   isValidating.value = false
@@ -266,18 +267,20 @@ async function onCreate() {
 </script>
 
 <template>
-  <div>
+  <div class="transition-navs-out-view">
     <ButtonMulti
-      v-if="editingRecipeId"
       class="create_edit__discard-button"
-      :icon="ArrowLeftIcon"
-      :desc="t('create_edit.discard_changes')"
+      :icon="CloseIcon"
+      :desc="editingRecipeId ? t('create_edit.discard_changes') : t('create_edit.discard')"
       showDesc
-      @click="$router.back()"
+      @click="
+        editingRecipeId
+          ? router.replace({ name: 'recipe', params: { id: route.params.id } })
+          : router.back()
+      "
     />
 
-    <h2 v-if="editingRecipeId" class="heading--root">{{ t('Edit recipe') }}</h2>
-    <h2 v-else class="heading--root">{{ t('Create recipe') }}</h2>
+    <h2 class="heading--root">{{ editingRecipeId ? t('Edit recipe') : t('Create recipe') }}</h2>
 
     <p v-if="loading" class="loading">{{ t('sync.status_pulling') }}</p>
 
@@ -449,7 +452,7 @@ async function onCreate() {
           :icon="CheckIcon"
           :desc="editingRecipeId ? t('Save changes') : t('Create recipe')"
           showDesc
-          @click="onCreate"
+          @click="onCreateEdit"
           :disabled="isValidating"
         />
         <SpinnerIcon v-if="isValidating" />

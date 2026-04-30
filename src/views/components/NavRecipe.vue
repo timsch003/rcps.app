@@ -9,10 +9,6 @@ import { t } from '@/lang/i18n'
 const route = useRoute()
 const router = useRouter()
 const { isScrolling } = useScroll(window, { behavior: 'smooth' })
-
-function edit() {
-  router.push({ name: 'edit', params: { id: route.params.id } })
-}
 </script>
 
 <template>
@@ -24,7 +20,13 @@ function edit() {
       accentColor
       small
     />
-    <ButtonMulti @click="edit()" :icon="EditIcon" :desc="t('Edit recipe')" accentColor small />
+    <ButtonMulti
+      @click="router.replace({ name: 'edit', params: { id: route.params.id } })"
+      :icon="EditIcon"
+      :desc="t('Edit recipe')"
+      accentColor
+      small
+    />
   </nav>
 </template>
 
