@@ -18,14 +18,14 @@ const { isScrolling } = useScroll(window, { behavior: 'smooth' })
       :icon="ArrowLeftIcon"
       :desc="t('Back')"
       accentColor
-      small
+      smallIcon
     />
     <ButtonMulti
       @click="router.replace({ name: 'edit', params: { id: route.params.id } })"
       :icon="EditIcon"
       :desc="t('Edit recipe')"
       accentColor
-      small
+      smallIcon
     />
   </nav>
 </template>

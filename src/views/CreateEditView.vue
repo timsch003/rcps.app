@@ -16,6 +16,7 @@ import XIcon from '@/views/icons/IconX.vue'
 import DragHandleIcon from '@/views/icons/IconDragHandle.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
+import ProcessIcon from '@/views/icons/IconProcess.vue'
 import type { RecipeLocal, RecipeRaw } from '@/types'
 import type { UseSortableOptions } from '@vueuse/integrations/useSortable'
 
@@ -45,7 +46,11 @@ const editingIngredients = ref(true)
 const sortableIngredients = computed<RecipeRaw['matchedIngredients']>({
   get: () => data.matchedIngredients || [],
   set: (ingredients) => {
-    data.matchedIngredients = ingredients
+    data.matchedIngredients = ingredients.map((ing, index) => ({
+      ...ing,
+      parts: ing.parts,
+      sortOrder: index * ingredientsManager.sortOrderMultiplier,
+    }))
   },
 })
 
@@ -104,7 +109,6 @@ onMounted(async () => {
             }),
           )
           data.ingredients = ingStrings
-            .filter((strings) => strings && strings.length > 0)
             .map((strings) => (strings ? strings.join('') : ''))
             .join('\n')
 
@@ -154,15 +158,33 @@ function toggleIngredientsInfoOverlay() {
   }
 }
 
-function onIngredientsBlur() {
+function detectIngredients(scrollIntoView = true) {
   if (!editingIngredients.value) return
 
-  data.matchedIngredients = data.ingredients
-    ? ingredientsManager.matchAndNormalize(data.ingredients)
-    : []
+  const miBefore =
+    data.matchedIngredients.map((ing) => ({
+      ...ing,
+      parts: ing.parts?.map((part) => ({ ...part })) || [],
+    })) || []
+
+  const miAfter = ingredientsManager.matchAndNormalize(data.ingredients) || []
+
+  data.matchedIngredients = miAfter.map((ing, index) => ({
+    ...ing,
+    parts:
+      ing.parts &&
+      ing.parts.map((part, partIndex) => {
+        const selectedBefore: boolean = miBefore[index]?.parts[partIndex]?.selected || false
+        return {
+          ...part,
+          selected: selectedBefore,
+        }
+      }),
+  }))
 
   editingIngredients.value = false
 
+  if (!scrollIntoView) return
   const headerHeight = document.querySelector('main > header')?.clientHeight || 0
   const ingAnchor = document.querySelector(
     '#checkcorrect__ingredients-anchor',
@@ -180,7 +202,10 @@ function onEditIngredients() {
   editingIngredients.value = true
   nextTick(() => {
     fitTextareaToContent(ingredientsTextarea.value)
-    ingredientsTextarea.value?.focus()
+    if (!ingredientsTextarea.value) return
+    ingredientsTextarea.value.focus()
+    ingredientsTextarea.value.selectionStart = 0
+    ingredientsTextarea.value.selectionEnd = 0
   })
 }
 
@@ -208,14 +233,14 @@ function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number
     !data.matchedIngredients ||
     !data.matchedIngredients[ingredientIndex] ||
     !data.matchedIngredients[ingredientIndex].parts ||
-    !data.matchedIngredients[ingredientIndex].parts[partIndex]
+    !data.matchedIngredients[ingredientIndex].parts[partIndex] ||
+    data.matchedIngredients[ingredientIndex].parts[partIndex].selected
   )
     return
 
   data.matchedIngredients[ingredientIndex].parts.forEach((ing) => {
     ing.selected = false
   })
-
   data.matchedIngredients[ingredientIndex].parts[partIndex].selected = true
 }
 
@@ -252,8 +277,9 @@ async function onCreateEdit() {
 
   normalizeTags()
 
-  if (data.ingredients && !data.matchedIngredients.length) {
-    data.matchedIngredients = ingredientsManager.matchAndNormalize(data.ingredients)
+  if (!data.matchedIngredients.length) {
+    detectIngredients(false)
+    console.log('detected while saving')
   }
 
   const recipeId = await recipesManager.createEdit(data, editingRecipeId.value || undefined)
@@ -305,7 +331,7 @@ async function onCreateEdit() {
       }}</label>
       <input type="checkbox" id="create__favorite-input" v-model="data.favorite" />
 
-      <div id="checkcorrect__ingredients-anchor"></div>
+      <div id="checkcorrect__ingredients-anchor" aria-hidden="true"></div>
       <label
         v-if="editingIngredients"
         for="create__ingredients-input"
@@ -331,10 +357,21 @@ async function onCreateEdit() {
         ref="ingredientsTextarea"
         id="create__ingredients-input"
         v-model.trim="data.ingredients"
-        @blur="onIngredientsBlur"
-        @focusout="onIngredientsBlur"
         @input="fitTextareaHeight"
+        class="checkcorrect__ingredients-raw"
       ></textarea>
+
+      <ButtonMulti
+        v-if="editingIngredients"
+        :icon="ProcessIcon"
+        :desc="t('checkcorrect.detect_ingredients')"
+        showDesc
+        smallIcon
+        smallText
+        @click="detectIngredients"
+        class="checkcorrect__detect-ingredients-button"
+      />
+
       <div v-else class="checkcorrect__ingredients-container">
         <div class="checkcorrect__ingredients-info">
           <div ref="ingredientsInfoElement" class="checkcorrect__ingredients-info--overlay">
@@ -376,8 +413,6 @@ async function onCreateEdit() {
           class="checkcorrect__ingredients-list"
         >
           <li v-for="(mi, ingIndex) in data.matchedIngredients" :key="ingIndex">
-            <DragHandleIcon class="drag-handle" />
-
             <!-- Keep span elements on the same line to avoid unwanted whitespace -->
             <span v-if="!mi.parts || !mi.parts.length">{{ mi.normalizedLine }}</span
             ><span v-else-if="mi.parts.length === 1 && mi.parts[0]"
@@ -420,12 +455,15 @@ async function onCreateEdit() {
               </template>
             </span>
 
-            <XIcon
-              class="checkcorrect__remove-button"
-              role="button"
-              aria-label="Remove ingredient"
-              @click="removeIngredient(ingIndex)"
-            />
+            <div class="checkcorrect__ingredient-controls">
+              <DragHandleIcon class="drag-handle" />
+              <XIcon
+                class="checkcorrect__remove-button"
+                role="button"
+                aria-label="Remove ingredient"
+                @click="removeIngredient(ingIndex)"
+              />
+            </div>
           </li>
         </ul>
         <p class="create__empty" v-else>-</p>
@@ -466,6 +504,11 @@ async function onCreateEdit() {
 .create textarea {
   margin-block-end: 0;
 }
+
+h2.heading--root {
+  padding: 0;
+}
+
 h2.heading--root,
 .create_edit__discard-button,
 .create > input,
@@ -477,8 +520,12 @@ h2.heading--root,
   margin-block-end: var(--inner-spacing-m);
 }
 
-h2.heading--root {
-  padding: 0;
+.create > textarea.checkcorrect__ingredients-raw {
+  margin-block-end: 8px;
+}
+
+.checkcorrect__detect-ingredients-button {
+  margin-inline: auto;
 }
 
 h3.heading--muted,
@@ -515,17 +562,6 @@ h3.heading--with-icon {
   }
 }
 
-.checkcorrect__remove-button,
-.checkcorrect__remove-button:hover,
-.checkcorrect__remove-button:active,
-.checkcorrect__remove-button:focus {
-  margin-inline-start: auto;
-  background-color: none;
-  color: var(--text);
-  opacity: var(--secondary-opacity);
-  cursor: pointer;
-}
-
 div#checkcorrect__ingredients-anchor {
   visibility: hidden;
 }
@@ -550,7 +586,7 @@ div.checkcorrect__ingredients-info {
     .drag-handle,
     .checkcorrect__remove-button {
       display: inline-block;
-      vertical-align: middle;
+      vertical-align: text-bottom;
     }
   }
 }
@@ -559,9 +595,26 @@ ul.checkcorrect__ingredients-list {
   --ing-spacing: 5px;
 }
 
+.checkcorrect__ingredient-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 2px;
+}
+
+.checkcorrect__remove-button,
+.checkcorrect__remove-button:hover,
+.checkcorrect__remove-button:active,
+.checkcorrect__remove-button:focus {
+  background-color: none;
+  color: var(--text);
+  opacity: var(--secondary-opacity);
+  cursor: pointer;
+}
+
 ul.checkcorrect__ingredients-list li {
   position: relative;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: var(--ing-spacing);
   padding-bottom: var(--ing-spacing);

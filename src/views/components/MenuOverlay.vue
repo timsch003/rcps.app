@@ -166,7 +166,7 @@ div.menu__inner h3.heading--muted {
   span {
     color: var(--text);
     opacity: var(--secondary-opacity);
-    font-size: 0.9rem;
+    font-size: var(--font-size-s);
   }
 }
 

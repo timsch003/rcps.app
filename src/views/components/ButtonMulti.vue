@@ -1,14 +1,16 @@
 <script setup lang="ts">
-const { route, desc, icon, showDesc, accentColor, inNavBottom, inline, small } = defineProps<{
-  route?: string
-  desc: string
-  icon?: object
-  showDesc?: boolean | false
-  accentColor?: boolean | false
-  inNavBottom?: boolean | false
-  inline?: boolean | false
-  small?: boolean | false
-}>()
+const { desc, route, icon, showDesc, accentColor, inNavBottom, inline, smallIcon, smallText } =
+  defineProps<{
+    desc: string
+    route?: string
+    icon?: object
+    showDesc?: boolean | false
+    accentColor?: boolean | false
+    inNavBottom?: boolean | false
+    inline?: boolean | false
+    smallIcon?: boolean | false
+    smallText?: boolean | false
+  }>()
 
 const baseElem = !!route ? 'RouterLink' : 'button'
 const baseClass = !!route ? 'btn-link' : 'btn-button'
@@ -16,7 +18,8 @@ const accentClass = !!accentColor ? 'btn--accent' : ''
 
 let modifierClass = !!inNavBottom ? 'btn-link--nav-bottom' : ''
 if (!inNavBottom && inline) modifierClass = 'btn-button--inline'
-if (small || (icon && showDesc)) modifierClass += ' btn--small'
+if (smallIcon || (icon && showDesc)) modifierClass += ' btn--small-icon'
+if (smallText) modifierClass += ' btn--small-text'
 
 const link = baseElem === 'RouterLink' ? { name: route } : null
 
@@ -50,7 +53,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
     :is="baseElem"
     :to="link"
     :type="buttonType"
-    :class="`${baseClass} ${accentClass}`"
+    :class="`${baseClass} ${accentClass} ${modifierClass}`"
     :aria-label="desc"
   >
     {{ desc }}
@@ -89,7 +92,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
   color: var(--accent);
 }
 
-.btn--small,
+.btn--small-icon,
 .btn-button--inline {
   svg {
     width: var(--icon-size-s);
@@ -101,6 +104,19 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 .btn-button__desc {
   opacity: var(--secondary-opacity);
   margin-left: var(--inner-spacing);
+  text-align: start;
+}
+
+.btn--small-text {
+  font-size: var(--font-size-s);
+  font-weight: 400;
+  text-transform: uppercase;
+  padding: 4px 10px;
+
+  svg {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+  }
 }
 
 .btn-link:hover,

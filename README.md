@@ -152,21 +152,31 @@ Current binary version: **0.37.3**
 ### General
 
 - Set up multilangual landing page with SEO
-- Check legal implications of storing user email/password and recipe data (no other personal data)
+- Check (international) legal implications of storing user email/password and recipe data (no other personal data)
 
 ### Bugs
 
-- Selected ingredient part is not persisted while editing and messes with sorting order
-- When editing ingredients changing selected part isn't restored and conflicts with sorting
+- Tags button in bottom nav is not active when navigated to tag view
 
 ### Refactoring
 
-- Rename IconX to IconX
+- Sync logic
+  - Partial recipe updates
+  - Initial sync on page load when edited on other logged in browser/device
+- Auth
+  - Removal of storage data when using different accounts on one browser/device
+  - Check auth token timeout
+- Error handling
+  - Check retraceability and user feedback
+  - Automated emails when errors occur?
+
+### Optimization
+
+- Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged data
 
 ### Functionality
 
 - Persist last viewed in user settings
-- Refactor error handling to improve retraceability and user feedback (automated emails when errors occur?)
 - Add links to tags in recipe view
 
 ### UI/UX
@@ -177,13 +187,11 @@ Current binary version: **0.37.3**
   - Add info section explaining sync to menu
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
-  - Fix tags in bottom nav not being active when navigated to tag view
 - Create/View/Edit
-  - Move ingredient drag handle to right side
   - Add commas when populating tags edit input
   - Show suggestions when typing in tags
 - Settings
-  - Add breadcrumbs sub-views
+  - Add breadcrumbs component to sub-views
 
 ### Internationalization
 
