@@ -151,14 +151,11 @@ Current binary version: **0.37.3**
 
 ## TODOs
 
-### General
-
-- Set up multilangual landing page with SEO
-- Check (international) legal implications of storing user email/password and recipe data (no other personal data)
-
 ### Bugs
 
-- Tags button in bottom nav is not active when navigated to tag view
+- Nav bottom scrolls with content (position: absolute)
+- Ingredients info overlay styling for ing parts not applied
+- Tags button in bottom nav not active when navigated to tag view
 
 ### Refactoring
 
@@ -178,8 +175,9 @@ Current binary version: **0.37.3**
 
 ### Functionality
 
+- Add option to delete recipes
 - Persist last viewed in user settings
-- Add links to tags in recipe view
+- Link tags in recipe view to tag views
 
 ### UI/UX
 
@@ -202,6 +200,11 @@ Current binary version: **0.37.3**
 - Flip arrows and back button positions where appropriate
 - Add script to handle <html dir> and fonts when changing language
 - Check if there are numerals that used regexes do not account for
+
+### General
+
+- Set up multilangual landing page with SEO
+- Check (international) legal implications of storing user email/password and recipe data (no other personal data)
 
 ## Deployment checklist
 
