@@ -168,6 +168,8 @@ Current binary version: **0.37.3**
 - Error handling
   - Check retraceability and user feedback
   - Automated emails when errors occur?
+- Local DB seeding 
+  - Increase length and variety of generated dummy data
 
 ### Optimization
 
