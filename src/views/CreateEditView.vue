@@ -16,7 +16,6 @@ import XIcon from '@/views/icons/IconX.vue'
 import DragHandleIcon from '@/views/icons/IconDragHandle.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
-import ProcessIcon from '@/views/icons/IconProcess.vue'
 import type { RecipeLocal, RecipeRaw } from '@/types'
 import type { UseSortableOptions } from '@vueuse/integrations/useSortable'
 
@@ -39,6 +38,7 @@ const ingredientsInfoVisible = ref(false)
 const ingredientsInfoElement = ref<HTMLDivElement | null>(null)
 const ingredientsListElement = ref<HTMLElement | null>(null)
 const ingredientsTextarea = ref<HTMLTextAreaElement | null>(null)
+const ingredientsTextareaEmpty = computed(() => !data.ingredients.trim() as boolean)
 const instructionsTextarea = ref<HTMLTextAreaElement | null>(null)
 const notesTextarea = ref<HTMLTextAreaElement | null>(null)
 const editingIngredients = ref(true)
@@ -119,7 +119,7 @@ onMounted(async () => {
         }
       }
     } catch (err) {
-      console.error('Failed to load recipe for editing:', err)
+      throw new Error(err instanceof Error ? err.message : String(err))
     } finally {
       loading.value = false
     }
@@ -198,8 +198,10 @@ function detectIngredients(scrollIntoView = true) {
 }
 
 function onEditIngredients() {
-  rebuildIngredientsTextFromMatched()
+  data.ingredients = data.matchedIngredients.map((mi) => mi.normalizedLine).join('\n')
+
   editingIngredients.value = true
+
   nextTick(() => {
     fitTextareaToContent(ingredientsTextarea.value)
     if (!ingredientsTextarea.value) return
@@ -207,12 +209,6 @@ function onEditIngredients() {
     ingredientsTextarea.value.selectionStart = 0
     ingredientsTextarea.value.selectionEnd = 0
   })
-}
-
-function rebuildIngredientsTextFromMatched() {
-  if (!data.matchedIngredients.length) return
-
-  data.ingredients = data.matchedIngredients.map((mi) => mi.normalizedLine).join('\n')
 }
 
 function removeIngredient(index: number) {
@@ -357,18 +353,17 @@ async function onCreateEdit() {
         ref="ingredientsTextarea"
         id="create__ingredients-input"
         v-model.trim="data.ingredients"
-        @input="fitTextareaHeight"
+        @input="(fitTextareaHeight, ingredientsTextareaEmpty ? detectIngredients() : null)"
         class="checkcorrect__ingredients-raw"
       ></textarea>
 
       <ButtonMulti
         v-if="editingIngredients"
-        :icon="ProcessIcon"
         :desc="t('checkcorrect.detect_ingredients')"
         showDesc
-        smallIcon
         smallText
         @click="detectIngredients"
+        ref="detectIngredientsButton"
         class="checkcorrect__detect-ingredients-button"
       />
 
@@ -381,7 +376,6 @@ async function onCreateEdit() {
             <p>
               {{ t('checkcorrect.ingredients_info_legend') }}
             </p>
-            <br />
             <p class="checkcorrect__ingredients-info--overlay-legend">
               <span class="checkcorrect__ingredient-quantity-unit--selected">
                 {{ t('checkcorrect.ingredients_info_selected') }}
@@ -397,12 +391,12 @@ async function onCreateEdit() {
             </p>
             <br />
             <p>
-              {{ t('checkcorrect.ingredients_info_remove-sort1')
-              }}<span><XIcon class="checkcorrect__remove-button" /></span>
+              {{ t('checkcorrect.ingredients_info_remove') }}
+              <span><XIcon class="checkcorrect__remove-button" /></span>
             </p>
             <p>
-              {{ t('checkcorrect.ingredients_info_remove-sort2')
-              }}<span><DragHandleIcon class="drag-handle" /></span>
+              {{ t('checkcorrect.ingredients_info_reorder') }}
+              <span><DragHandleIcon class="drag-handle" /></span>
             </p>
           </div>
         </div>
@@ -588,11 +582,38 @@ div.checkcorrect__ingredients-info {
       display: inline-block;
       vertical-align: text-bottom;
     }
+
+    .checkcorrect__ingredient-quantity-unit--ignored,
+    .checkcorrect__ingredient-quantity-unit--selected,
+    .drag-handle {
+      cursor: unset;
+    }
   }
 }
 
+ul.checkcorrect__ingredients-list li,
+p.checkcorrect__ingredients-info--overlay-legend {
+  line-height: 1.6;
+}
+
 ul.checkcorrect__ingredients-list {
-  --ing-spacing: 5px;
+  --ing-spacing: 0.8ex;
+  --color-selected: var(--accent);
+  --color-ignored: var(--decor-light);
+}
+
+ul.checkcorrect__ingredients-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--ing-spacing);
+  padding-block-start: calc(var(--ing-spacing) / 2);
+  padding-block-end: var(--ing-spacing);
+  border-block-end: 1px dashed var(--decor);
+}
+
+ul.checkcorrect__ingredients-list li:first-child {
+  border-block-start: 1px dashed var(--decor);
 }
 
 .checkcorrect__ingredient-controls {
@@ -611,46 +632,13 @@ ul.checkcorrect__ingredients-list {
   cursor: pointer;
 }
 
-ul.checkcorrect__ingredients-list li {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--ing-spacing);
-  padding-bottom: var(--ing-spacing);
-  border-bottom: 1px solid var(--decor);
-  margin-bottom: var(--ing-spacing);
-}
-ul.checkcorrect__ingredients-list li:first-child {
-  padding-top: var(--ing-spacing);
-  border-top: 1px solid var(--decor);
-}
-ul.checkcorrect__ingredients-list li:last-child {
-  margin-bottom: 0;
-}
-
-ul.checkcorrect__ingredients-list li,
-p.checkcorrect__ingredients-info--overlay-legend {
-  line-height: 2;
-}
-
 .checkcorrect__ingredient-quantity-unit--ignored,
 .checkcorrect__ingredient-quantity-unit--selected,
 .checkcorrect__ingredient-quantity-unit--single {
-  --color-selected: var(--accent);
-  --color-ignored: var(--decor-light);
-  --border-width: 3px;
-  --padding-selected: 1px;
-  --padding-ignored: 3px;
-
+  padding: 2px 2px 0 2px;
   font-weight: var(--quantity-unit-font-weight);
-  border-radius: var(--border-radius);
-  padding-inline: 2px;
-  padding-block: 2px;
   cursor: pointer;
-  transition:
-    padding var(--transition-duration),
-    border-color var(--transition-duration);
+  transition: border var(--transition-duration);
 }
 
 .checkcorrect__ingredient-quantity-unit--single {
@@ -659,27 +647,13 @@ p.checkcorrect__ingredients-info--overlay-legend {
 }
 
 .checkcorrect__ingredient-quantity-unit--ignored {
-  border-top: var(--border-width) solid var(--color-ignored);
-  border-bottom: var(--border-width) solid var(--color-ignored);
-  padding-block: var(--padding-ignored);
-  position: relative;
-  z-index: 1;
+  border-block-end: 2px solid var(--color-ignored);
+  border-radius: 0;
 }
 
 .checkcorrect__ingredient-quantity-unit--selected {
-  border-top: var(--border-width) solid var(--color-selected);
-  border-bottom: var(--border-width) solid var(--color-selected);
-  padding-block: var(--padding-selected);
-  position: relative;
-  z-index: 2;
-}
-
-div.checkcorrect__ingredients-info--overlay {
-  .checkcorrect__ingredient-quantity-unit--ignored,
-  .checkcorrect__ingredient-quantity-unit--selected,
-  .drag-handle {
-    cursor: unset;
-  }
+  border-block-end: 3px solid var(--color-selected);
+  border-radius: var(--border-radius);
 }
 
 .drag-handle {
