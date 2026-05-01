@@ -14,7 +14,7 @@ import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import IconArrowLeft from '@/views/icons/IconArrowLeft.vue'
 import ModeLightIcon from '@/views/icons/IconModeLight.vue'
 import ModeDarkIcon from '@/views/icons/IconModeDark.vue'
-import CloseIcon from '@/views/icons/IconClose.vue'
+import XIcon from '@/views/icons/IconX.vue'
 
 defineProps<{
   setting: 'appearance' | 'ui'
@@ -109,7 +109,7 @@ function setAccent(accent: string) {
             role="radio"
             @click="setAccent(accent)"
           >
-            <CloseIcon v-if="accent === NO_ACCENT_TOKEN" />
+            <XIcon v-if="accent === NO_ACCENT_TOKEN" />
           </button>
         </div>
       </form>

@@ -35,11 +35,14 @@ export type RecipeIngredient = {
   sortOrder: number
 }
 
-export type MatchedIngredient = QuantityUnitText[] | string
-
-export type QuantityUnitText = {
+export type MatchedIngredient = {
   normalizedLine: string
   textBeforeFirstMatch?: string
+  parts?: QuantityUnitText[] | undefined
+  sortOrder: number
+}
+
+export type QuantityUnitText = {
   quantity?: number
   quantityUpper?: number
   knownUnit?: string

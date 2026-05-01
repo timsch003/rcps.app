@@ -79,29 +79,38 @@ const buildIngredientLine = () => {
 }
 
 const ensureSelectedQuantity = (matchedIngredient: MatchedIngredient): MatchedIngredient => {
-  if (typeof matchedIngredient === 'string') return matchedIngredient
+  if (!matchedIngredient.parts) return matchedIngredient
 
-  const hasSelectedQuantity = matchedIngredient.some(
+  const hasSelectedQuantity = matchedIngredient.parts.some(
     (part) => part.quantity !== undefined && part.selected,
   )
-  const firstQuantityIndex = matchedIngredient.findIndex((part) => part.quantity !== undefined)
+  const firstQuantityIndex = matchedIngredient.parts.findIndex(
+    (part) => part.quantity !== undefined,
+  )
 
-  return matchedIngredient.map((part, index) => {
-    const quantityPartSelected =
-      part.quantity !== undefined &&
-      (hasSelectedQuantity ? !!part.selected : index === firstQuantityIndex)
+  return {
+    ...matchedIngredient,
+    parts: matchedIngredient.parts.map((part, index) => {
+      const quantityPartSelected =
+        part.quantity !== undefined &&
+        (hasSelectedQuantity ? !!part.selected : index === firstQuantityIndex)
 
-    return {
-      ...part,
-      selected: quantityPartSelected,
-    }
-  })
+      return {
+        ...part,
+        selected: quantityPartSelected,
+      }
+    }),
+  }
 }
 
-const buildMatchedIngredient = (ingredientLine: string): MatchedIngredient => {
+const buildMatchedIngredient = (ingredientLine: string, sortOrder: number): MatchedIngredient => {
   const matchedIngredient = ingredientsManager.matchAndNormalize(ingredientLine)[0]
 
-  if (!matchedIngredient) return ingredientLine
+  if (!matchedIngredient)
+    return {
+      normalizedLine: ingredientLine,
+      sortOrder: sortOrder * ingredientsManager.sortOrderMultiplier,
+    }
   return ensureSelectedQuantity(matchedIngredient)
 }
 
@@ -137,8 +146,8 @@ const buildRandomRecipe = (index: number): RecipeRaw => {
   const ingredientCount = 2 + Math.floor(Math.random() * 4)
   const tags = pickUnique(tagNames, 1 + Math.floor(Math.random() * 2))
   const ingredientLines = Array.from({ length: ingredientCount }, () => buildIngredientLine())
-  const matchedIngredients = ingredientLines.map((ingredientLine) =>
-    buildMatchedIngredient(ingredientLine),
+  const matchedIngredients = ingredientLines.map((ingredientLine, index) =>
+    buildMatchedIngredient(ingredientLine, index),
   )
   const instructions = [pick(instructionOpeners), pick(instructionTemplates)].join(' ')
 

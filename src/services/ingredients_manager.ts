@@ -22,10 +22,12 @@ const quantityUnitTextRegex =
 
 const dashesRegex = /\s?[-–—−~〜～\u2010-\u2015]\s?/
 
+// Enable reordering ingredients without updating all of them
+const sortOrderMultiplier = 100
+
 async function addRecipeIngredient(
   recipeId: RecipeLocal['id'],
   matchedIngredient: MatchedIngredient,
-  index: number,
 ): Promise<RecipeIngredient['id'] | undefined> {
   let ingredientName: string
   let ingredientId: Ingredient['id']
@@ -34,28 +36,30 @@ async function addRecipeIngredient(
   let selectedQut: QuantityUnitText | undefined = undefined
   let singleQut: QuantityUnitText | undefined = undefined
 
-  if (typeof matchedIngredient === 'string') {
-    ingredientName = matchedIngredient
+  if (!matchedIngredient.parts) {
+    ingredientName = matchedIngredient.normalizedLine
   } else {
-    let selectedQutIndex = matchedIngredient.findIndex((qut: QuantityUnitText) => qut.selected)
+    let selectedQutIndex = matchedIngredient.parts.findIndex(
+      (qut: QuantityUnitText) => qut.selected,
+    )
     if (selectedQutIndex === -1) {
       selectedQutIndex = 0
       console.warn(
         'Ingredients manager: no quantity/unit selected for ingredient, defaulting to first detected.',
       )
     }
-    selectedQut = matchedIngredient[selectedQutIndex]
-    singleQut = !selectedQut ? matchedIngredient[0] : undefined
+    selectedQut = matchedIngredient.parts[selectedQutIndex]
+    singleQut = !selectedQut ? matchedIngredient.parts[0] : undefined
     const qut = selectedQut || singleQut
     if (!qut) return undefined
 
     const quantityString = `${qut.quantity}${qut.quantityUpper ? dashes[1]! + String(qut.quantityUpper) : ''}`
     let quantityUnitString = `${quantityString}${qut.knownUnit ? ' ' + qut.knownUnit : ''}`
-    quantityUnitPosition = qut.normalizedLine.indexOf(quantityUnitString)
+    quantityUnitPosition = matchedIngredient.normalizedLine.indexOf(quantityUnitString)
     if (quantityUnitPosition === -1)
       quantityUnitString = `${quantityString}${qut.knownUnit ? qut.knownUnit : ''}`
-    quantityUnitPosition = qut.normalizedLine.indexOf(quantityUnitString)
-    ingredientName = qut.normalizedLine.replace(quantityUnitString, '').trim()
+    quantityUnitPosition = matchedIngredient.normalizedLine.indexOf(quantityUnitString)
+    ingredientName = matchedIngredient.normalizedLine.replace(quantityUnitString, '').trim()
   }
 
   const existingIngredient = await db.ingredients.where({ name: ingredientName }).first()
@@ -89,7 +93,7 @@ async function addRecipeIngredient(
     quantityUpper: selectedQut?.quantityUpper,
     unitId: unitId,
     quantityUnitPosition: quantityUnitPosition,
-    sortOrder: index * 100, // multiply index by 100 to allow for future reordering without needing to update all recipe ingredients
+    sortOrder: matchedIngredient.sortOrder,
   }
 
   const newRecipeIngredientId = await db.recipe_ingredients.add(newRecipeIngredient)
@@ -112,10 +116,12 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
 
   const ingredientLines = ingredients.split('\n')
 
-  return ingredientLines.map((line) => {
+  return ingredientLines.map((line, index) => {
     const trimmedLine = line.replace(/\s+/g, ' ').trim()
+    let normalizedLine = trimmedLine
+    let textBeforeFirstMatch: string | undefined
 
-    const parts = []
+    const parts: QuantityUnitText[] = []
     let match
 
     while ((match = quantityUnitTextRegex.exec(trimmedLine)) !== null) {
@@ -144,16 +150,17 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
         if (quantityNormalized) lowerFloat = limitDecimals(fractionToFloat(quantityNormalized))
       }
 
-      const normalizedLine = quantityIsRange
-        ? trimmedLine.replace(String(quantity), String(lowerFloat + dashes[1]! + upperFloat))
-        : trimmedLine.replace(String(quantity), String(lowerFloat))
+      if (parts.length === 0 && match.index > 0) {
+        textBeforeFirstMatch = trimmedLine.slice(0, match.index).trim()
+      }
+
+      const normalizedQuantity = quantityIsRange
+        ? String(lowerFloat + dashes[1]! + upperFloat)
+        : String(lowerFloat)
+
+      normalizedLine = normalizedLine.replace(String(quantity), normalizedQuantity)
 
       parts.push({
-        textBeforeFirstMatch:
-          parts.length === 0 && match.index > 0
-            ? trimmedLine.slice(0, match.index).trim()
-            : undefined,
-        normalizedLine: normalizedLine,
         quantity: lowerFloat !== -1 ? lowerFloat : undefined,
         quantityUpper: upperFloat !== -1 ? upperFloat : undefined,
         knownUnit: knownUnit || undefined,
@@ -162,10 +169,16 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
       })
     }
 
-    if (!parts[0]) return trimmedLine
-    else {
-      parts.find((part) => part.quantity !== undefined)!.selected = true
-      return parts
+    if (!parts[0]) return { normalizedLine: trimmedLine, sortOrder: index * sortOrderMultiplier }
+
+    const firstQuantityPart = parts.find((part) => part.quantity !== undefined)
+    if (firstQuantityPart) firstQuantityPart.selected = true
+
+    return {
+      normalizedLine,
+      textBeforeFirstMatch,
+      parts,
+      sortOrder: index * sortOrderMultiplier,
     }
   })
 }
@@ -197,6 +210,7 @@ async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined
 }
 
 export const ingredientsManager = {
+  sortOrderMultiplier,
   addRecipeIngredient,
   getRecipeIngredients,
   getName,

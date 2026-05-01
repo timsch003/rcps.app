@@ -23,8 +23,8 @@ async function createEdit(
   }
 
   const recipeIngredientIds: UUID[] = await Promise.all(
-    data.matchedIngredients.map(async (mi, index) => {
-      return await ingredientsManager.addRecipeIngredient(newRecipeId, mi, index)
+    data.matchedIngredients.map(async (mi) => {
+      return await ingredientsManager.addRecipeIngredient(newRecipeId, mi)
     }),
   ).then((ids) => ids.filter((id): id is UUID => !!id))
 

@@ -10,10 +10,9 @@ import { tagsManager } from '@/services/tags_manager'
 import { dashes } from '@/utils/fixed_values'
 import { getCssCustomPropertyDurationMs, limitDecimals } from '@/utils/conversion'
 import { t } from '@/lang/i18n'
-import ArrowLeftIcon from '@/views/icons/IconArrowLeft.vue'
 import CheckIcon from '@/views/icons/IconCheck.vue'
 import EditIcon from '@/views/icons/IconEdit.vue'
-import CloseIcon from '@/views/icons/IconClose.vue'
+import XIcon from '@/views/icons/IconX.vue'
 import DragHandleIcon from '@/views/icons/IconDragHandle.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
@@ -188,9 +187,7 @@ function onEditIngredients() {
 function rebuildIngredientsTextFromMatched() {
   if (!data.matchedIngredients.length) return
 
-  data.ingredients = data.matchedIngredients
-    .map((mi) => (typeof mi === 'string' ? mi : mi[0] && mi[0].normalizedLine))
-    .join('\n')
+  data.ingredients = data.matchedIngredients.map((mi) => mi.normalizedLine).join('\n')
 }
 
 function removeIngredient(index: number) {
@@ -209,17 +206,17 @@ function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number
 
   if (
     !data.matchedIngredients ||
-    typeof data.matchedIngredients[ingredientIndex] === 'string' ||
     !data.matchedIngredients[ingredientIndex] ||
-    !data.matchedIngredients[ingredientIndex][partIndex]
+    !data.matchedIngredients[ingredientIndex].parts ||
+    !data.matchedIngredients[ingredientIndex].parts[partIndex]
   )
     return
 
-  data.matchedIngredients[ingredientIndex].forEach((ing) => {
-    if (typeof ing !== 'string') ing.selected = false
+  data.matchedIngredients[ingredientIndex].parts.forEach((ing) => {
+    ing.selected = false
   })
 
-  data.matchedIngredients[ingredientIndex][partIndex].selected = true
+  data.matchedIngredients[ingredientIndex].parts[partIndex].selected = true
 }
 
 const fitTextareaHeight = (e: Event) => {
@@ -270,7 +267,7 @@ async function onCreateEdit() {
   <div class="transition-navs-out-view">
     <ButtonMulti
       class="create_edit__discard-button"
-      :icon="CloseIcon"
+      :icon="XIcon"
       :desc="editingRecipeId ? t('create_edit.discard_changes') : t('create_edit.discard')"
       showDesc
       @click="
@@ -364,7 +361,7 @@ async function onCreateEdit() {
             <br />
             <p>
               {{ t('checkcorrect.ingredients_info_remove-sort1')
-              }}<span><CloseIcon class="checkcorrect__remove-button" /></span>
+              }}<span><XIcon class="checkcorrect__remove-button" /></span>
             </p>
             <p>
               {{ t('checkcorrect.ingredients_info_remove-sort2')
@@ -382,26 +379,29 @@ async function onCreateEdit() {
             <DragHandleIcon class="drag-handle" />
 
             <!-- Keep span elements on the same line to avoid unwanted whitespace -->
-            <span v-if="typeof mi === 'string'">{{ mi }}</span
-            ><span v-else-if="mi.length === 1 && mi[0]"
-              ><span v-if="mi[0].textBeforeFirstMatch">{{ mi[0].textBeforeFirstMatch + ' ' }}</span
-              ><span v-if="mi[0]" class="checkcorrect__ingredient-quantity-unit--single">
+            <span v-if="!mi.parts || !mi.parts.length">{{ mi.normalizedLine }}</span
+            ><span v-else-if="mi.parts.length === 1 && mi.parts[0]"
+              ><span v-if="mi.textBeforeFirstMatch">{{ mi.textBeforeFirstMatch + ' ' }}</span
+              ><span class="checkcorrect__ingredient-quantity-unit--single">
                 {{
-                  mi[0].quantity &&
-                  limitDecimals(Number(mi[0].quantity)) + (mi[0].quantityUpper ? '' : ' ')
+                  mi.parts[0].quantity &&
+                  limitDecimals(Number(mi.parts[0].quantity)) +
+                    (mi.parts[0].quantityUpper ? '' : ' ')
                 }}{{
-                  mi[0].quantityUpper
-                    ? dashes[1] && dashes[1] + limitDecimals(Number(mi[0].quantityUpper))
+                  mi.parts[0].quantityUpper
+                    ? dashes[1] && dashes[1] + limitDecimals(Number(mi.parts[0].quantityUpper))
                     : ''
-                }}{{ mi[0].knownUnit && mi[0].knownUnit }}</span
-              ><span v-if="mi[0].textAfterQuantity">{{ mi[0].textAfterQuantity }}</span></span
+                }}{{ mi.parts[0].knownUnit && mi.parts[0].knownUnit }}</span
+              ><span v-if="mi.parts[0].textAfterQuantity">{{
+                mi.parts[0].textAfterQuantity
+              }}</span></span
             >
 
-            <span v-else-if="mi.length > 1 && mi[0]">
-              <span v-if="mi[0].textBeforeFirstMatch">{{ mi[0].textBeforeFirstMatch }}</span>
-              <template v-for="(qut, index) in mi" :key="index">
+            <span v-else-if="mi.parts && mi.parts.length > 1 && mi.parts[0]">
+              <span v-if="mi.textBeforeFirstMatch">{{ mi.textBeforeFirstMatch }}</span>
+              <template v-for="(qut, index) in mi.parts" :key="index">
                 <!-- Keep span elements on the same line to avoid unwanted whitespace -->
-                <span>{{ index <= mi.length || mi[0].textBeforeFirstMatch ? ' ' : '' }}</span
+                <span>{{ index <= mi.parts.length || mi.textBeforeFirstMatch ? ' ' : '' }}</span
                 ><span
                   class="checkcorrect__ingredient-quantity-unit"
                   :class="{
@@ -414,13 +414,13 @@ async function onCreateEdit() {
                     qut.quantityUpper
                       ? dashes[1] && dashes[1] + limitDecimals(Number(qut.quantityUpper))
                       : ''
-                  }}{{ qut.quantityUpper || index <= mi.length ? '' : ' '
+                  }}{{ qut.quantityUpper || index <= mi.parts.length ? '' : ' '
                   }}{{ qut.knownUnit && ' ' + qut.knownUnit }}</span
                 ><span v-if="qut.textAfterQuantity">{{ qut.textAfterQuantity }}</span>
               </template>
             </span>
 
-            <CloseIcon
+            <XIcon
               class="checkcorrect__remove-button"
               role="button"
               aria-label="Remove ingredient"

@@ -161,8 +161,7 @@ Current binary version: **0.37.3**
 
 ### Refactoring
 
-- Move keys normalizedLine and textBeforeFirstMatch to top level of type MatchedIngredient instead of QuantityUnitText[]
-- Rename IconClose to IconX
+- Rename IconX to IconX
 
 ### Functionality
 

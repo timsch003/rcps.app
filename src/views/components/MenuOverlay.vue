@@ -9,7 +9,7 @@ import { t } from '@/lang/i18n'
 import AppLogo from '@/views/components/AppLogo.vue'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import MenuOverlaySetting from '@/views/components/MenuOverlaySetting.vue'
-import CloseIcon from '@/views/icons/IconClose.vue'
+import XIcon from '@/views/icons/IconX.vue'
 import LogoutIcon from '@/views/icons/IconLogout.vue'
 import ChangeMailIcon from '@/views/icons/IconChangeMail.vue'
 import ResetPasswordIcon from '@/views/icons/IconResetPassword.vue'
@@ -70,7 +70,7 @@ function logout() {
       <div class="menu__inner">
         <div class="menu__header">
           <AppLogo omitAnimation />
-          <ButtonMulti :icon="CloseIcon" :desc="t('Close menu')" @click="close" />
+          <ButtonMulti :icon="XIcon" :desc="t('Close menu')" @click="close" />
         </div>
         <Transition :name="settingsTransition" mode="out-in">
           <div v-if="!activeSetting" key="menu-overview">
