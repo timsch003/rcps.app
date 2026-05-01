@@ -35,7 +35,7 @@ nav.bottom {
   justify-content: space-around;
   align-items: flex-start;
 
-  position: fixed;
+  position: absolute;
   inset: auto 0 0 0;
 
   z-index: 10;

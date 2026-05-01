@@ -10,3 +10,18 @@ provide('syncStatus', syncStatus)
 <template>
   <RouterView />
 </template>
+
+<style>
+#app {
+  max-width: unset;
+}
+
+@media screen and (min-width: 850px) {
+  #app {
+    position: absolute;
+    max-width: 820px;
+    inset: 0 calc(100vw / 2 - 410px);
+    border-inline: var(--nav-border-width) solid var(--bg-lighter);
+  }
+}
+</style>
