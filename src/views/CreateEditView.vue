@@ -569,6 +569,10 @@ div.checkcorrect__ingredients-info {
   position: relative;
 
   div.checkcorrect__ingredients-info--overlay {
+    --ing-spacing: 0.8ex;
+    --color-selected: var(--accent);
+    --color-ignored: var(--decor-light);
+
     position: absolute;
     z-index: 7;
     clip-path: inset(0px 0px 100% 0px);
@@ -585,6 +589,7 @@ div.checkcorrect__ingredients-info {
 
     .checkcorrect__ingredient-quantity-unit--ignored,
     .checkcorrect__ingredient-quantity-unit--selected,
+    .checkcorrect__remove-button,
     .drag-handle {
       cursor: unset;
     }
@@ -594,12 +599,6 @@ div.checkcorrect__ingredients-info {
 ul.checkcorrect__ingredients-list li,
 p.checkcorrect__ingredients-info--overlay-legend {
   line-height: 1.6;
-}
-
-ul.checkcorrect__ingredients-list {
-  --ing-spacing: 0.8ex;
-  --color-selected: var(--accent);
-  --color-ignored: var(--decor-light);
 }
 
 ul.checkcorrect__ingredients-list li {

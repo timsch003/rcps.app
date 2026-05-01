@@ -31,7 +31,7 @@ const { isScrolling } = useScroll(window, { behavior: 'smooth' })
 </template>
 
 <style scoped>
-nav.recipe {
+nav {
   display: flex;
   flex-direction: column;
 
@@ -44,14 +44,14 @@ nav.recipe {
   border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
 
-nav.recipe {
+nav {
   opacity: var(--secondary-opacity);
   transition: all var(--transition-duration);
 }
-nav.recipe:hover,
-nav.recipe:focus,
-nav.recipe:active,
-nav.recipe.scrolling {
+nav:hover,
+nav:focus,
+nav:active,
+nav.scrolling {
   opacity: 1;
 }
 </style>

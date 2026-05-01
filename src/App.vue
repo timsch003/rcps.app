@@ -29,6 +29,10 @@ provide('syncStatus', syncStatus)
     margin: 0 auto;
   }
 
+  main > nav.recipe {
+    inset: 0 calc(100vw / 2 - 410px) auto auto;
+  }
+
   main {
     border-inline: var(--nav-border-width) solid var(--bg-lighter);
   }
