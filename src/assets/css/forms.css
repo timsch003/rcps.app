@@ -56,7 +56,7 @@ form {
     box-shadow: 2px 2px var(--decor);
     font-weight: 600;
     transform: translate(-1px, -1px);
-    padding: 6px 12px;
+    padding: var(--btn-padding-block) var(--btn-padding-inline);
   }
 
   button:active:not(:disabled) {

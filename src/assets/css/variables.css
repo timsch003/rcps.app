@@ -21,6 +21,8 @@
   --icon-size-s: 1.5rem;
   --icon-size-xs: 1rem;
   --nav-border-width: 2px;
+  --btn-padding-block: 6px;
+  --btn-padding-inline: 12px;
 
   /* Misc
   */

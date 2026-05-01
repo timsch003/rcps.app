@@ -73,7 +73,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
   border: none;
   border-radius: 10em;
   transform: translate(-1px, -1px);
-  padding: 6px 12px;
+  padding: var(--btn-padding-block) var(--btn-padding-inline);
   cursor: pointer;
   color: var(--text);
 
@@ -111,7 +111,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
   font-size: var(--font-size-s);
   font-weight: 400;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: calc(var(--btn-padding-block) - 2px) calc(var(--btn-padding-inline) - 2px);
 
   svg {
     width: var(--icon-size-xs);

@@ -139,10 +139,12 @@ Current binary version: **0.37.3**
 - UX
   - Default view to show on app load
   - Categorize favorites by tags
+  - Star as favorites icon
+  - Condensed recipe view
 - Formatting
   - Spaces between quantity & unit and inside quantity ranges
   - Quantity range character selection
-  - Decimal or fraction quantities
+  - Decimal (comma or dot) or fraction quantities
 - Accessibility
   - Disable animations
   - Left-handed mode

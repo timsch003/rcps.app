@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import SpanIcon from '@/views/components/SpanIcon.vue'
+import IconInline from '@/views/components/IconInline.vue'
 import TagsIcon from '@/views/icons/IconTags.vue'
 import { t } from '@/lang/i18n'
 import type { Tag, RecipeLocal } from '@/types'
@@ -23,7 +23,7 @@ defineProps<{
   </RouterLink>
   <RouterLink v-else class="card card__tag" :to="{ name: 'tag', params: { id: tag?.id } }">
     <h2 class="heading">
-      <SpanIcon :icon="TagsIcon" :desc="t('Tags')">{{ tag?.name }}</SpanIcon>
+      <IconInline :icon="TagsIcon" :desc="t('Tags')" space="before">{{ tag?.name }}</IconInline>
     </h2>
   </RouterLink>
 </template>

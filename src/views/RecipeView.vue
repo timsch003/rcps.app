@@ -6,8 +6,10 @@ import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
 import { useSettingsStore } from '@/stores/settings'
-import { t } from '@/lang/i18n'
 import ButtonMulti from './components/ButtonMulti.vue'
+import FavoritesIcon from '@/views/icons/IconFavorites.vue'
+import IconInline from './components/IconInline.vue'
+import { t } from '@/lang/i18n'
 import type { RecipeLocal, RecipeIngredient, Tag } from '@/types'
 
 const route = useRoute()
@@ -62,7 +64,10 @@ function onServingsIncrease() {
 <template>
   <p v-if="error" class="error">{{ t('error') }}: {{ error }}</p>
   <div v-else-if="!loading && recipe" class="recipe-view transition-navs-out-view">
-    <h2 class="heading--root">{{ recipe!.name }}</h2>
+    <h2 class="heading--root">
+      {{ recipe!.name
+      }}<IconInline v-if="recipe!.favorite" :icon="FavoritesIcon" desc="Favorite" spaceBefore />
+    </h2>
 
     <div v-if="recipe!.servings" class="servings">
       <h3 class="heading--muted">{{ `${t('Servings')}: ${recipe!.servings}` }}</h3>
@@ -99,6 +104,13 @@ function onServingsIncrease() {
 h2.heading-root,
 h3.heading--muted {
   margin-top: var(--inner-spacing-m);
+}
+
+h2.heading--root {
+  /* Prevent overlap with NavRecipe */
+  max-width: calc(
+    100% - (var(--btn-padding-inline) * 2 + var(--icon-size-s) + var(--outer-spacing))
+  );
 }
 
 div.servings {

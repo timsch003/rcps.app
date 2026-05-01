@@ -110,7 +110,7 @@ div.centered {
 
 p.error,
 p.success {
-  margin-top: 26px;
+  margin-top: var(--inner-spacing-l);
   padding: 12px 8px;
   max-width: fit-content;
 }
