@@ -143,7 +143,7 @@ function logout() {
 
 <style scoped>
 div.menu {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background-color: var(--bg);
   z-index: 20;

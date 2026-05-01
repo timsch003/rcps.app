@@ -153,7 +153,6 @@ Current binary version: **0.37.3**
 
 ### Bugs
 
-- Nav bottom scrolls with content (position: absolute)
 - Ingredients info overlay styling for ing parts not applied
 - Tags button in bottom nav not active when navigated to tag view
 
@@ -168,7 +167,7 @@ Current binary version: **0.37.3**
 - Error handling
   - Check retraceability and user feedback
   - Automated emails when errors occur?
-- Local DB seeding 
+- Local DB seeding
   - Increase length and variety of generated dummy data
 
 ### Optimization

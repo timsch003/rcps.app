@@ -21,6 +21,15 @@ provide('syncStatus', syncStatus)
     position: absolute;
     max-width: 820px;
     inset: 0 calc(100vw / 2 - 410px);
+  }
+
+  .menu,
+  nav.bottom {
+    max-width: 816px;
+    margin: 0 auto;
+  }
+
+  main {
     border-inline: var(--nav-border-width) solid var(--bg-lighter);
   }
 }
