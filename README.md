@@ -153,9 +153,6 @@ Current binary version: **0.37.3**
 
 ### Bugs
 
-- Ingredients info overlay styling for ing parts not applied
-- Tags button in bottom nav not active when navigated to tag view
-
 ### Refactoring
 
 - Sync logic

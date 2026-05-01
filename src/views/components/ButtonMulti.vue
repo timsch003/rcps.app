@@ -146,7 +146,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 .btn-link--nav-bottom.active::before {
   content: '';
   position: absolute;
-  top: -13px;
+  top: -12px;
   z-index: 11;
   width: 100%;
   border-top: 2px solid var(--accent);

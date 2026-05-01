@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import FavoritesIcon from '@/views/icons/IconFavorites.vue'
 import TagsIcon from '@/views/icons/IconTags.vue'
@@ -23,7 +24,14 @@ import { t } from '@/lang/i18n'
       accentColor
       inNavBottom
     />
-    <ButtonMulti route="tags" :icon="TagsIcon" :desc="t('Tags')" accentColor inNavBottom />
+    <ButtonMulti
+      route="tags"
+      :icon="TagsIcon"
+      :desc="t('Tags')"
+      accentColor
+      inNavBottom
+      :class="useRoute().name === 'tag' ? 'active' : ''"
+    />
     <ButtonMulti route="create" :icon="AddIcon" :desc="t('Add recipe')" accentColor inNavBottom />
   </nav>
 </template>
