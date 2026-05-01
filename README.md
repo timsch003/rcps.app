@@ -153,6 +153,8 @@ Current binary version: **0.37.3**
 
 ### Bugs
 
+- Nav bottom animation flickers when navigating from tags to tag
+
 ### Refactoring
 
 - Sync logic
