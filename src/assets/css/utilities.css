@@ -54,7 +54,7 @@ div.centered {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity calc(var(--transition-duration) * 0.5);
+  transition: opacity var(--transition-duration);
 }
 .fade-enter-from,
 .fade-leave-to {
@@ -66,13 +66,13 @@ div.centered {
 .slide-in-ltr-leave-active,
 .slide-in-rtl-enter-active,
 .slide-in-rtl-leave-active {
-  transition: all var(--transition-duration);
+  transition: all var(--transition-duration-long);
 }
 .slide-in-ltr-out-in-enter-active,
 .slide-in-ltr-out-in-leave-active,
 .slide-in-rtl-out-in-enter-active,
 .slide-in-rtl-out-in-leave-active {
-  transition: all calc(var(--transition-duration) * 0.5);
+  transition: all var(--transition-duration-long);
 }
 .slide-in-ltr-enter-from,
 .slide-in-rtl-leave-to,
@@ -94,7 +94,7 @@ div.centered {
 .slide-out-top-leave-active,
 .slide-out-bottom-enter-active,
 .slide-out-bottom-leave-active {
-  transition: transform calc(var(--transition-duration) * 2);
+  transition: transform var(--transition-duration-long);
 }
 .slide-out-top-enter-from,
 .slide-out-top-leave-to {
@@ -103,6 +103,12 @@ div.centered {
 .slide-out-bottom-enter-from,
 .slide-out-bottom-leave-to {
   transform: translateY(100%);
+}
+
+/* Fix for interfering transitions */
+.isolate-stacking-context {
+  position: relative;
+  overflow: hidden;
 }
 
 /* Misc

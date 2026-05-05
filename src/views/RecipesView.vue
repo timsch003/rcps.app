@@ -42,7 +42,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="!error && !loading && recipes.length">
+  <div v-if="!error && !loading && recipes.length" class="isolate-stacking-context">
     <Transition :name="viewType === 'tag' ? 'slide-in-rtl' : ''" appear>
       <NavBreadcrumbs :viewType />
     </Transition>

@@ -16,7 +16,8 @@
   /* UI
   */
   --border-radius: 7px;
-  --transition-duration: 0.15s;
+  --transition-duration: 150ms;
+  --transition-duration-long: 250ms;
   --icon-size: 2rem;
   --icon-size-s: 1.5rem;
   --icon-size-xs: 1rem;

@@ -198,14 +198,4 @@ menu.menu__content--settings {
   border-bottom: 1px solid var(--decor);
   margin-bottom: calc(var(--inner-spacing-l) - 1ex);
 }
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity var(--transition-duration) linear;
-}
-
-.fade-leave-to,
-.fade-enter-from {
-  opacity: 0;
-}
 </style>
