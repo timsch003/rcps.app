@@ -358,7 +358,7 @@ async function onCreateEdit() {
       ></textarea>
 
       <ButtonMulti
-        v-if="editingIngredients"
+        v-if="editingIngredients && !ingredientsTextareaEmpty"
         :desc="t('checkcorrect.detect_ingredients')"
         showDesc
         smallText
@@ -367,7 +367,7 @@ async function onCreateEdit() {
         class="checkcorrect__detect-ingredients-button"
       />
 
-      <div v-else class="checkcorrect__ingredients-container">
+      <div v-if="!editingIngredients" class="checkcorrect__ingredients-container">
         <div class="checkcorrect__ingredients-info">
           <div ref="ingredientsInfoElement" class="checkcorrect__ingredients-info--overlay">
             <p>
