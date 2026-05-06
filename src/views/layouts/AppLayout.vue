@@ -13,7 +13,14 @@ const menuOverlayOpen = reactive({ value: false })
   <MenuOverlay v-model="menuOverlayOpen.value" />
   <main>
     <Transition name="slide-out-top" mode="out-in">
-      <header v-if="$route.name !== 'recipe' && $route.name !== 'create' && $route.name !== 'edit'">
+      <header
+        v-if="
+          $route.name !== 'recipe' &&
+          $route.name !== 'create' &&
+          $route.name !== 'edit' &&
+          $route.name !== 'create-from-image'
+        "
+      >
         <AppLogo omitAnimation />
         <NavTop v-model:menuOverlayOpen="menuOverlayOpen.value" />
       </header>
@@ -23,7 +30,12 @@ const menuOverlayOpen = reactive({ value: false })
     </section>
     <Transition name="slide-out-bottom" mode="out-in">
       <NavBottom
-        v-if="$route.name !== 'recipe' && $route.name !== 'create' && $route.name !== 'edit'"
+        v-if="
+          $route.name !== 'recipe' &&
+          $route.name !== 'create' &&
+          $route.name !== 'edit' &&
+          $route.name !== 'create-from-image'
+        "
       />
     </Transition>
     <NavRecipe v-if="$route.name === 'recipe'" />

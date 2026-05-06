@@ -9,6 +9,7 @@ import { unitsManager } from './services/units_manager'
 import { seedLocalDB } from './utils/local_db_seeding'
 import { resetTestData } from './adapters/pocketbase'
 import { i18n } from './lang/i18n'
+import { registerServiceWorker } from './utils/register_service_worker'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -28,3 +29,5 @@ app.use(router)
 app.use(i18n)
 
 app.mount('#app')
+
+registerServiceWorker()

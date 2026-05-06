@@ -16,6 +16,7 @@ import XIcon from '@/views/icons/IconX.vue'
 import DragHandleIcon from '@/views/icons/IconDragHandle.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
+import { useCreateDraftStore } from '@/stores/create_draft'
 import type { RecipeLocal, RecipeRaw } from '@/types'
 import type { UseSortableOptions } from '@vueuse/integrations/useSortable'
 
@@ -31,6 +32,7 @@ const data = reactive<RecipeRaw>({
 })
 const route = useRoute()
 const router = useRouter()
+const createDraftStore = useCreateDraftStore()
 const editingRecipeId = ref<RecipeLocal['id'] | null>(null)
 const loading = ref(false)
 const isValidating = ref(false)
@@ -122,6 +124,20 @@ onMounted(async () => {
       throw new Error(err instanceof Error ? err.message : String(err))
     } finally {
       loading.value = false
+    }
+  } else {
+    const importedDraft = createDraftStore.consumeImportedRecipeDraft()
+    if (importedDraft) {
+      data.name = importedDraft.name
+      data.tags = importedDraft.tags.join(', ')
+      data.ingredients = importedDraft.ingredients
+      data.instructions = importedDraft.instructions
+      data.notes = importedDraft.notes
+
+      if (data.ingredients) {
+        data.matchedIngredients = ingredientsManager.matchAndNormalize(data.ingredients)
+        editingIngredients.value = false
+      }
     }
   }
 

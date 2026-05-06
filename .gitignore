@@ -37,3 +37,6 @@ pb_public
 
 # Vitest
 __screenshots__/
+
+# Local-only ONNX artifacts, not committed
+/public/models/

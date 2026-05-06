@@ -104,6 +104,20 @@ Current binary version: **0.37.3**
 2. Start PocketBase using `npm run pb:lan`
 3. Start Vite using `npm run dev:lan`
 
+#### Local caching
+
+- The app registers a service worker (`public/sw.js`) and caches:
+  - app shell/runtime assets
+  - model files under `/models/**`
+  - Hugging Face model/tokenizer/config requests after first download
+- Transformers also uses browser cache (`env.useBrowserCache = true`), so model assets are reused across sessions.
+
+To avoid repeated model downloads during development/testing, place predownloaded model files here:
+
+`public/models/onnx-community/gemma-3-270m-it-ONNX/`
+
+The folder should mirror the Hugging Face repository structure (same filenames/subfolders as in `onnx-community/gemma-3-270m-it-ONNX`).
+
 ## Features
 
 ### MVP
@@ -166,6 +180,10 @@ Current binary version: **0.37.3**
   - Automated emails when errors occur?
 - Local DB seeding
   - Increase length and variety of generated dummy data
+
+### Accessibility
+
+- Check tab-index for NavBottom create sub-menu
 
 ### Optimization
 

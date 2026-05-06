@@ -79,6 +79,14 @@ export type RecipeRaw = {
   notes: string
 }
 
+export type ImportedRecipeDraft = {
+  name: string
+  tags: string[]
+  ingredients: string
+  instructions: string
+  notes: string
+}
+
 export type SyncStatus = 'synced' | 'pulling' | 'pushing' | 'offline' | 'error'
 
 export type SyncResult = {
