@@ -3,7 +3,6 @@ import { ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
-import IconInline from '@/views/components/IconInline.vue'
 import { t } from '@/lang/i18n'
 import FavoritesIcon from '@/views/icons/IconFavorites.vue'
 import TagsIcon from '@/views/icons/IconTags.vue'
@@ -83,7 +82,7 @@ function toggleCreateDrawer() {
         <ButtonMulti route="create" :desc="t('create_drawer.manual')" smallText accentColor />
         <ButtonMulti
           route="create-from-images"
-          :desc="t('create_drawer.from_image')"
+          :desc="t('create_drawer.from_images')"
           smallText
           accentColor
         />

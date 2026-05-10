@@ -9,6 +9,13 @@ form {
     margin-block-end: var(--inner-spacing);
   }
 
+  .submit {
+    margin-block-end: var(--inner-spacing);
+    button {
+      margin-block-end: 0;
+    }
+  }
+
   label {
     display: block;
     padding-bottom: 2px;

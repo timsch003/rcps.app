@@ -17,6 +17,17 @@ function normalizeOcrText(text: string): string {
     .trim()
 }
 
+function normalizeInstructionsText(text: string): string {
+  return text
+    .replace(/\r\n?/g, '\n')
+    .split('\n')
+    .map((l) => l.trimEnd())
+    .join('\n')
+    .replace(/(?<!\n)\n(?!\n)/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function getCurrentOcrLanguage(): string {
   const locale = String(i18n.global.locale.value || 'en')
   const baseLocale = locale.toLowerCase().split('-')[0] || 'en'
@@ -28,7 +39,7 @@ async function runOcr(
   file: File,
 ): Promise<string> {
   const { data } = await worker.recognize(file)
-  return normalizeOcrText(data.text)
+  return data.text
 }
 
 async function importFromImages(
@@ -44,8 +55,9 @@ async function importFromImages(
   let instructions = ''
 
   try {
-    if (ingredientsImage) ingredients = await runOcr(worker, ingredientsImage)
-    if (directionsImage) instructions = await runOcr(worker, directionsImage)
+    if (ingredientsImage) ingredients = normalizeOcrText(await runOcr(worker, ingredientsImage))
+    if (directionsImage)
+      instructions = normalizeInstructionsText(await runOcr(worker, directionsImage))
   } finally {
     await worker.terminate()
   }
