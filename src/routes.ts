@@ -71,7 +71,8 @@ const router = createRouter({
           name: 'create',
           component: CreateEditView,
           beforeEnter: (to, from) => {
-            to.meta.fromPath = from.fullPath
+            if (from.name === 'create-from-images') to.meta.fromPath = from.meta.fromPath
+            else to.meta.fromPath = from.fullPath
           },
         },
         {

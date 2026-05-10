@@ -581,14 +581,16 @@ textarea#create__ingredients-input {
   overflow-x: auto;
 }
 
+div.checkcorrect__ingredients-container {
+  --ing-spacing: 0.8ex;
+  --color-selected: var(--accent);
+  --color-ignored: var(--decor-light);
+}
+
 div.checkcorrect__ingredients-info {
   position: relative;
 
   div.checkcorrect__ingredients-info--overlay {
-    --ing-spacing: 0.8ex;
-    --color-selected: var(--accent);
-    --color-ignored: var(--decor-light);
-
     position: absolute;
     z-index: 7;
     clip-path: inset(0px 0px 100% 0px);

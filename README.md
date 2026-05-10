@@ -190,6 +190,7 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 ### Optimization
 
 - Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged data
+- Improve OCR results by using NLP
 
 ### Functionality
 

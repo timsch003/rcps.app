@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
+import { useFileDialog } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useCreateDraftStore } from '@/stores/create_draft'
 import { importFromImages } from '@/services/image_import'
@@ -19,9 +20,9 @@ interface CropRect {
   height: number
 }
 
-type CropSlot = 'ingredients' | 'directions'
+type CropSlot = 'title' | 'ingredients' | 'directions' | 'notes'
 type ResizeHandle = 'n' | 'e' | 's' | 'w' | 'nw' | 'ne' | 'sw' | 'se'
-type InteractionMode = 'create' | 'move' | 'resize'
+type InteractionMode = 'resize'
 type DragState = {
   slot: CropSlot
   mode: InteractionMode
@@ -31,63 +32,142 @@ type DragState = {
   handle?: ResizeHandle
 }
 
-const MIN_CROP_SIZE = 24
+const MIN_CROP_SIZE = 12
 
+const titleImage = ref<File | null>(null)
 const ingredientsImage = ref<File | null>(null)
 const directionsImage = ref<File | null>(null)
+const notesImage = ref<File | null>(null)
+const titleImageUrl = ref('')
 const ingredientsImageUrl = ref('')
 const directionsImageUrl = ref('')
+const notesImageUrl = ref('')
+const titleImageElement = ref<HTMLImageElement | null>(null)
 const ingredientsImageElement = ref<HTMLImageElement | null>(null)
 const directionsImageElement = ref<HTMLImageElement | null>(null)
+const notesImageElement = ref<HTMLImageElement | null>(null)
+const titlePreviewElement = ref<HTMLDivElement | null>(null)
 const ingredientsPreviewElement = ref<HTMLDivElement | null>(null)
 const directionsPreviewElement = ref<HTMLDivElement | null>(null)
+const notesPreviewElement = ref<HTMLDivElement | null>(null)
+const titleCrop = ref<CropRect | null>(null)
 const ingredientsCrop = ref<CropRect | null>(null)
 const directionsCrop = ref<CropRect | null>(null)
+const notesCrop = ref<CropRect | null>(null)
 const dragState = ref<DragState | null>(null)
 const isActiveCropDrag = ref(false)
+const shortcutImageFile = ref<File | null>(null)
+const shortcutImageSourceSlot = ref<CropSlot | null>(null)
 const processing = ref(false)
 const errorMessage = ref('')
 
 const canImport = computed(
-  () => (!!ingredientsImage.value || !!directionsImage.value) && !processing.value,
+  () =>
+    (!!titleImage.value ||
+      !!ingredientsImage.value ||
+      !!directionsImage.value ||
+      !!notesImage.value) &&
+    !processing.value,
 )
 
-function onIngredientsImageChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  if (ingredientsImageUrl.value) URL.revokeObjectURL(ingredientsImageUrl.value)
-  ingredientsImage.value = input.files?.[0] || null
-  ingredientsImageUrl.value = ingredientsImage.value
-    ? URL.createObjectURL(ingredientsImage.value)
-    : ''
-  ingredientsCrop.value = null
+function updateShortcutImage(slot: CropSlot, file: File | null): void {
+  if (!file) return
+  shortcutImageFile.value = file
+  shortcutImageSourceSlot.value = slot
 }
 
-function onDirectionsImageChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  if (directionsImageUrl.value) URL.revokeObjectURL(directionsImageUrl.value)
-  directionsImage.value = input.files?.[0] || null
-  directionsImageUrl.value = directionsImage.value ? URL.createObjectURL(directionsImage.value) : ''
-  directionsCrop.value = null
+function setSlotImage(slot: CropSlot, file: File | null): void {
+  if (slot === 'title') {
+    if (titleImageUrl.value) URL.revokeObjectURL(titleImageUrl.value)
+    titleImage.value = file
+    titleImageUrl.value = file ? URL.createObjectURL(file) : ''
+    titleCrop.value = null
+    return
+  }
+
+  if (slot === 'ingredients') {
+    if (ingredientsImageUrl.value) URL.revokeObjectURL(ingredientsImageUrl.value)
+    ingredientsImage.value = file
+    ingredientsImageUrl.value = file ? URL.createObjectURL(file) : ''
+    ingredientsCrop.value = null
+    return
+  }
+
+  if (slot === 'directions') {
+    if (directionsImageUrl.value) URL.revokeObjectURL(directionsImageUrl.value)
+    directionsImage.value = file
+    directionsImageUrl.value = file ? URL.createObjectURL(file) : ''
+    directionsCrop.value = null
+    return
+  }
+
+  if (notesImageUrl.value) URL.revokeObjectURL(notesImageUrl.value)
+  notesImage.value = file
+  notesImageUrl.value = file ? URL.createObjectURL(file) : ''
+  notesCrop.value = null
+}
+
+function canReuseSelectedImage(slot: CropSlot): boolean {
+  return !!shortcutImageFile.value && shortcutImageSourceSlot.value !== slot
+}
+
+function onUseSelectedImage(slot: CropSlot): void {
+  if (!shortcutImageFile.value || shortcutImageSourceSlot.value === slot) return
+  setSlotImage(slot, shortcutImageFile.value)
+}
+
+const fileDialogTargetSlot = ref<CropSlot>('title')
+const { open: openFileDialog, onChange: onFileDialogChange } = useFileDialog({
+  multiple: false,
+  accept: 'image/*',
+})
+
+onFileDialogChange((files) => {
+  const file = files?.item(0) || null
+  setSlotImage(fileDialogTargetSlot.value, file)
+  updateShortcutImage(fileDialogTargetSlot.value, file)
+})
+
+function onBrowseImage(slot: CropSlot): void {
+  fileDialogTargetSlot.value = slot
+  openFileDialog()
 }
 
 function getPreviewElement(slot: CropSlot): HTMLDivElement | null {
-  return slot === 'ingredients' ? ingredientsPreviewElement.value : directionsPreviewElement.value
+  if (slot === 'title') return titlePreviewElement.value
+  if (slot === 'ingredients') return ingredientsPreviewElement.value
+  if (slot === 'directions') return directionsPreviewElement.value
+  return notesPreviewElement.value
 }
 
 function getImageElement(slot: CropSlot): HTMLImageElement | null {
-  return slot === 'ingredients' ? ingredientsImageElement.value : directionsImageElement.value
+  if (slot === 'title') return titleImageElement.value
+  if (slot === 'ingredients') return ingredientsImageElement.value
+  if (slot === 'directions') return directionsImageElement.value
+  return notesImageElement.value
 }
 
 function getCrop(slot: CropSlot): CropRect | null {
-  return slot === 'ingredients' ? ingredientsCrop.value : directionsCrop.value
+  if (slot === 'title') return titleCrop.value
+  if (slot === 'ingredients') return ingredientsCrop.value
+  if (slot === 'directions') return directionsCrop.value
+  return notesCrop.value
 }
 
 function setCrop(slot: CropSlot, rect: CropRect | null): void {
+  if (slot === 'title') {
+    titleCrop.value = rect
+    return
+  }
   if (slot === 'ingredients') {
     ingredientsCrop.value = rect
     return
   }
-  directionsCrop.value = rect
+  if (slot === 'directions') {
+    directionsCrop.value = rect
+    return
+  }
+  notesCrop.value = rect
 }
 
 function getRelativePoint(e: PointerEvent, element: HTMLElement): { x: number; y: number } {
@@ -260,6 +340,14 @@ async function onImportFromImage() {
   errorMessage.value = ''
 
   try {
+    const croppedTitleImage = titleImage.value
+      ? await createCroppedImageFile(
+          titleImage.value,
+          titleImageElement.value,
+          titleCrop.value,
+          'title',
+        )
+      : null
     const croppedIngredientsImage = ingredientsImage.value
       ? await createCroppedImageFile(
           ingredientsImage.value,
@@ -276,8 +364,21 @@ async function onImportFromImage() {
           'directions',
         )
       : null
+    const croppedNotesImage = notesImage.value
+      ? await createCroppedImageFile(
+          notesImage.value,
+          notesImageElement.value,
+          notesCrop.value,
+          'notes',
+        )
+      : null
 
-    const imported = await importFromImages(croppedIngredientsImage, croppedDirectionsImage)
+    const imported = await importFromImages(
+      croppedTitleImage,
+      croppedIngredientsImage,
+      croppedDirectionsImage,
+      croppedNotesImage,
+    )
     createDraftStore.setImportedRecipeDraft(imported)
     router.replace({ name: 'create' })
   } catch (err) {
@@ -288,8 +389,10 @@ async function onImportFromImage() {
 }
 
 onUnmounted(() => {
+  if (titleImageUrl.value) URL.revokeObjectURL(titleImageUrl.value)
   if (ingredientsImageUrl.value) URL.revokeObjectURL(ingredientsImageUrl.value)
   if (directionsImageUrl.value) URL.revokeObjectURL(directionsImageUrl.value)
+  if (notesImageUrl.value) URL.revokeObjectURL(notesImageUrl.value)
 })
 </script>
 
@@ -300,23 +403,116 @@ onUnmounted(() => {
       :icon="XIcon"
       :desc="t('create_edit.discard')"
       showDesc
-      @click="router.back()"
+      @click="router.replace($route.meta.fromPath || { name: 'tags' })"
     />
 
     <h2 id="create_from_images-heading" class="heading--root">
       {{ t('create_from_images.heading') }}
     </h2>
 
+    <div id="create_from_images__title">
+      <h3 class="heading--muted">
+        {{ t('Name') }}
+      </h3>
+      <div class="create_from_images__image-actions">
+        <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('title')" />
+        <ButtonMulti
+          v-if="canReuseSelectedImage('title')"
+          :desc="t('create_from_images.use_last')"
+          showDesc
+          smallText
+          @click="onUseSelectedImage('title')"
+        />
+      </div>
+
+      <div
+        v-if="titleImageUrl"
+        ref="titlePreviewElement"
+        class="create_from_images__preview"
+        @pointermove="onCropPointerMove('title', $event)"
+        @pointerup="onCropPointerUp('title', $event)"
+        @pointercancel="onCropPointerCancel('title', $event)"
+      >
+        <img
+          ref="titleImageElement"
+          :src="titleImageUrl"
+          :alt="t('Name')"
+          draggable="false"
+          @load="onImageLoaded('title')"
+        />
+        <div
+          v-if="titleCrop"
+          class="create_from_images__crop"
+          :style="{
+            left: `${titleCrop.x}px`,
+            top: `${titleCrop.y}px`,
+            width: `${titleCrop.width}px`,
+            height: `${titleCrop.height}px`,
+          }"
+          @touchmove="onCropTouchMove"
+        >
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--n"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('title', 'n', $event)"
+          ></div>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--nw"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('title', 'nw', $event)"
+          ></button>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--ne"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('title', 'ne', $event)"
+          ></button>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--e"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('title', 'e', $event)"
+          ></div>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--s"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('title', 's', $event)"
+          ></div>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--sw"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('title', 'sw', $event)"
+          ></button>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--se"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('title', 'se', $event)"
+          ></button>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--w"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('title', 'w', $event)"
+          ></div>
+        </div>
+      </div>
+    </div>
+
     <div id="create_from_images__ingredients">
       <h3 class="heading--muted">
         {{ t('Ingredients') }}
       </h3>
-      <input
-        type="file"
-        accept="image/*"
-        @change="onIngredientsImageChange"
-        :aria-label="t('Ingredients')"
-      />
+      <div class="create_from_images__image-actions">
+        <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('ingredients')" />
+        <ButtonMulti
+          v-if="canReuseSelectedImage('ingredients')"
+          :desc="t('create_from_images.use_last')"
+          showDesc
+          smallText
+          @click="onUseSelectedImage('ingredients')"
+        />
+      </div>
 
       <div
         v-if="ingredientsImageUrl"
@@ -396,12 +592,16 @@ onUnmounted(() => {
       <h3 class="heading--muted">
         {{ t('Instructions') }}
       </h3>
-      <input
-        type="file"
-        accept="image/*"
-        @change="onDirectionsImageChange"
-        :aria-label="t('Instructions')"
-      />
+      <div class="create_from_images__image-actions">
+        <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('directions')" />
+        <ButtonMulti
+          v-if="canReuseSelectedImage('directions')"
+          :desc="t('create_from_images.use_last')"
+          showDesc
+          smallText
+          @click="onUseSelectedImage('directions')"
+        />
+      </div>
 
       <div
         v-if="directionsImageUrl"
@@ -477,6 +677,95 @@ onUnmounted(() => {
       </div>
     </div>
 
+    <div id="create_from_images__notes">
+      <h3 class="heading--muted">
+        {{ t('Notes') }}
+      </h3>
+      <div class="create_from_images__image-actions">
+        <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('notes')" />
+        <ButtonMulti
+          v-if="canReuseSelectedImage('notes')"
+          :desc="t('create_from_images.use_last')"
+          showDesc
+          smallText
+          @click="onUseSelectedImage('notes')"
+        />
+      </div>
+
+      <div
+        v-if="notesImageUrl"
+        ref="notesPreviewElement"
+        class="create_from_images__preview"
+        @pointermove="onCropPointerMove('notes', $event)"
+        @pointerup="onCropPointerUp('notes', $event)"
+        @pointercancel="onCropPointerCancel('notes', $event)"
+      >
+        <img
+          ref="notesImageElement"
+          :src="notesImageUrl"
+          :alt="t('Notes')"
+          draggable="false"
+          @load="onImageLoaded('notes')"
+        />
+        <div
+          v-if="notesCrop"
+          class="create_from_images__crop"
+          :style="{
+            left: `${notesCrop.x}px`,
+            top: `${notesCrop.y}px`,
+            width: `${notesCrop.width}px`,
+            height: `${notesCrop.height}px`,
+          }"
+          @touchmove="onCropTouchMove"
+        >
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--n"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('notes', 'n', $event)"
+          ></div>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--nw"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('notes', 'nw', $event)"
+          ></button>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--ne"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('notes', 'ne', $event)"
+          ></button>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--e"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('notes', 'e', $event)"
+          ></div>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--s"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('notes', 's', $event)"
+          ></div>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--sw"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('notes', 'sw', $event)"
+          ></button>
+          <button
+            type="button"
+            class="create_from_images__crop-handle create_from_images__crop-handle--se"
+            :aria-label="t('create_from_images.crop_resize')"
+            @pointerdown="onCropHandlePointerDown('notes', 'se', $event)"
+          ></button>
+          <div
+            class="create_from_images__crop-edge create_from_images__crop-edge--w"
+            aria-hidden="true"
+            @pointerdown="onCropHandlePointerDown('notes', 'w', $event)"
+          ></div>
+        </div>
+      </div>
+    </div>
+
     <div class="submit">
       <ButtonMulti
         :desc="t('Import')"
@@ -494,16 +783,12 @@ onUnmounted(() => {
 
 <style scoped>
 .create_from_images__discard-button,
+#create_from_images__title,
 #create_from_images__ingredients,
-#create_from_images__directions {
+#create_from_images__directions,
+#create_from_images__notes {
   margin: 0;
   margin-bottom: var(--inner-spacing-m);
-}
-
-#create_from_images__ingredients > input,
-#create_from_images__directions > input {
-  margin: 0;
-  margin-bottom: 6px;
 }
 
 .create_from_images__preview {
@@ -513,6 +798,15 @@ onUnmounted(() => {
   overflow: hidden;
   user-select: none;
   cursor: default;
+}
+
+.create_from_images__image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  margin-bottom: 6px;
 }
 
 .create_from_images__preview img {
