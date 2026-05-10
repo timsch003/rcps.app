@@ -24,9 +24,9 @@
     "deploy:backend": "rsync -avz -e ssh pb_hooks pb_migrations pocketbase root@178.104.238.103:/root/pb/"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
     "@vueuse/core": "^14.2.1",
     "@vueuse/integrations": "^14.2.1",
+    "compromise": "^14.15.0",
     "dexie": "^4.2.1",
     "pinia": "^3.0.4",
     "pocketbase": "^0.26.8",

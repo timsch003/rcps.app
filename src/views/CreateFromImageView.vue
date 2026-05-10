@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { t } from '@/lang/i18n'
-import { recipeImageImportManager } from '@/services/recipe_image_import'
 import { useCreateDraftStore } from '@/stores/create_draft'
+import { importFromImages } from '@/services/image_import'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
+import { t } from '@/lang/i18n'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
 import XIcon from '@/views/icons/IconX.vue'
 import ArrowRight from '@/views/icons/IconArrowRight.vue'
@@ -30,7 +30,7 @@ async function onImportFromImage() {
   errorMessage.value = ''
 
   try {
-    const imported = await recipeImageImportManager.importFromImages(selectedFiles.value)
+    const imported = await importFromImages(selectedFiles.value)
     createDraftStore.setImportedRecipeDraft(imported)
     router.replace({ name: 'create' })
   } catch (err) {
