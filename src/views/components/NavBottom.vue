@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { onClickOutside } from '@vueuse/core'
 import { useRoute } from 'vue-router'
 import ButtonMulti from '@/views/components/ButtonMulti.vue'
+import IconInline from '@/views/components/IconInline.vue'
 import { t } from '@/lang/i18n'
 import FavoritesIcon from '@/views/icons/IconFavorites.vue'
 import TagsIcon from '@/views/icons/IconTags.vue'
@@ -70,24 +71,23 @@ function toggleCreateDrawer() {
       :class="{ 'bottom__create-drawer--open': createDrawerVisible }"
     >
       <div class="bottom__create-drawer-content">
-        <h3 class="heading--muted">{{ t('create_drawer.heading') }}</h3>
-        <div class="bottom__create-drawer-controls">
-          <ButtonMulti route="create" :desc="t('create_drawer.manual')" smallText accentColor />
+        <h3 class="heading--muted">
+          {{ t('create_drawer.heading') }}
           <ButtonMulti
-            route="create-from-image"
-            :desc="t('create_drawer.from_image')"
-            smallText
-            accentColor
+            :icon="ArrowDownIcon"
+            :desc="t('Close')"
+            inline
+            @click="toggleCreateDrawer"
           />
-        </div>
+        </h3>
+        <ButtonMulti route="create" :desc="t('create_drawer.manual')" smallText accentColor />
+        <ButtonMulti
+          route="create-from-image"
+          :desc="t('create_drawer.from_image')"
+          smallText
+          accentColor
+        />
       </div>
-      <ButtonMulti
-        :icon="ArrowDownIcon"
-        :desc="t('Close')"
-        accentColor
-        smallIcon
-        @click="toggleCreateDrawer"
-      />
     </div>
   </nav>
 </template>
@@ -111,23 +111,20 @@ div.bottom__create-drawer {
 }
 
 div.bottom__create-drawer {
-  justify-content: flex-end;
-  align-items: flex-start;
-  gap: var(--inner-spacing-l);
   position: absolute;
   z-index: 11;
   inset: auto 0 0 auto;
   clip-path: inset(100% 0px 0px 0px);
   pointer-events: none;
   transition: clip-path var(--transition-duration);
-  padding: var(--inner-spacing) var(--inner-spacing-m);
+  padding: var(--inner-spacing);
   border-left: var(--nav-border-width) solid var(--bg-lighter);
-}
 
-div.bottom__create-drawer-controls {
-  display: flex;
-  flex-direction: column;
-  gap: var(--inner-spacing);
+  h3 {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--inner-spacing);
+  }
 }
 
 div.bottom__create-drawer.bottom__create-drawer--open {
@@ -135,7 +132,8 @@ div.bottom__create-drawer.bottom__create-drawer--open {
   pointer-events: auto;
 }
 
-div.bottom__create-drawer h3 {
-  margin-bottom: 8px;
+div.bottom__create-drawer h3,
+div.bottom__create-drawer a {
+  margin-bottom: var(--inner-spacing);
 }
 </style>
