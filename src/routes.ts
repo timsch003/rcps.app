@@ -11,7 +11,7 @@ import VerifyEmailView from './views/auth/VerifyEmailView.vue'
 import ResetPasswordView from './views/auth/ResetPasswordView.vue'
 import ChangeEmailView from './views/auth/ChangeEmailView.vue'
 import CreateEditView from './views/CreateEditView.vue'
-import CreateFromImageView from './views/CreateFromImageView.vue'
+import CreateFromImagesView from './views/CreateFromImagesView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -75,9 +75,9 @@ const router = createRouter({
           },
         },
         {
-          path: '/create-from-image',
-          name: 'create-from-image',
-          component: CreateFromImageView,
+          path: '/create-from-images',
+          name: 'create-from-images',
+          component: CreateFromImagesView,
           beforeEnter: (to, from) => {
             to.meta.fromPath = from.fullPath
           },

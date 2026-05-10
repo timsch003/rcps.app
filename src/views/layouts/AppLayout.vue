@@ -18,7 +18,7 @@ const menuOverlayOpen = reactive({ value: false })
           $route.name !== 'recipe' &&
           $route.name !== 'create' &&
           $route.name !== 'edit' &&
-          $route.name !== 'create-from-image'
+          $route.name !== 'create-from-images'
         "
       >
         <AppLogo omitAnimation />
@@ -34,7 +34,7 @@ const menuOverlayOpen = reactive({ value: false })
           $route.name !== 'recipe' &&
           $route.name !== 'create' &&
           $route.name !== 'edit' &&
-          $route.name !== 'create-from-image'
+          $route.name !== 'create-from-images'
         "
       />
     </Transition>

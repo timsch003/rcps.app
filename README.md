@@ -167,6 +167,8 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 
 ### Bugs
 
+- Sync infinitely fires requests after creating recipe
+
 ### Refactoring
 
 - Sync logic
