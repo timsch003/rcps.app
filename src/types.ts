@@ -87,7 +87,7 @@ export type ImportedRecipeDraft = {
   notes: string
 }
 
-export type SyncStatus = 'synced' | 'pulling' | 'pushing' | 'offline' | 'error'
+export type SyncStatus = 'synced' | 'pulling' | 'pushing' | 'offline' | 'unsynced' | 'error'
 
 export type SyncResult = {
   success: boolean

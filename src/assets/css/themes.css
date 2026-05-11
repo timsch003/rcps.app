@@ -59,6 +59,7 @@
   /* Use only for technical indications
   */
   --error: #ee0000;
+  --warning: #ffe500;
   --success: #00c500;
 }
 

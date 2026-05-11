@@ -1,25 +1,35 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { sync } from '@/services/sync'
+import { useSyncStore } from '@/stores/sync_status'
+import ButtonMulti from './ButtonMulti.vue'
+import { t } from '@/lang/i18n'
 import SearchIcon from '@/views/icons/IconSearch.vue'
 import MenuIcon from '@/views/icons/IconMenu.vue'
 import SyncedIcon from '@/views/icons/IconSynced.vue'
 import SyncOfflineIcon from '@/views/icons/IconSyncOffline.vue'
+import SyncUnsyncedIcon from '@/views/icons/IconSyncUnsynced.vue'
 import SyncPullingIcon from '@/views/icons/IconSyncPulling.vue'
 import SyncPushingIcon from '@/views/icons/IconSyncPushing.vue'
 import SyncErrorIcon from '@/views/icons/IconSyncError.vue'
-import ButtonMulti from './ButtonMulti.vue'
-import { sync } from '@/services/sync'
-import { t } from '@/lang/i18n'
-import type { SyncStatus } from '@/types'
 
+const syncStore = useSyncStore()
 const menuOverlayOpen = defineModel<boolean>('menuOverlayOpen')
-const syncStatus: SyncStatus = inject('syncStatus', 'offline')
 const syncMap = {
   synced: { icon: SyncedIcon, desc: t('sync.status_synced') },
   offline: { icon: SyncOfflineIcon, desc: t('sync.status_offline') },
+  unsynced: { icon: SyncUnsyncedIcon, desc: t('sync.status_unsynced') },
   pulling: { icon: SyncPullingIcon, desc: t('sync.status_pulling') },
   pushing: { icon: SyncPushingIcon, desc: t('sync.status_pushing') },
   error: { icon: SyncErrorIcon, desc: t('sync.status_error') },
+}
+
+async function triggerSync() {
+  if (
+    syncStore.status !== 'pushing' &&
+    syncStore.status !== 'pulling' &&
+    syncStore.status !== 'offline'
+  )
+    sync.init()
 }
 </script>
 
@@ -27,16 +37,12 @@ const syncMap = {
   <nav class="top">
     <div
       class="sync-indicator"
-      :icon="syncMap[syncStatus].icon"
-      :aria-label="syncMap[syncStatus].desc"
+      :icon="syncMap[syncStore.status].icon"
+      :aria-label="syncMap[syncStore.status].desc"
       tabindex="0"
-      @click="
-        syncStatus === 'offline' || syncStatus === 'error' || syncStatus === 'synced'
-          ? sync.init()
-          : null
-      "
+      @click="triggerSync"
     >
-      <component :is="syncMap[syncStatus].icon" :key="syncStatus" />
+      <component :is="syncMap[syncStore.status].icon" :key="syncStore.status" />
     </div>
     <ButtonMulti :icon="SearchIcon" :desc="t('Search')" />
     <ButtonMulti :icon="MenuIcon" :desc="t('Menu')" @click="menuOverlayOpen = true" />
@@ -60,17 +66,26 @@ nav.top {
   border-radius: 50%;
 }
 
+.sync-indicator:has(svg.sync--offline),
+.sync-indicator svg.sync--offline {
+  cursor: not-allowed;
+}
+
 svg[class*='sync--'] {
   stroke: var(--text);
   width: 1.65rem;
   height: 1.65rem;
 }
+
 svg.sync--synced {
   stroke: var(--accent);
 }
-svg.sync--offline {
-  stroke: var(--error);
+
+svg.sync--offline,
+svg.sync--unsynced {
+  stroke: var(--warning);
 }
+
 svg.sync--error {
   stroke: var(--error);
 }

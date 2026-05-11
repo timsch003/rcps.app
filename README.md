@@ -167,14 +167,11 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 
 ### Bugs
 
-- Sync infinitely fires requests after creating recipe
-
 ### Refactoring
 
 - Sync logic
   - Use state machine and events patterns
   - Partial recipe updates
-  - Initial sync on page load when edited on other logged in browser/device
 - Auth
   - Removal of storage data when using different accounts on one browser/device
   - Check auth token timeout
@@ -205,8 +202,7 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 ### UI/UX
 
 - Sync status
-  - Indicate unsynced local changes when offline
-  - Add tick to synced icon
+  - Indicate unsynced changes and offline with separate combined icon
   - Add info section explaining sync to menu
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
