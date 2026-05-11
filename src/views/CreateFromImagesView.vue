@@ -8,7 +8,8 @@ import ButtonMulti from '@/views/components/ButtonMulti.vue'
 import { t } from '@/lang/i18n'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
 import XIcon from '@/views/icons/IconX.vue'
-import ArrowRight from '@/views/icons/IconArrowRight.vue'
+import ArrowRightIcon from '@/views/icons/IconArrowRight.vue'
+import TrashIcon from '@/views/icons/IconTrash.vue'
 
 const router = useRouter()
 const createDraftStore = useCreateDraftStore()
@@ -57,7 +58,6 @@ const notesCrop = ref<CropRect | null>(null)
 const dragState = ref<DragState | null>(null)
 const isActiveCropDrag = ref(false)
 const shortcutImageFile = ref<File | null>(null)
-const shortcutImageSourceSlot = ref<CropSlot | null>(null)
 const processing = ref(false)
 const errorMessage = ref('')
 
@@ -73,47 +73,35 @@ const canImport = computed(
 function updateShortcutImage(slot: CropSlot, file: File | null): void {
   if (!file) return
   shortcutImageFile.value = file
-  shortcutImageSourceSlot.value = slot
 }
 
 function setSlotImage(slot: CropSlot, file: File | null): void {
-  if (slot === 'title') {
-    if (titleImageUrl.value) URL.revokeObjectURL(titleImageUrl.value)
-    titleImage.value = file
-    titleImageUrl.value = file ? URL.createObjectURL(file) : ''
-    titleCrop.value = null
-    return
+  switch (slot) {
+    case 'title':
+      if (titleImageUrl.value) URL.revokeObjectURL(titleImageUrl.value)
+      titleImage.value = file
+      titleImageUrl.value = file ? URL.createObjectURL(file) : ''
+      titleCrop.value = null
+      break
+    case 'ingredients':
+      if (ingredientsImageUrl.value) URL.revokeObjectURL(ingredientsImageUrl.value)
+      ingredientsImage.value = file
+      ingredientsImageUrl.value = file ? URL.createObjectURL(file) : ''
+      ingredientsCrop.value = null
+      break
+    case 'directions':
+      if (directionsImageUrl.value) URL.revokeObjectURL(directionsImageUrl.value)
+      directionsImage.value = file
+      directionsImageUrl.value = file ? URL.createObjectURL(file) : ''
+      directionsCrop.value = null
+      break
+    case 'notes':
+      if (notesImageUrl.value) URL.revokeObjectURL(notesImageUrl.value)
+      notesImage.value = file
+      notesImageUrl.value = file ? URL.createObjectURL(file) : ''
+      notesCrop.value = null
+      break
   }
-
-  if (slot === 'ingredients') {
-    if (ingredientsImageUrl.value) URL.revokeObjectURL(ingredientsImageUrl.value)
-    ingredientsImage.value = file
-    ingredientsImageUrl.value = file ? URL.createObjectURL(file) : ''
-    ingredientsCrop.value = null
-    return
-  }
-
-  if (slot === 'directions') {
-    if (directionsImageUrl.value) URL.revokeObjectURL(directionsImageUrl.value)
-    directionsImage.value = file
-    directionsImageUrl.value = file ? URL.createObjectURL(file) : ''
-    directionsCrop.value = null
-    return
-  }
-
-  if (notesImageUrl.value) URL.revokeObjectURL(notesImageUrl.value)
-  notesImage.value = file
-  notesImageUrl.value = file ? URL.createObjectURL(file) : ''
-  notesCrop.value = null
-}
-
-function canReuseSelectedImage(slot: CropSlot): boolean {
-  return !!shortcutImageFile.value && shortcutImageSourceSlot.value !== slot
-}
-
-function onUseSelectedImage(slot: CropSlot): void {
-  if (!shortcutImageFile.value || shortcutImageSourceSlot.value === slot) return
-  setSlotImage(slot, shortcutImageFile.value)
 }
 
 const fileDialogTargetSlot = ref<CropSlot>('title')
@@ -411,17 +399,24 @@ onUnmounted(() => {
     </h2>
 
     <div id="create_from_images__title">
-      <h3 class="heading--muted">
+      <h3 class="heading--muted heading--with-buttons">
         {{ t('Name') }}
+        <ButtonMulti
+          v-if="titleImageUrl"
+          :desc="t('Remove')"
+          :icon="TrashIcon"
+          inline
+          @click="setSlotImage('title', null)"
+        />
       </h3>
       <div class="create_from_images__image-actions">
         <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('title')" />
         <ButtonMulti
-          v-if="canReuseSelectedImage('title')"
+          v-if="shortcutImageFile"
           :desc="t('create_from_images.use_last')"
           showDesc
           smallText
-          @click="onUseSelectedImage('title')"
+          @click="setSlotImage('title', shortcutImageFile)"
         />
       </div>
 
@@ -500,17 +495,24 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__ingredients">
-      <h3 class="heading--muted">
+      <h3 class="heading--muted heading--with-buttons">
         {{ t('Ingredients') }}
+        <ButtonMulti
+          v-if="ingredientsImageUrl"
+          :desc="t('Remove')"
+          :icon="TrashIcon"
+          inline
+          @click="setSlotImage('ingredients', null)"
+        />
       </h3>
       <div class="create_from_images__image-actions">
         <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('ingredients')" />
         <ButtonMulti
-          v-if="canReuseSelectedImage('ingredients')"
+          v-if="shortcutImageFile"
           :desc="t('create_from_images.use_last')"
           showDesc
           smallText
-          @click="onUseSelectedImage('ingredients')"
+          @click="setSlotImage('ingredients', shortcutImageFile)"
         />
       </div>
 
@@ -589,17 +591,24 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__directions">
-      <h3 class="heading--muted">
+      <h3 class="heading--muted heading--with-buttons">
         {{ t('Instructions') }}
+        <ButtonMulti
+          v-if="directionsImageUrl"
+          :desc="t('Remove')"
+          :icon="TrashIcon"
+          inline
+          @click="setSlotImage('directions', null)"
+        />
       </h3>
       <div class="create_from_images__image-actions">
         <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('directions')" />
         <ButtonMulti
-          v-if="canReuseSelectedImage('directions')"
+          v-if="shortcutImageFile"
           :desc="t('create_from_images.use_last')"
           showDesc
           smallText
-          @click="onUseSelectedImage('directions')"
+          @click="setSlotImage('directions', shortcutImageFile)"
         />
       </div>
 
@@ -678,17 +687,24 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__notes">
-      <h3 class="heading--muted">
+      <h3 class="heading--muted heading--with-buttons">
         {{ t('Notes') }}
+        <ButtonMulti
+          v-if="notesImageUrl"
+          :desc="t('Remove')"
+          :icon="TrashIcon"
+          inline
+          @click="setSlotImage('notes', null)"
+        />
       </h3>
       <div class="create_from_images__image-actions">
         <ButtonMulti :desc="t('Browse')" showDesc smallText @click="onBrowseImage('notes')" />
         <ButtonMulti
-          v-if="canReuseSelectedImage('notes')"
+          v-if="shortcutImageFile"
           :desc="t('create_from_images.use_last')"
           showDesc
           smallText
-          @click="onUseSelectedImage('notes')"
+          @click="setSlotImage('notes', shortcutImageFile)"
         />
       </div>
 
@@ -769,7 +785,7 @@ onUnmounted(() => {
     <div class="submit">
       <ButtonMulti
         :desc="t('Import')"
-        :icon="ArrowRight"
+        :icon="ArrowRightIcon"
         showDesc
         :disabled="!canImport"
         @click="onImportFromImage"
@@ -788,7 +804,11 @@ onUnmounted(() => {
 #create_from_images__directions,
 #create_from_images__notes {
   margin: 0;
-  margin-bottom: var(--inner-spacing-m);
+  margin-block-end: var(--inner-spacing-m);
+}
+
+#create_from_images__notes {
+  padding-block-end: 4px;
 }
 
 .create_from_images__preview {
@@ -813,10 +833,11 @@ onUnmounted(() => {
   display: block;
   width: 100%;
   height: auto;
+  border: 2px solid var(--decor);
 }
 
 .create_from_images__crop {
-  --crop-corner-hit-size: var(--icon-size-s);
+  --crop-corner-hit-size: 10px;
 
   position: absolute;
   border: 2px solid var(--accent);
@@ -825,8 +846,8 @@ onUnmounted(() => {
 .create_from_images__crop-handle {
   position: absolute;
   z-index: 2;
-  width: var(--icon-size-s);
-  height: var(--icon-size-s);
+  width: var(--crop-corner-hit-size);
+  height: var(--crop-corner-hit-size);
   border-radius: 50%;
   border: 2px solid var(--bg);
   background-color: var(--accent);
@@ -842,7 +863,7 @@ onUnmounted(() => {
 .create_from_images__crop-edge--n,
 .create_from_images__crop-edge--s {
   left: calc(var(--crop-corner-hit-size) / 2);
-  width: calc(100% - var(--crop-corner-hit-size));
+  width: calc(100% - var(--crop-corner-hit-size) / 2);
   height: var(--crop-corner-hit-size);
   transform: translateY(-50%);
 }
@@ -850,8 +871,8 @@ onUnmounted(() => {
 .create_from_images__crop-edge--e,
 .create_from_images__crop-edge--w {
   top: calc(var(--crop-corner-hit-size) / 2);
-  width: 1rem;
-  height: calc(100% - var(--crop-corner-hit-size));
+  width: var(--crop-corner-hit-size);
+  height: calc(100% - var(--crop-corner-hit-size) / 2);
   transform: translateX(-50%);
 }
 

@@ -172,6 +172,7 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 ### Refactoring
 
 - Sync logic
+  - Use state machine and events patterns
   - Partial recipe updates
   - Initial sync on page load when edited on other logged in browser/device
 - Auth
@@ -182,6 +183,7 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
   - Automated emails when errors occur?
 - Local DB seeding
   - Increase length and variety of generated dummy data
+- Rename spacing CSS vars uniformly to --spacing-xs etc.
 
 ### Accessibility
 
@@ -190,7 +192,9 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 ### Optimization
 
 - Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged data
-- Improve OCR results by using NLP
+- Improve OCR results
+  - By optimizing images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
+  - If not sufficient test adding NLP
 
 ### Functionality
 

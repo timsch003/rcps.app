@@ -85,6 +85,7 @@ const buttonType = baseElem === 'button' ? 'button' : undefined
 }
 
 .btn-button:disabled {
+  color: var(--decor);
   cursor: not-allowed;
 }
 

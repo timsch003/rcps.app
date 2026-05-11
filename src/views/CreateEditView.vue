@@ -352,7 +352,7 @@ async function onCreateEdit() {
       >
         {{ t('Ingredients') }} {{ t('create_edit.ingredients_hint') }}
       </label>
-      <h3 v-else class="heading--muted heading--with-icon">
+      <h3 v-else class="heading--muted heading--with-buttons">
         {{ t('Ingredients') }}
         <ButtonMulti
           v-if="data.matchedIngredients.length"
@@ -560,16 +560,8 @@ textarea {
   text-align: center;
 }
 
-h3.heading--with-icon {
-  display: flex;
-  align-items: center;
-  gap: var(--inner-spacing);
-  margin-bottom: 4px;
-
-  button svg {
-    width: 1em;
-    height: 1em;
-  }
+h3.heading--with-buttons {
+  margin-block-end: 2px;
 }
 
 div#checkcorrect__ingredients-anchor {

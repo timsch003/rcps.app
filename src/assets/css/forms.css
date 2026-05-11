@@ -78,6 +78,11 @@ form {
     margin-top: 8px;
   }
 
+  button:disabled {
+    color: var(--decor);
+    cursor: not-allowed;
+  }
+
   /* Hide input controls */
   input[type='number'] {
     -webkit-appearance: textfield;

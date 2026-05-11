@@ -15,6 +15,17 @@
   padding-bottom: 2px;
 }
 
+.heading--with-buttons {
+  display: flex;
+  align-items: center;
+  gap: var(--inner-spacing);
+
+  button svg {
+    width: var(--icon-size-xs);
+    height: var(--icon-size-xs);
+  }
+}
+
 .multiline_text {
   white-space: pre-wrap;
 }
@@ -140,11 +151,6 @@ div.submit {
     margin-top: 0;
     margin-bottom: 0;
   }
-}
-
-button:disabled {
-  opacity: 0.75;
-  cursor: not-allowed;
 }
 
 .transition-navs-out-view {
