@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { loginUser } from '@/adapters/pocketbase'
+import { sync } from '@/services/sync'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import { t } from '@/lang/i18n'
@@ -20,6 +21,7 @@ async function onSubmit() {
   const result = await loginUser(email.value, password.value)
 
   if (result.success && authStore.isAuth) {
+    void sync.trigger()
     router.push({ name: 'tags' })
   } else {
     errorMessage.value = result.error || t('auth.login_failed')

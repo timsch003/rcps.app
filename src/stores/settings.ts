@@ -4,9 +4,12 @@ import type { UserSettings } from '@/types'
 import { resolveAccent, resolveTheme } from '@/utils/theme_settings'
 
 const STORAGE_KEY = 'rcps-app-settings'
+const SETTINGS_KEYS: ReadonlyArray<keyof UserSettings> = ['theme', 'accent', 'keepScreenOn']
 
 export const useSettingsStore = defineStore('settings', () => {
   const settings = ref<UserSettings>(withDefaults(readFromStorage()))
+  const hasLocalChanges = ref(false)
+
   applyVisualSettings(settings.value)
 
   function readFromStorage(): UserSettings {
@@ -51,8 +54,16 @@ export const useSettingsStore = defineStore('settings', () => {
     applyDarkReaderLock(theme)
   }
 
+  function isShallowEqualByKeys(left: UserSettings, right: UserSettings): boolean {
+    return SETTINGS_KEYS.every((key) => left[key] === right[key])
+  }
+
   function update(patch: Partial<UserSettings>) {
-    settings.value = withDefaults({ ...settings.value, ...patch })
+    const nextSettings = withDefaults({ ...settings.value, ...patch })
+    if (isShallowEqualByKeys(nextSettings, settings.value)) return
+
+    settings.value = nextSettings
+    hasLocalChanges.value = true
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings.value))
     applyVisualSettings(settings.value)
   }
@@ -65,5 +76,9 @@ export const useSettingsStore = defineStore('settings', () => {
     applyVisualSettings(merged)
   }
 
-  return { settings, update, hydrate }
+  function markSettingsSynced() {
+    hasLocalChanges.value = false
+  }
+
+  return { settings, hasLocalChanges, update, hydrate, markSettingsSynced }
 })

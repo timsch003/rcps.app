@@ -42,7 +42,7 @@ async function createEdit(
 
   await db.recipes.put(newRecipe)
   updateCaches(newRecipe)
-  sync.pushLocalChanges()
+  void sync.trigger()
   return newRecipe.id
 }
 

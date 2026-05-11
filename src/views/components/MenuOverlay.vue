@@ -55,7 +55,7 @@ function closeSetting() {
 function close() {
   open.value = false
   activeSetting.value = null
-  sync.pushLocalChanges()
+  void sync.trigger()
 }
 
 function logout() {

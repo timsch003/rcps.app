@@ -8,6 +8,7 @@ import MenuIcon from '@/views/icons/IconMenu.vue'
 import SyncedIcon from '@/views/icons/IconSynced.vue'
 import SyncOfflineIcon from '@/views/icons/IconSyncOffline.vue'
 import SyncUnsyncedIcon from '@/views/icons/IconSyncUnsynced.vue'
+import SyncUnsyncedOfflineIcon from '@/views/icons/IconSyncUnsyncedOffline.vue'
 import SyncPullingIcon from '@/views/icons/IconSyncPulling.vue'
 import SyncPushingIcon from '@/views/icons/IconSyncPushing.vue'
 import SyncErrorIcon from '@/views/icons/IconSyncError.vue'
@@ -18,6 +19,7 @@ const syncMap = {
   synced: { icon: SyncedIcon, desc: t('sync.status_synced') },
   offline: { icon: SyncOfflineIcon, desc: t('sync.status_offline') },
   unsynced: { icon: SyncUnsyncedIcon, desc: t('sync.status_unsynced') },
+  'unsynced-offline': { icon: SyncUnsyncedOfflineIcon, desc: t('sync.status_unsynced_offline') },
   pulling: { icon: SyncPullingIcon, desc: t('sync.status_pulling') },
   pushing: { icon: SyncPushingIcon, desc: t('sync.status_pushing') },
   error: { icon: SyncErrorIcon, desc: t('sync.status_error') },
@@ -29,7 +31,7 @@ async function triggerSync() {
     syncStore.status !== 'pulling' &&
     syncStore.status !== 'offline'
   )
-    sync.init()
+    void sync.trigger()
 }
 </script>
 
@@ -82,7 +84,8 @@ svg.sync--synced {
 }
 
 svg.sync--offline,
-svg.sync--unsynced {
+svg.sync--unsynced,
+svg.sync--unsynced-offline {
   stroke: var(--warning);
 }
 

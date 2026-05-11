@@ -11,7 +11,8 @@ export const useSyncStore = defineStore('sync', () => {
   })
 
   window.addEventListener('online', () => {
-    sync.init()
+    setStatus('unsynced')
+    void sync.trigger()
   })
 
   function setStatus(newStatus: SyncStatus) {
@@ -19,7 +20,7 @@ export const useSyncStore = defineStore('sync', () => {
   }
 
   function isOffline(): boolean {
-    if (status.value === 'offline' || !navigator.onLine) return true
+    if (!navigator.onLine) return true
     return false
   }
 

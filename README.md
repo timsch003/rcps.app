@@ -169,6 +169,8 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 
 ### Refactoring
 
+- Service workers
+  - Implement check to make sure app shell is not only cached on PWA install
 - Sync logic
   - Use state machine and events patterns
   - Partial recipe updates
@@ -178,9 +180,9 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 - Error handling
   - Check retraceability and user feedback
   - Automated emails when errors occur?
-- Local DB seeding
-  - Increase length and variety of generated dummy data
-- Rename spacing CSS vars uniformly to --spacing-xs etc.
+- CSS
+  - Rename spacing CSS vars uniformly to --spacing-xs etc.
+  - Change all non-logical CSS rules to logical ones
 
 ### Accessibility
 
@@ -202,19 +204,17 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 ### UI/UX
 
 - Sync status
-  - Indicate unsynced changes and offline with separate combined icon
   - Add info section explaining sync to menu
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
 - Create/View/Edit
-  - Add commas when populating tags edit input
-  - Show suggestions when typing in tags
+  - Add spaces after commas when populating tags edit input
+  - Show tag suggestions on input focus (last) and when typing (autocomplete)
 - Settings
   - Add breadcrumbs component to sub-views
 
 ### Internationalization
 
-- Change all non-logical CSS rules to logical ones
 - Support mixed-direction content by applying dir="auto" or <bdi> where necessary
 - Flip arrows and back button positions where appropriate
 - Add script to handle <html dir> and fonts when changing language

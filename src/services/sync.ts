@@ -1,4 +1,3 @@
-import { nextTick } from 'vue'
 import { db } from '@/adapters/dexie'
 import {
   upsertRecord,
@@ -14,22 +13,39 @@ import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
 import type { RecipeLocal, Ingredient, Tag, Unit, Recipe } from '@/types'
 
-// Init sync store after pinia
-let syncStore: ReturnType<typeof useSyncStore>
-nextTick(() => (syncStore = useSyncStore()))
-
-async function init(): Promise<void> {
-  await pushLocalChanges()
-  await pullRemoteData()
+// Prevent racing conditions on first sync at app startup
+function getSyncStore() {
+  return useSyncStore()
 }
 
-async function pushLocalChanges(): Promise<{
+async function trigger(): Promise<void> {
+  const push = await pushLocalChanges()
+  if (push) console.log('Sync push result:', push)
+  const pull = await pullRemoteData()
+  if (pull) console.log('Sync pull result:', pull)
+}
+
+function checkRequirements(
+  unsyncedRecipes: RecipeLocal[] | undefined,
+  userId: string | undefined = useAuthStore().user?.id,
+): {
   success: boolean
-  pushedRecipes?: number
   errors?: string
-}> {
+} {
+  const syncStore = getSyncStore()
+  const settingsStore = useSettingsStore()
   const authStore = useAuthStore()
-  const userId = authStore.user?.id
+
+  if (settingsStore.hasLocalChanges || unsyncedRecipes?.length) {
+    if (syncStore.isOffline()) {
+      syncStore.setStatus('unsynced-offline')
+      return { success: false, errors: 'Offline with unsynced local changes' }
+    }
+
+    syncStore.setStatus('unsynced')
+  }
+
+  if (syncStore.isOffline()) return { success: false, errors: 'Offline' }
 
   if (!authStore.isAuth || !authStore.user) {
     syncStore.setStatus('error')
@@ -41,28 +57,37 @@ async function pushLocalChanges(): Promise<{
     return { success: false, errors: 'No user ID' }
   }
 
-  // Always push user settings regardless of whether there are recipes to push
+  return { success: true }
+}
+
+async function pushLocalChanges(): Promise<{
+  success: boolean
+  pushedRecipes?: number
+  errors?: string
+}> {
+  const syncStore = getSyncStore()
   const settingsStore = useSettingsStore()
-  const currentSettings = { ...settingsStore.settings }
-  if (Object.keys(currentSettings).length) {
-    if (syncStore.isOffline()) {
-      syncStore.setStatus('unsynced')
-      return { success: false, errors: 'Offline' }
-    }
+  const authStore = useAuthStore()
+  const userId = authStore.user?.id
+  const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
+
+  const result = checkRequirements(unsyncedRecipes, userId)
+  if (!result.success) return { success: false, errors: result.errors }
+
+  // Always push user settings regardless of whether there are recipes to push
+  if (settingsStore.hasLocalChanges) {
     syncStore.setStatus('pushing')
-    await updateUserSettings(userId, currentSettings)
+    await updateUserSettings(userId!, { ...settingsStore.settings })
+    settingsStore.markSettingsSynced()
+    console.log('Synced user settings')
+  } else {
+    console.log('Sync: no local user settings changes to push')
   }
 
   // Gather unsynced recipes to push
-  const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
-  if (unsyncedRecipes.length === 0) {
+  if (unsyncedRecipes.length <= 0) {
     syncStore.setStatus('synced')
-    return { success: true, pushedRecipes: 0 }
-  }
-
-  if (syncStore.isOffline()) {
-    if (unsyncedRecipes.length) syncStore.setStatus('unsynced')
-    return { success: false, errors: 'Offline' }
+    return { success: false, errors: 'No local recipe changes to sync' }
   }
 
   syncStore.setStatus('pushing')
@@ -103,7 +128,7 @@ async function pushLocalChanges(): Promise<{
       // Push the recipe (before recipe_ingredients so the relation resolves)
       const r: Recipe = {
         id: recipe.id,
-        userId: userId,
+        userId: userId!,
         name: recipe.name,
         servings: recipe.servings,
         tagIds: recipe.tagIds || undefined,
@@ -169,21 +194,19 @@ async function pullRemoteData(): Promise<{
   pulledRecipes?: number
   error?: string
 }> {
-  if (syncStore.isOffline()) return { success: false, error: 'Offline' }
-
+  const syncStore = getSyncStore()
   const authStore = useAuthStore()
+  const userId = authStore.user?.id
 
-  if (!authStore.isAuth || !authStore.user) {
-    syncStore.setStatus('error')
-    return { success: false, error: 'Not authenticated' }
-  }
+  const result = checkRequirements(undefined, userId)
+  if (!result.success) return { success: false, error: result.errors }
 
   syncStore.setStatus('pulling')
 
   try {
     // Always pull user settings regardless of whether there are recipes to pull
-    if (authStore.user?.id) {
-      const remoteSettings = await fetchUserSettings(authStore.user.id)
+    if (userId) {
+      const remoteSettings = await fetchUserSettings(userId)
       if (remoteSettings) useSettingsStore().hydrate(remoteSettings)
     }
 
@@ -204,7 +227,7 @@ async function pullRemoteData(): Promise<{
 
     if (!recipesToPull.length) {
       syncStore.setStatus('synced')
-      return { success: true, pulledRecipes: 0 }
+      return { success: false, error: 'No remote recipe changes to pull' }
     }
 
     // Store tags from expanded data
@@ -280,7 +303,5 @@ async function pullRemoteData(): Promise<{
 }
 
 export const sync = {
-  init,
-  pushLocalChanges,
-  pullRemoteData,
+  trigger,
 }
