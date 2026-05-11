@@ -79,12 +79,19 @@ function toggleCreateDrawer() {
             @click="toggleCreateDrawer"
           />
         </h3>
-        <ButtonMulti route="create" :desc="t('create_drawer.manual')" smallText accentColor />
+        <ButtonMulti
+          route="create"
+          :desc="t('create_drawer.manual')"
+          smallText
+          accentColor
+          @click="toggleCreateDrawer"
+        />
         <ButtonMulti
           route="create-from-images"
           :desc="t('create_drawer.from_images')"
           smallText
           accentColor
+          @click="toggleCreateDrawer"
         />
       </div>
     </div>

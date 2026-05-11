@@ -837,7 +837,7 @@ onUnmounted(() => {
 }
 
 .create_from_images__crop {
-  --crop-corner-hit-size: 10px;
+  --crop-corner-hit-size: 12px;
 
   position: absolute;
   border: 2px solid var(--accent);

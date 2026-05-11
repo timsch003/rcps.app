@@ -117,7 +117,6 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
   const ingredientLines = ingredients.split('\n')
 
   return ingredientLines.map((line, index) => {
-    quantityUnitTextRegex.lastIndex = 0
     const trimmedLine = line.replace(/\s+/g, ' ').trim()
     let normalizedLine = trimmedLine
     let textBeforeFirstMatch: string | undefined
@@ -172,8 +171,9 @@ export function matchAndNormalize(ingredients: string): MatchedIngredient[] | []
 
     if (!parts[0]) return { normalizedLine: trimmedLine, sortOrder: index * sortOrderMultiplier }
 
-    const firstQuantityPart = parts.find((part) => part.quantity !== undefined)
-    if (firstQuantityPart) firstQuantityPart.selected = true
+    const firstQuantityPartIndex = parts.findIndex((part) => part.quantity !== undefined)
+    if (firstQuantityPartIndex !== -1 && parts[firstQuantityPartIndex])
+      parts[firstQuantityPartIndex].selected = true
 
     return {
       normalizedLine,

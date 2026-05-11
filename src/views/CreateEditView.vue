@@ -259,6 +259,8 @@ function selectQuantityUnit(e: Event, ingredientIndex: number, partIndex: number
 const fitTextareaHeight = (e: Event) => {
   const textarea = e.target as HTMLTextAreaElement
   fitTextareaToContent(textarea)
+
+  if (ingredientsTextareaEmpty.value) detectIngredients()
 }
 
 function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
@@ -369,7 +371,7 @@ async function onCreateEdit() {
         ref="ingredientsTextarea"
         id="create__ingredients-input"
         v-model.trim="data.ingredients"
-        @input="(fitTextareaHeight, ingredientsTextareaEmpty ? detectIngredients() : null)"
+        @input="fitTextareaHeight"
         class="checkcorrect__ingredients-raw"
       ></textarea>
 
@@ -594,7 +596,7 @@ div.checkcorrect__ingredients-info {
     .drag-handle,
     .checkcorrect__remove-button {
       display: inline-block;
-      vertical-align: text-bottom;
+      vertical-align: top;
     }
 
     .checkcorrect__ingredient-quantity-unit--ignored,
