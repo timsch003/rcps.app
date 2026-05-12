@@ -108,28 +108,9 @@ Current binary version: **0.37.3**
 
 The app registers a service worker (`public/sw.js`) and caches the app shell as well as the bundled app assets.
 
-## Features
+## Planned features
 
-### MVP
-
-- Basic user accounts
-- Local data persistence and server sync
-- Card views for browsing tags and recipes
-- Recipe view for creating, viewing, editing and deleting single recipes
-- Importing recipes from screenshots/photos, workflow:
-  1. Select screenshots/photos from gallery (view with large buttons and icons prompting user to choose one for ingredients and one for instructions)
-  2. Crop both images in one view (types indicated by the icons from step 1)  
-     Images are then scanned with OCR (executed on client via Tesseract.js or similar)
-  3. Check imported data (quick-correct view with larger monospace font and common OCR errors highlighted)
-- Settings view
-  - Dark/light theme switch
-  - Accent color selection (based on dark/light theme)
-  - Tags (view, add, edit, delete)
-  - Language (automatic or manual locale selection)
-
-### Planned
-
-#### General
+### General
 
 - Alphabetical <-> last edited sorting toggle for card views
 - Multiple tags selection mode
@@ -138,7 +119,7 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 - Share screenshots/photos for recipe creation (Web Share Target API, ingredients <-> directions assignment toggle view)
 - Ticking ingredients and resetting ticks
 
-#### Settings
+### Settings
 
 - UX
   - Default view to show on app load
