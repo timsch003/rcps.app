@@ -98,7 +98,7 @@ Current binary version: **0.37.3**
 ./pocketbase update
 ```
 
-#### Access dev servers via local network
+#### Access dev servers via local network (no https)
 
 1. Set the local IP of the device you want to use in _.env.development_
 2. Start PocketBase using `npm run pb:lan`
@@ -106,17 +106,7 @@ Current binary version: **0.37.3**
 
 #### Local caching
 
-- The app registers a service worker (`public/sw.js`) and caches:
-  - app shell/runtime assets
-  - model files under `/models/**`
-  - Hugging Face model/tokenizer/config requests after first download
-- Transformers also uses browser cache (`env.useBrowserCache = true`), so model assets are reused across sessions.
-
-To avoid repeated model downloads during development/testing, place predownloaded model files here:
-
-`public/models/onnx-community/gemma-3-270m-it-ONNX/`
-
-The folder should mirror the Hugging Face repository structure (same filenames/subfolders as in `onnx-community/gemma-3-270m-it-ONNX`).
+The app registers a service worker (`public/sw.js`) and caches the app shell as well as the bundled app assets.
 
 ## Features
 
@@ -169,9 +159,8 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 
 ### Refactoring
 
-- Service workers
-  - Implement check to make sure app shell is not only cached on PWA install
 - Sync logic
+  - Handle connection loss while syncing / active pb request
   - Use state machine and events patterns
   - Partial recipe updates
 - Auth
@@ -205,6 +194,7 @@ The folder should mirror the Hugging Face repository structure (same filenames/s
 
 - Sync status
   - Add info section explaining sync to menu
+  - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
 - Create/View/Edit
