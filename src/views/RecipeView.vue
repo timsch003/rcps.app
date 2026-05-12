@@ -40,6 +40,7 @@ onMounted(async () => {
     }
 
     if (recipe.value.tagIds?.length) tags = await tagsManager.getNames(recipe.value.tagIds)
+    if (tags.length === 1 && tags[0] === '---untagged---') tags = []
 
     if (settings?.keepScreenOn && wakeLock.isSupported.value) await wakeLock.request('screen')
   } catch (err) {

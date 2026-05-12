@@ -1,6 +1,7 @@
 {
   "en": {
     "Tags": "Tags",
+    "Untagged": "Untagged",
     "Menu": "Menu",
     "Close": "Close",
     "Close menu": "Close menu",
@@ -62,7 +63,6 @@
     "create_edit.ingredients_hint": "(one per line)",
     "create_edit.alert_name_required": "Recipe name is required.",
     "create_edit.alert_name_exists": "A recipe with this name already exists.",
-    "create_edit.alert_tags_required": "At least one tag is required.",
     "create_edit.failed": "Failed to create recipe.",
     "create_from_images.heading": "Select screenshots or photos to import sections",
     "create_from_images.crop_resize": "Resize crop area",
@@ -112,6 +112,7 @@
   },
   "de": {
     "Tags": "Tags",
+    "Untagged": "Ohne Tag",
     "Menu": "Menü",
     "Close": "Schließen",
     "Close menu": "Menü schließen",
@@ -176,7 +177,6 @@
     "create_edit.ingredients_hint": "(eine pro Zeile)",
     "create_edit.alert_name_required": "Rezeptname ist erforderlich.",
     "create_edit.alert_name_exists": "Ein Rezept mit diesem Namen existiert bereits.",
-    "create_edit.alert_tags_required": "Mindestens ein Tag ist erforderlich.",
     "create_edit.failed": "Erstellung des Rezepts fehlgeschlagen.",
     "create_from_images.heading": "Wähle Screenshots oder Fotos aus, um Abschnitte zu importieren",
     "create_from_images.crop_resize": "Zuschneidebereich anpassen",

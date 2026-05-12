@@ -14,13 +14,18 @@ async function addOrGetExisting(tagName: Tag['name']): Promise<UUID | undefined>
     id: uuidv7(),
     name: tagName,
   }
+
+  if (newTag.name === '---untagged---') newTag.id = '00000000-0000-0000-0000-000000000000'
+
   const newTagId = await db.tags.add(newTag)
   if (newTagId) cache(newTag)
   return newTagId
 }
 
 function cache(tag: Tag): void {
-  useTagsStore().cached.push(tag)
+  const tagsStore = useTagsStore()
+  if (tag.name === '---untagged---') tagsStore.cached.unshift(tag)
+  else tagsStore.cached.push(tag)
 }
 
 async function cacheAll(): Promise<void> {

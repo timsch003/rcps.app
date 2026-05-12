@@ -465,7 +465,7 @@ const normalizeLikeCreateForm = (data: RecipeRaw): RecipeRaw => {
 
 const buildRandomRecipe = (index: number): RecipeRaw => {
   const ingredientCount = randomInt(8, 16)
-  const tags = pickUnique(tagNames, randomInt(3, 7))
+  const tags = index === 0 ? ['---untagged---'] : pickUnique(tagNames, randomInt(3, 7))
   const ingredientLines = Array.from({ length: ingredientCount }, () => buildIngredientLine())
   const matchedIngredients = ingredientLines.map((ingredientLine, index) =>
     buildMatchedIngredient(ingredientLine, index),

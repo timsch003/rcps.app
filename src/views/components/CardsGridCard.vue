@@ -23,7 +23,14 @@ defineProps<{
   </RouterLink>
   <RouterLink v-else class="card card__tag" :to="{ name: 'tag', params: { id: tag?.id } }">
     <h2 class="heading">
-      <IconInline :icon="TagsIcon" :desc="t('Tags')" space="before">{{ tag?.name }}</IconInline>
+      <IconInline
+        v-if="tag?.name !== '---untagged---'"
+        :icon="TagsIcon"
+        :desc="t('Tags')"
+        space="before"
+        >{{ tag?.name }}</IconInline
+      >
+      <span class="card__tag--untagged" v-else>{{ t('Untagged') }}</span>
     </h2>
   </RouterLink>
 </template>
@@ -65,7 +72,7 @@ a.card__recipe {
 }
 
 a.card__tag {
-  padding: 3px 6px 6px 6px;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,5 +80,9 @@ a.card__tag {
   h2 {
     text-align: center;
   }
+}
+
+.card__tag--untagged {
+  font-weight: 300;
 }
 </style>

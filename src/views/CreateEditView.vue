@@ -141,6 +141,8 @@ onMounted(async () => {
     }
   }
 
+  if (data.tags.length === 1 && data.tags[0] === '---untagged---') data.tags = []
+
   await nextTick()
   fitTextareaToContent(instructionsTextarea.value)
   fitTextareaToContent(notesTextarea.value)
@@ -281,8 +283,7 @@ async function onCreateEdit() {
     return
   }
   if (!data.tags.length || (typeof data.tags === 'string' && !data.tags.trim())) {
-    alert(t('create_edit.alert_tags_required'))
-    return
+    data.tags = ['---untagged---']
   }
 
   isValidating.value = true

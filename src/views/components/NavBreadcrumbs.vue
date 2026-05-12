@@ -27,6 +27,9 @@ switch (props.viewType) {
   default:
     viewName = ''
 }
+
+let tagName = isTagsView ? tagsStore.getName(tagId) : t(viewName)
+if (tagName === '---untagged---') tagName = t('Untagged')
 </script>
 
 <template>
@@ -34,7 +37,9 @@ switch (props.viewType) {
     <h2 class="heading--root">
       <RouterLink v-if="isTagsView" :to="{ name: 'tags' }"> {{ t(viewName) }}&nbsp;</RouterLink>
       <span v-if="isTagsView" aria-hidden="true">→</span>
-      {{ isTagsView ? tagsStore.getName(tagId) : t(viewName) }}
+      <span :class="tagName === t('Untagged') ? 'breadcrumbs__untagged-title' : ''">{{
+        tagName
+      }}</span>
     </h2>
   </nav>
 </template>
@@ -46,6 +51,10 @@ nav {
 
     span {
       margin-inline: 5px;
+    }
+
+    span.breadcrumbs__untagged-title {
+      font-weight: 300;
     }
   }
 
