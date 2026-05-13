@@ -92,9 +92,11 @@ function logout() {
                   @click="openSetting('ui')"
                 />
               </li>
+              <!--
               <li>
                 <ButtonMulti :icon="LanguageIcon" :desc="t('settings.language')" showDesc />
               </li>
+              -->
             </menu>
             <h3 class="heading--muted">
               {{ t('settings.user_account') }} <span>{{ authStore.user?.email }}</span>
@@ -103,6 +105,7 @@ function logout() {
               <li>
                 <ButtonMulti :icon="LogoutIcon" :desc="t('auth.logout')" showDesc @click="logout" />
               </li>
+              <!--
               <li>
                 <ButtonMulti
                   route="reset"
@@ -119,6 +122,7 @@ function logout() {
                   showDesc
                 />
               </li>
+              -->
             </menu>
           </div>
 

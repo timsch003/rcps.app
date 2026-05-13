@@ -155,35 +155,39 @@ Services (`/src/services`) are used to keep responsibility for mutating data as 
 ### Bugs
 
 - Menu -> submenu transition is delayed
+- When after editing a recipe a tag has no recipes associated to it anymore:
+  - users get a non-breaking error when navigating back
+  - the tag stays cached and being displayed in the tags view
 
 ### MVP Roadmap
 
 - Sync last viewed in user settings
+- Sort items by name in favorites and tags views
+- Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
+- Adjust ingredient quantities based on portions
+- Improve OCR results, especially regarding empty lines between ingredients
+  - Optimize images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
+  - If not sufficient research if NLP could help
+- Basic search functionality
 - Trigger sync on menu close only when changes were made
-- Improve OCR results
-  - By optimizing images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
-  - If not sufficient test adding NLP
-- Adjust ingredient quantities based on set portions
+- Recipe images (up to 5 per recipe, low resolution version for offline storage)
 - Menu functionality
   - Language selection
   - Reset password
   - Change email
-- Basic search functionality
-- Recipe images (up to 5 per recipe, low resolution version for offline storage)
 
 ### Functionality
 
 - Link tags in recipe view to tag views
+- Add option to set changed portions count and adjusted ingredient quantities permanently (= edit recipe from RecipeView?)
 
 ### UI/UX
 
 - Sync status
   - Add sync info section to menu (icons legend, advice user to let offline changes sync before editing on other device/browser)
-  - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
 - Create/View/Edit
-  - Sort items by name in favorites and tags views
   - Add spaces after commas when populating tags edit input
   - Show tag suggestions on input focus (last) and when typing (autocomplete)
 - Settings

@@ -193,7 +193,7 @@ async function pushLocalChanges(): Promise<{
       syncStore.setStatus('synced')
     } catch (e) {
       syncStore.setStatus('error')
-      errors.push(`${e instanceof Error ? e.name + ': ' + e.message : String(e)}`)
+      errors.push(String(e))
     }
   }
 
@@ -214,11 +214,13 @@ async function pushLocalChanges(): Promise<{
 async function pullRemoteData(): Promise<{
   success: boolean
   pulledRecipes?: number
+  deletedRecipes?: number
   error?: string
 }> {
   const syncStore = getSyncStore()
   const authStore = useAuthStore()
   const userId = authStore.user?.id
+  let deletedRecipesCount = 0
 
   const result = checkRequirements(undefined, userId)
   if (!result.success) return { success: false, error: result.errors }
@@ -255,6 +257,7 @@ async function pullRemoteData(): Promise<{
       await db.recipes.delete(recipe.id)
       await tagsManager.removeOrphanedFromLocal(recipeTagIds)
       recipesManager.removeRecipeFromCache(recipe.id)
+      deletedRecipesCount++
     }
 
     // Pull only recipes that are not present locally at all.
@@ -278,7 +281,7 @@ async function pullRemoteData(): Promise<{
       }
     }
 
-    // Fetch user's recipe_ingredients
+    // Fetch user's recipeIngredients
     const conditions = recipesToPull.map((r) => `recipeId = "${r.id}"`).join(' || ')
     const recipeIngredients = await fetchAll('recipe_ingredients', {
       filter: conditions,
@@ -286,7 +289,7 @@ async function pullRemoteData(): Promise<{
       skipTotal: true,
     })
 
-    // Store ingredients and units from expanded data, then recipe_ingredients
+    // Store ingredients and units from expanded data, then recipeIngredients
     for (const ri of recipeIngredients) {
       if (ri.expand?.ingredientId) {
         const ing = ri.expand.ingredientId as Ingredient
@@ -335,10 +338,14 @@ async function pullRemoteData(): Promise<{
     await unitsManager.cacheAll()
 
     syncStore.setStatus('synced')
-    return { success: true, pulledRecipes: recipesToPull.length }
+    return {
+      success: true,
+      pulledRecipes: recipesToPull.length - deletedRecipesCount,
+      deletedRecipes: deletedRecipesCount,
+    }
   } catch (e) {
     syncStore.setStatus('error')
-    return { success: false, error: e instanceof Error ? e.message : String(e) }
+    return { success: false, error: String(e) }
   }
 }
 
