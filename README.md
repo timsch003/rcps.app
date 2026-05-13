@@ -141,8 +141,7 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 ### Refactoring
 
 - Sync logic
-  - Handle connection loss while syncing / active pb request
-  - Use state machine and events patterns
+  - Handle connection loss while syncing / active pb request (outbox, state machine / transition map patterns)
   - Partial recipe updates
 - Auth
   - Removal of storage data when using different accounts on one browser/device
