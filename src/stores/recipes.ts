@@ -59,6 +59,12 @@ export const useRecipesStore = defineStore('recipes', () => {
     return recipes.sort((a, b) => a.name.localeCompare(b.name))
   }
 
+  function removeCached(recipeId: RecipeLocal['id']): void {
+    favorites.value = favorites.value.filter((recipe) => recipe.id !== recipeId)
+    tagged.value = tagged.value.filter((recipe) => recipe.id !== recipeId)
+    lastViewed.value = lastViewed.value.filter((recipe) => recipe.id !== recipeId)
+  }
+
   return {
     favorites,
     lastViewed,
@@ -67,6 +73,7 @@ export const useRecipesStore = defineStore('recipes', () => {
     cacheFavorites,
     cacheTagged,
     updateLastViewed,
+    removeCached,
     getRemainingCacheSize,
     sortByCreated,
     sortByName,

@@ -3,8 +3,14 @@ import { useRecipesStore } from '@/stores/recipes'
 import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
-import { sync } from './sync'
 import type { RecipeLocal, RecipeRaw, Tag, UUID } from '@/types'
+
+async function triggerSync(): Promise<void> {
+  // Import sync module dynamically to avoid circular dependency
+  // (since sync also imports recipesManager)
+  const { sync } = await import('./sync')
+  await sync.trigger()
+}
 
 async function createEdit(
   data: RecipeRaw,
@@ -38,12 +44,41 @@ async function createEdit(
     instructions: data.instructions,
     notes: data.notes,
     synced: false,
+    deleted: false,
   }
 
   await db.recipes.put(newRecipe)
   updateCaches(newRecipe)
-  void sync.trigger()
+  void triggerSync()
   return newRecipe.id
+}
+
+async function deleteById(recipeId: RecipeLocal['id']): Promise<void> {
+  const recipe = await db.recipes.get(recipeId)
+  if (!recipe || recipe.deleted) return
+
+  const tagIds = recipe.tagIds || []
+
+  if (recipe.recipeIngredientIds?.length) {
+    await db.recipe_ingredients.bulkDelete(recipe.recipeIngredientIds)
+  }
+
+  removeRecipeFromCache(recipeId)
+
+  if (!recipe.synced) {
+    await db.recipes.delete(recipeId)
+    await tagsManager.removeOrphanedFromLocal(tagIds)
+    return
+  }
+
+  await db.recipes.update(recipeId, {
+    synced: false,
+    deleted: true,
+  })
+
+  await tagsManager.removeOrphanedFromLocal(tagIds)
+
+  void triggerSync()
 }
 
 async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
@@ -53,6 +88,7 @@ async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
   if (!cached) cached = recipesStore.tagged.find((r) => r.id === recipeId)
 
   const recipe = cached ? cached : await db.recipes.get(recipeId)
+  if (recipe?.deleted) return undefined
   if (recipe) recipesStore.updateLastViewed(recipe)
   return recipe
 }
@@ -62,7 +98,7 @@ async function getFavorites(): Promise<RecipeLocal[]> {
 
   if (recipesStore.favorites.length > 0) return recipesStore.favorites
 
-  const favorites = await db.recipes.filter((r) => r.favorite).toArray()
+  const favorites = await db.recipes.filter((r) => r.favorite && !r.deleted).toArray()
   recipesStore.cacheFavorites(favorites)
   return favorites
 }
@@ -77,23 +113,30 @@ async function getTagged(tagId: Tag['id']): Promise<RecipeLocal[]> {
   const cached = recipesStore.tagged[0]?.tagIds?.includes(tagId)
   if (cached) return recipesStore.tagged
 
-  const recipes = await db.recipes.where('tagIds').equals(tagId).toArray()
+  const recipes = (await db.recipes.where('tagIds').equals(tagId).toArray()).filter(
+    (r) => !r.deleted,
+  )
   recipesStore.cacheTagged(tagId, recipes)
   return recipes
 }
 
 async function nameExists(name: string): Promise<boolean> {
   const existingCached = useRecipesStore().lastViewed.find(
-    (r) => r.name.toLowerCase() === name.toLowerCase(),
+    (r) => !r.deleted && r.name.toLowerCase() === name.toLowerCase(),
   )
   if (existingCached) return true
 
   const existingDb = await db.recipes.where('name').equalsIgnoreCase(name).first()
-  return !!existingDb
+  return !!existingDb && !existingDb.deleted
 }
 
 async function updateCaches(newOrEdited: RecipeLocal): Promise<void> {
   const recipesStore = useRecipesStore()
+
+  if (newOrEdited.deleted) {
+    removeRecipeFromCache(newOrEdited.id)
+    return
+  }
 
   replaceRecipe(recipesStore.lastViewed, newOrEdited)
 
@@ -116,6 +159,10 @@ async function updateCaches(newOrEdited: RecipeLocal): Promise<void> {
   }
 }
 
+function removeRecipeFromCache(recipeId: RecipeLocal['id']): void {
+  useRecipesStore().removeCached(recipeId)
+}
+
 function replaceRecipe(collection: RecipeLocal[], recipe: RecipeLocal): void {
   const existingIndex = collection.findIndex((item) => item.id === recipe.id)
   if (existingIndex !== -1) collection.splice(existingIndex, 1, recipe)
@@ -124,10 +171,12 @@ function replaceRecipe(collection: RecipeLocal[], recipe: RecipeLocal): void {
 
 export const recipesManager = {
   createEdit,
+  deleteById,
   getById,
   getFavorites,
   getLastViewed,
   getTagged,
   nameExists,
+  removeRecipeFromCache,
   updateCaches,
 }

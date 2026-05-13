@@ -32,6 +32,30 @@ async function cacheAll(): Promise<void> {
   useTagsStore().cached = await db.tags.toArray()
 }
 
+async function removeOrphanedFromLocal(tagIds: UUID[]): Promise<void> {
+  if (!tagIds.length) return
+
+  const uniqueTagIds = [...new Set(tagIds)]
+  const orphanedTagIds: UUID[] = []
+
+  for (const tagId of uniqueTagIds) {
+    const activeRecipeCount = await db.recipes
+      .where('tagIds')
+      .equals(tagId)
+      .filter((recipe) => !recipe.deleted)
+      .limit(1)
+      .count()
+
+    if (activeRecipeCount === 0) orphanedTagIds.push(tagId)
+  }
+
+  if (!orphanedTagIds.length) return
+
+  await db.tags.bulkDelete(orphanedTagIds)
+  const tagsStore = useTagsStore()
+  tagsStore.cached = tagsStore.cached.filter((tag) => !orphanedTagIds.includes(tag.id))
+}
+
 function getNames(tagIds: UUID[]): Tag['name'][] {
   const tagsStore = useTagsStore()
   return tagIds
@@ -48,4 +72,5 @@ export const tagsManager = {
   cache,
   cacheAll,
   getNames,
+  removeOrphanedFromLocal,
 }

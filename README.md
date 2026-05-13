@@ -4,9 +4,10 @@
 
 1. [Stack](#stack)
 2. [Setup](#setup)
-3. [Features](#features)
-4. [TODOs](#todos)
-5. [Deployment checklist](#deployment-checklist)
+3. [Architecture](#architecture)
+4. [Planned features](#planned-features)
+5. [TODOs](#todos)
+6. [Deployment checklist](#deployment-checklist)
 
 ## Stack
 
@@ -108,6 +109,20 @@ Current binary version: **0.37.3**
 
 The app registers a service worker (`public/sw.js`) and caches the app shell as well as the bundled app assets.
 
+## Architecture
+
+### Backend
+
+Pivot tables are employed to share data which is likely to be duplicated a lot between users (ingredients, units and tags).
+
+### IDs
+
+For all types that have an ID UUIDv7 is used which offers integrated time stamps. Those can be used e.g. for sorting purposes or syncing conflict handling. IDs are only created on the client.
+
+### Services
+
+Services (`/src/services`) are used to keep responsibility for mutating data as decoupled as possible.
+
 ## Planned features
 
 ### General
@@ -122,7 +137,8 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 ### Settings
 
 - UX
-  - Default view to show on app load
+  - Default view to show on app load (settings key with value of route object: `{name: 'tags'}`)
+  - Display 'Categorie(s)' instead of 'Tag(s)' or even let user edit the term freely
   - Categorize favorites by tags
   - Star as favorites icon
   - Condensed recipe view
@@ -138,6 +154,53 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 
 ### Bugs
 
+- Menu -> submenu transition is delayed
+
+### MVP Roadmap
+
+- Sync last viewed in user settings
+- Trigger sync on menu close only when changes were made
+- Improve OCR results
+  - By optimizing images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
+  - If not sufficient test adding NLP
+- Adjust ingredient quantities based on set portions
+- Menu functionality
+  - Language selection
+  - Reset password
+  - Change email
+- Basic search functionality
+- Recipe images (up to 5 per recipe, low resolution version for offline storage)
+
+### Functionality
+
+- Link tags in recipe view to tag views
+
+### UI/UX
+
+- Sync status
+  - Add sync info section to menu (icons legend, advice user to let offline changes sync before editing on other device/browser)
+  - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
+- Navs
+  - Add transition / animation to nav bottom active indicator (:before)
+- Create/View/Edit
+  - Sort items by name in favorites and tags views
+  - Add spaces after commas when populating tags edit input
+  - Show tag suggestions on input focus (last) and when typing (autocomplete)
+- Settings
+  - Add breadcrumbs component to sub-views
+
+### Accessibility
+
+- Check tab-index for NavBottom create sub-menu
+
+### Testing
+
+- Check how pivot tables entries shared between users are handeled when created offline and already present under different ID when synced
+
+### Optimization
+
+- Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged recipes
+
 ### Refactoring
 
 - Sync logic
@@ -152,36 +215,6 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 - CSS
   - Rename spacing CSS vars uniformly to --spacing-xs etc.
   - Change all non-logical CSS rules to logical ones
-
-### Accessibility
-
-- Check tab-index for NavBottom create sub-menu
-
-### Optimization
-
-- Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged data
-- Improve OCR results
-  - By optimizing images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
-  - If not sufficient test adding NLP
-
-### Functionality
-
-- Add option to delete recipes
-- Persist last viewed in user settings
-- Link tags in recipe view to tag views
-
-### UI/UX
-
-- Sync status
-  - Add info section explaining sync to menu
-  - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
-- Navs
-  - Add transition / animation to nav bottom active indicator (:before)
-- Create/View/Edit
-  - Add spaces after commas when populating tags edit input
-  - Show tag suggestions on input focus (last) and when typing (autocomplete)
-- Settings
-  - Add breadcrumbs component to sub-views
 
 ### Internationalization
 

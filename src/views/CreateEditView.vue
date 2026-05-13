@@ -218,7 +218,7 @@ function detectIngredients(scrollIntoView = true) {
 
 function onEditIngredients() {
   data.ingredients = data.matchedIngredients.map((mi) => mi.normalizedLine).join('\n')
-
+  data.matchedIngredients = []
   editingIngredients.value = true
 
   nextTick(() => {
@@ -275,9 +275,9 @@ function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
 function onDelete() {
   if (!editingRecipeId.value) return
 
-  const confirmDelete = confirm(t('create_edit.confirm_delete'))
-  if (confirmDelete) {
-    // TODO
+  if (confirm(t('create_edit.confirm_delete'))) {
+    void recipesManager.deleteById(editingRecipeId.value)
+    router.replace({ name: 'tags' })
   }
 }
 
@@ -302,10 +302,7 @@ async function onCreateEdit() {
 
   normalizeTags()
 
-  if (!data.matchedIngredients.length) {
-    detectIngredients(false)
-    console.log('detected while saving')
-  }
+  if (!data.matchedIngredients.length) detectIngredients(false)
 
   const recipeId = await recipesManager.createEdit(data, editingRecipeId.value || undefined)
   if (recipeId) router.replace({ name: 'recipe', params: { id: recipeId } })

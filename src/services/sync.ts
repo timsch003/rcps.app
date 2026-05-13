@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
+import { recipesManager } from './recipes_manager'
 import type { RecipeLocal, Ingredient, Tag, Unit, Recipe } from '@/types'
 
 // Prevent racing conditions on first sync at app startup
@@ -20,9 +21,9 @@ function getSyncStore() {
 
 async function trigger(): Promise<void> {
   const push = await pushLocalChanges()
-  if (push) console.log('Sync push result:', push)
+  if (push) console.log('Sync: push results', push)
   const pull = await pullRemoteData()
-  if (pull) console.log('Sync pull result:', pull)
+  if (pull) console.log('Sync: pull results', pull)
 }
 
 function checkRequirements(
@@ -63,6 +64,7 @@ function checkRequirements(
 async function pushLocalChanges(): Promise<{
   success: boolean
   pushedRecipes?: number
+  deletedRecipes?: number
   errors?: string
 }> {
   const syncStore = getSyncStore()
@@ -70,6 +72,7 @@ async function pushLocalChanges(): Promise<{
   const authStore = useAuthStore()
   const userId = authStore.user?.id
   const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
+  let deletedRecipesCount = 0
 
   const result = checkRequirements(unsyncedRecipes, userId)
   if (!result.success) return { success: false, errors: result.errors }
@@ -79,7 +82,7 @@ async function pushLocalChanges(): Promise<{
     syncStore.setStatus('pushing')
     await updateUserSettings(userId!, { ...settingsStore.settings })
     settingsStore.markSettingsSynced()
-    console.log('Synced user settings')
+    console.log('Sync: user settings pushed')
   } else {
     console.log('Sync: no local user settings changes to push')
   }
@@ -96,6 +99,20 @@ async function pushLocalChanges(): Promise<{
 
   for (const recipe of unsyncedRecipes) {
     try {
+      if (recipe.deleted) {
+        if (recipe.recipeIngredientIds?.length) {
+          for (const recipeIngredientId of recipe.recipeIngredientIds) {
+            await deleteRecord('recipe_ingredients', recipeIngredientId)
+          }
+        }
+
+        await deleteRecord('recipes', recipe.id)
+        await db.recipes.delete(recipe.id)
+        recipesManager.removeRecipeFromCache(recipe.id)
+        deletedRecipesCount++
+        continue
+      }
+
       // Push tags referenced by this recipe
       if (recipe.tagIds?.length) {
         const tags = await db.tags.where('id').anyOf(recipe.tagIds).toArray()
@@ -170,6 +187,7 @@ async function pushLocalChanges(): Promise<{
       await db.recipes.update(recipe.id, {
         synced: true,
         deletedRecipeIngredientIds: [],
+        deleted: false,
       })
 
       syncStore.setStatus('synced')
@@ -186,7 +204,11 @@ async function pushLocalChanges(): Promise<{
     return { success: false, errors: allErrors }
   }
   syncStore.setStatus('synced')
-  return { success: true, pushedRecipes: unsyncedRecipes.length }
+  return {
+    success: true,
+    pushedRecipes: unsyncedRecipes.length - deletedRecipesCount,
+    deletedRecipes: deletedRecipesCount,
+  }
 }
 
 async function pullRemoteData(): Promise<{
@@ -216,18 +238,35 @@ async function pullRemoteData(): Promise<{
       skipTotal: true,
     })
 
-    // Check if any remote recipes already exist locally as synced
-    const localMatches = await db.recipes
-      .where('id')
-      .anyOf(remoteRecipes.map((r) => r.id))
-      .toArray()
+    const localRecipes = await db.recipes.toArray()
+    const localIds = new Set(localRecipes.map((recipe) => recipe.id))
+    const remoteIds = new Set(remoteRecipes.map((recipe) => recipe.id))
 
-    const syncedLocalIds = new Set(localMatches.filter((r) => r.synced).map((r) => r.id))
-    const recipesToPull = remoteRecipes.filter((r) => !syncedLocalIds.has(r.id))
+    // Remove local recipes that used to be synced but are no longer present on the server.
+    const deletedRemotely = localRecipes.filter(
+      (recipe) => recipe.synced && !recipe.deleted && !remoteIds.has(recipe.id),
+    )
+
+    for (const recipe of deletedRemotely) {
+      const recipeTagIds = recipe.tagIds || []
+      if (recipe.recipeIngredientIds?.length) {
+        await db.recipe_ingredients.bulkDelete(recipe.recipeIngredientIds)
+      }
+      await db.recipes.delete(recipe.id)
+      await tagsManager.removeOrphanedFromLocal(recipeTagIds)
+      recipesManager.removeRecipeFromCache(recipe.id)
+    }
+
+    // Pull only recipes that are not present locally at all.
+    const recipesToPull = remoteRecipes.filter((recipe) => !localIds.has(recipe.id))
 
     if (!recipesToPull.length) {
       syncStore.setStatus('synced')
-      return { success: false, error: 'No remote recipe changes to pull' }
+      return {
+        success: deletedRemotely.length > 0,
+        pulledRecipes: 0,
+        error: deletedRemotely.length > 0 ? undefined : 'No remote recipe changes to pull',
+      }
     }
 
     // Store tags from expanded data
@@ -286,6 +325,7 @@ async function pullRemoteData(): Promise<{
         notes: recipe.notes || undefined,
         deletedRecipeIngredientIds: [],
         synced: true,
+        deleted: false,
       }
       await db.recipes.put(localRecipe)
     }
