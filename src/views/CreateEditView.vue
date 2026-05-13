@@ -13,6 +13,7 @@ import { t } from '@/lang/i18n'
 import CheckIcon from '@/views/icons/IconCheck.vue'
 import EditIcon from '@/views/icons/IconEdit.vue'
 import XIcon from '@/views/icons/IconX.vue'
+import TrashIcon from '@/views/icons/IconTrash.vue'
 import DragHandleIcon from '@/views/icons/IconDragHandle.vue'
 import InfoIcon from '@/views/icons/IconInfo.vue'
 import SpinnerIcon from '@/views/icons/IconSpinner.vue'
@@ -271,6 +272,15 @@ function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
   textarea.style.height = `${textarea.scrollHeight}px`
 }
 
+function onDelete() {
+  if (!editingRecipeId.value) return
+
+  const confirmDelete = confirm(t('create_edit.confirm_delete'))
+  if (confirmDelete) {
+    // TODO
+  }
+}
+
 async function onCreateEdit() {
   if (isValidating.value) return
 
@@ -318,7 +328,16 @@ async function onCreateEdit() {
       "
     />
 
-    <h2 class="heading--root">{{ editingRecipeId ? t('Edit recipe') : t('Create recipe') }}</h2>
+    <h2 class="heading--root heading--buttons-spaced">
+      {{ editingRecipeId ? t('Edit recipe') : t('Create recipe') }}
+      <ButtonMulti
+        v-if="editingRecipeId"
+        :icon="TrashIcon"
+        :desc="t('Delete recipe')"
+        smallIcon
+        @click="onDelete"
+      />
+    </h2>
 
     <p v-if="loading" class="loading">{{ t('sync.status_pulling') }}</p>
 
@@ -355,7 +374,7 @@ async function onCreateEdit() {
       >
         {{ t('Ingredients') }} {{ t('create_edit.ingredients_hint') }}
       </label>
-      <h3 v-else class="heading--muted heading--with-buttons">
+      <h3 v-else class="heading--muted heading--buttons">
         {{ t('Ingredients') }}
         <ButtonMulti
           v-if="data.matchedIngredients.length"
@@ -563,7 +582,7 @@ textarea {
   text-align: center;
 }
 
-h3.heading--with-buttons {
+h3.heading--buttons {
   margin-block-end: 2px;
 }
 

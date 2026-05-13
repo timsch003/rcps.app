@@ -14,7 +14,7 @@ const { isScrolling } = useScroll(window, { behavior: 'smooth' })
 <template>
   <nav class="recipe" :class="{ scrolling: isScrolling }">
     <ButtonMulti
-      @click="router.push(route.meta.fromPath || 'tags')"
+      @click="router.push(route.meta.fromPath || { name: 'tags' })"
       :icon="ArrowLeftIcon"
       :desc="t('Back')"
       accentColor

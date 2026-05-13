@@ -399,7 +399,7 @@ onUnmounted(() => {
     </h2>
 
     <div id="create_from_images__title">
-      <h3 class="heading--muted heading--with-buttons">
+      <h3 class="heading--muted heading--buttons">
         {{ t('Name') }}
         <ButtonMulti
           v-if="titleImageUrl"
@@ -495,7 +495,7 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__ingredients">
-      <h3 class="heading--muted heading--with-buttons">
+      <h3 class="heading--muted heading--buttons">
         {{ t('Ingredients') }}
         <ButtonMulti
           v-if="ingredientsImageUrl"
@@ -591,7 +591,7 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__directions">
-      <h3 class="heading--muted heading--with-buttons">
+      <h3 class="heading--muted heading--buttons">
         {{ t('Instructions') }}
         <ButtonMulti
           v-if="directionsImageUrl"
@@ -687,7 +687,7 @@ onUnmounted(() => {
     </div>
 
     <div id="create_from_images__notes">
-      <h3 class="heading--muted heading--with-buttons">
+      <h3 class="heading--muted heading--buttons">
         {{ t('Notes') }}
         <ButtonMulti
           v-if="notesImageUrl"

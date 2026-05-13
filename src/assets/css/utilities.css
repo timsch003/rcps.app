@@ -15,7 +15,8 @@
   padding-bottom: 2px;
 }
 
-.heading--with-buttons {
+.heading--buttons,
+.heading--buttons-spaced {
   display: flex;
   align-items: center;
   gap: var(--inner-spacing);
@@ -24,6 +25,10 @@
     width: var(--icon-size-xs);
     height: var(--icon-size-xs);
   }
+}
+
+.heading--buttons-spaced {
+  justify-content: space-between;
 }
 
 .multiline_text {
