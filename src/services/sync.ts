@@ -21,9 +21,9 @@ function getSyncStore() {
 
 async function trigger(): Promise<void> {
   const push = await pushLocalChanges()
-  if (push) console.log('Sync: push results', push)
+  if (push) console.log('Sync: push results\n', push)
   const pull = await pullRemoteData()
-  if (pull) console.log('Sync: pull results', pull)
+  if (pull) console.log('Sync: pull results\n', pull)
 }
 
 function checkRequirements(
@@ -229,9 +229,9 @@ async function pullRemoteData(): Promise<{
         const changes = useSettingsStore().hydrate(remoteSettings)
         if (changes)
           console.log(
-            'Sync: remote user settings ',
+            'Sync: remote user settings merged into local\nRemote:',
             changes.before,
-            ' merged into local',
+            '\nLocal:',
             changes.after,
           )
       }

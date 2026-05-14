@@ -161,7 +161,7 @@ Services (`/src/services`) are used to keep responsibility for mutating data as 
 
 ### MVP Roadmap
 
-- Sync last viewed in user settings
+- Sync last viewed in user settings and fix user settings sync to always apply last change
 - Sort items by name in favorites and tags views
 - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
 - Adjust ingredient quantities based on portions
