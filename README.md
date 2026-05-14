@@ -121,11 +121,11 @@ For all types that have an ID a UUIDv7 is created on the client. UUIDv7 has inte
 
 ### Services
 
-## Managers
+#### Managers
 
 Used to keep data flow responsibilities decoupled from the local caching mechanisms (Pinia stores and IndexedDB).
 
-## Sync
+#### Sync
 
 All locally edited data is pushed to the pocketbase sync server on app startup, when coming back online and on data mutating user interactions. Afterwards a pull is performed to integrate missing data into the local caches or initially populate them.
 
