@@ -272,12 +272,12 @@ function fitTextareaToContent(textarea: HTMLTextAreaElement | null) {
   textarea.style.height = `${textarea.scrollHeight}px`
 }
 
-function onDelete() {
+async function onDelete() {
   if (!editingRecipeId.value) return
 
   if (confirm(t('create_edit.confirm_delete'))) {
-    void recipesManager.deleteById(editingRecipeId.value)
-    router.replace({ name: 'tags' })
+    await recipesManager.deleteById(editingRecipeId.value)
+    router.replace(route.meta.fromPath || { name: 'tags' })
   }
 }
 

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { recipesManager } from '@/services/recipes_manager'
+import { tagsManager } from '@/services/tags_manager'
 import { t } from '@/lang/i18n'
 import CardsGrid from '@/views/components/CardsGrid.vue'
 import NavBreadcrumbs from './components/NavBreadcrumbs.vue'
 import type { RecipeLocal } from '@/types'
 
 const route = useRoute()
+const router = useRouter()
 const viewType = route.name as string
 const emptyMessage = ref('')
 const loading = ref(false)
@@ -20,7 +22,10 @@ onMounted(async () => {
     switch (viewType) {
       case 'tag':
         recipes.value = await recipesManager.getTagged(route.params.id as string)
-        if (!recipes.value.length) throw new Error(t('error.no_recipes_found_for_tag'))
+        if (!recipes.value.length) {
+          await tagsManager.removeOrphanedFromLocal([route.params.id as string])
+          router.push({ name: 'tags' }) // DO NOT include when implementing default view setting
+        }
         break
       case 'last':
         recipes.value = await recipesManager.getLastViewed()
