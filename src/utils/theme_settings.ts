@@ -1,6 +1,7 @@
-export type ThemeMode = 'light' | 'dark'
+import { DEFAULT_ACCENT_BY_THEME, NO_ACCENT_TOKEN } from '../constants'
+import type { ThemeMode } from '@/types'
 
-export type ThemeAccents = {
+type ThemeAccents = {
   dark: string[]
   light: string[]
 }
@@ -43,13 +44,6 @@ export const THEME_ACCENTS: ThemeAccents = {
     '--l-raspberry',
   ],
 }
-
-export const DEFAULT_ACCENT_BY_THEME: Record<ThemeMode, string> = {
-  dark: '--d-grapefruit',
-  light: '--l-cherry',
-}
-
-export const NO_ACCENT_TOKEN = '--text'
 
 export function resolveTheme(theme?: string): ThemeMode {
   return theme === 'light' ? 'light' : 'dark'

@@ -9,9 +9,9 @@ import {
 import { useSyncStore } from '@/stores/sync_status'
 import { useAuthStore } from '@/stores/auth'
 import { useSettingsStore } from '@/stores/settings'
+import { recipesManager } from './recipes_manager'
 import { tagsManager } from './tags_manager'
 import { unitsManager } from './units_manager'
-import { recipesManager } from './recipes_manager'
 import type { RecipeLocal, Ingredient, Tag, Unit, Recipe } from '@/types'
 
 // Prevent racing conditions on first sync at app startup
@@ -80,9 +80,9 @@ async function pushLocalChanges(): Promise<{
   // Always push user settings regardless of whether there are recipes to push
   if (settingsStore.hasLocalChanges) {
     syncStore.setStatus('pushing')
-    await updateUserSettings(userId!, { ...settingsStore.settings })
+    await updateUserSettings(userId!, { ...settingsStore.getStoredSettings() })
     settingsStore.markSettingsSynced()
-    console.log('Sync: user settings pushed')
+    console.log('Sync: user settings pushed\n', settingsStore.getStoredSettings())
   } else {
     console.log('Sync: no local user settings changes to push')
   }
@@ -229,9 +229,9 @@ async function pullRemoteData(): Promise<{
         const changes = useSettingsStore().hydrate(remoteSettings)
         if (changes)
           console.log(
-            'Sync: remote user settings merged into local\nRemote:',
+            'Sync: remote user settings merged into local\nBefore:',
             changes.before,
-            '\nLocal:',
+            '\nAfter:',
             changes.after,
           )
       }
@@ -267,6 +267,7 @@ async function pullRemoteData(): Promise<{
     const recipesToPull = remoteRecipes.filter((recipe) => !localIds.has(recipe.id))
 
     if (!recipesToPull.length) {
+      await recipesManager.updateLastViewed()
       syncStore.setStatus('synced')
       return {
         success: deletedRemotely.length > 0,
@@ -339,6 +340,7 @@ async function pullRemoteData(): Promise<{
     // Refresh caches
     await tagsManager.cacheAll()
     await unitsManager.cacheAll()
+    await recipesManager.updateLastViewed()
 
     syncStore.setStatus('synced')
     return {

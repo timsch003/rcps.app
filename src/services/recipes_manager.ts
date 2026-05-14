@@ -1,5 +1,6 @@
 import { db } from '@/adapters/dexie'
 import { useRecipesStore } from '@/stores/recipes'
+import { useSettingsStore } from '@/stores/settings'
 import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
@@ -103,7 +104,26 @@ async function getFavorites(): Promise<RecipeLocal[]> {
   return favorites
 }
 
-function getLastViewed(): RecipeLocal[] {
+async function updateLastViewed(): Promise<void> {
+  const recipesStore = useRecipesStore()
+  const settingsStore = useSettingsStore()
+  const recipeIds = settingsStore.settings.lastViewed
+
+  if (!recipeIds.length) {
+    recipesStore.lastViewed = []
+    return
+  }
+
+  const recipes = await Promise.all(
+    recipeIds.map(async (recipeId) => await db.recipes.get(recipeId)),
+  )
+  recipesStore.lastViewed = recipes.filter(
+    (recipe): recipe is RecipeLocal => !!recipe && !recipe.deleted,
+  )
+}
+
+async function getLastViewed(): Promise<RecipeLocal[]> {
+  await updateLastViewed()
   return useRecipesStore().lastViewed
 }
 
@@ -175,6 +195,7 @@ export const recipesManager = {
   getById,
   getFavorites,
   getLastViewed,
+  updateLastViewed: updateLastViewed,
   getTagged,
   nameExists,
   removeRecipeFromCache,

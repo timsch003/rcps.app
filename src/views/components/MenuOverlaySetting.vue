@@ -2,10 +2,9 @@
 import { computed } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import { t } from '@/lang/i18n'
+import { NO_ACCENT_TOKEN } from '@/constants'
 import {
   getAvailableAccents,
-  NO_ACCENT_TOKEN,
-  resolveNextThemeSelection,
   resolveSelectedAccent,
   resolveTheme,
   THEME_ACCENTS,
@@ -29,27 +28,26 @@ const settings = computed(() => settingsStore.settings)
 
 const activeTheme = computed<'light' | 'dark'>(() => resolveTheme(settings.value.theme))
 const keepScreenOn = computed({
-  get: () => settings.value.keepScreenOn ?? true,
+  get: () => settings.value.keepScreenOn,
   set: (value: boolean) => settingsStore.update({ keepScreenOn: value }),
 })
 const availableAccents = computed(() => getAvailableAccents(activeTheme.value, THEME_ACCENTS))
 const accentOptions = computed(() => [NO_ACCENT_TOKEN, ...availableAccents.value])
+const accentForTheme = computed(() =>
+  activeTheme.value === 'dark' ? settings.value.accentDark : settings.value.accentLight,
+)
 const selectedAccent = computed(() =>
-  resolveSelectedAccent(activeTheme.value, settings.value.accent, availableAccents.value),
+  resolveSelectedAccent(activeTheme.value, accentForTheme.value, availableAccents.value),
 )
 
 function toggleTheme() {
-  const nextThemeSelection = resolveNextThemeSelection(
-    activeTheme.value,
-    settings.value.accent,
-    THEME_ACCENTS,
-  )
-  settingsStore.update(nextThemeSelection)
+  settingsStore.update({ theme: activeTheme.value === 'light' ? 'dark' : 'light' })
 }
 
 function setAccent(accent: string) {
   if (accent !== NO_ACCENT_TOKEN && !availableAccents.value.includes(accent)) return
-  settingsStore.update({ accent })
+  if (activeTheme.value === 'dark') settingsStore.update({ accentDark: accent })
+  else settingsStore.update({ accentLight: accent })
 }
 </script>
 

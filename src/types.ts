@@ -11,6 +11,8 @@ export type Unit = IdAndName
 
 export type UserSetting = { key: string; value: string }
 
+export type ThemeMode = 'light' | 'dark'
+
 export type User = {
   id: UUID
   email: string
@@ -20,8 +22,10 @@ export type User = {
 
 export type UserSettings = {
   theme?: string
-  accent?: string
+  accentDark?: string
+  accentLight?: string
   keepScreenOn?: boolean
+  lastViewed: UUID[]
 }
 
 export type RecipeIngredient = {

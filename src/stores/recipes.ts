@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { useSettingsStore } from '@/stores/settings'
+import { MAX_LAST_VIEWED_CACHE_SIZE, MAX_TOTAL_CACHE_SIZE } from '@/constants'
 import type { RecipeLocal } from '@/types'
 
-const MAX_TOTAL_CACHE_SIZE = 1000
-const MAX_LAST_VIEWED_CACHE_SIZE = 100
 const KEEP_LAST_VIEWED_UNTIL_INDEX = MAX_LAST_VIEWED_CACHE_SIZE / 2 - 1
 
 export const useRecipesStore = defineStore('recipes', () => {
+  const settingsStore = useSettingsStore()
   const favorites = ref<RecipeLocal[]>([])
   const lastViewed = ref<RecipeLocal[]>([])
   const tagged = ref<RecipeLocal[]>([])
@@ -20,6 +21,7 @@ export const useRecipesStore = defineStore('recipes', () => {
       lastViewed.value.splice(KEEP_LAST_VIEWED_UNTIL_INDEX)
 
     lastViewed.value.unshift(recipe)
+    updateLastViewedSettings()
   }
 
   function cacheFavorites(recipes: RecipeLocal[]): void {
@@ -63,6 +65,13 @@ export const useRecipesStore = defineStore('recipes', () => {
     favorites.value = favorites.value.filter((recipe) => recipe.id !== recipeId)
     tagged.value = tagged.value.filter((recipe) => recipe.id !== recipeId)
     lastViewed.value = lastViewed.value.filter((recipe) => recipe.id !== recipeId)
+    updateLastViewedSettings()
+  }
+
+  function updateLastViewedSettings(): void {
+    settingsStore.update({
+      lastViewed: lastViewed.value.map((recipe) => recipe.id),
+    })
   }
 
   return {
@@ -74,6 +83,7 @@ export const useRecipesStore = defineStore('recipes', () => {
     cacheTagged,
     updateLastViewed,
     removeCached,
+    updateLastViewedSettings,
     getRemainingCacheSize,
     sortByCreated,
     sortByName,

@@ -1,9 +1,10 @@
 import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
 import { v7 as uuidv7 } from 'uuid'
 import translateError from '@/utils/pb_error_translation'
+import { PB_AUTH_STORAGE_KEY } from '@/constants'
 import type { IdAndName, Recipe, RecipeIngredient, UserSettings } from '@/types'
 
-const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore('rcps-app-auth'))
+const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore(PB_AUTH_STORAGE_KEY))
 
 pb.autoCancellation(true)
 
@@ -49,7 +50,10 @@ export function logoutUser(): void {
   pb.authStore.clear()
 }
 
-export async function updateUserSettings(userId: string, settings: UserSettings): Promise<void> {
+export async function updateUserSettings(
+  userId: string,
+  settings: Partial<UserSettings>,
+): Promise<void> {
   if (!userId) return
 
   try {
@@ -59,7 +63,7 @@ export async function updateUserSettings(userId: string, settings: UserSettings)
   }
 }
 
-export async function fetchUserSettings(userId: string): Promise<UserSettings | null> {
+export async function fetchUserSettings(userId: string): Promise<Partial<UserSettings> | null> {
   if (!userId) return null
 
   try {
