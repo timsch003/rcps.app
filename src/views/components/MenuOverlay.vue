@@ -26,7 +26,7 @@ const authStore = useAuthStore()
 const settingsStore = useSettingsStore()
 const settings = computed(() => settingsStore.settings)
 const activeSetting = ref<SettingView>(null)
-const settingsTransition = ref<'slide-in-rtl-out-in' | 'slide-in-ltr-out-in'>('slide-in-rtl-out-in')
+const settingsTransition = ref<'slide-in-rtl' | 'slide-in-ltr'>('slide-in-rtl')
 
 const activeTheme = computed<'light' | 'dark'>(() =>
   settings.value.theme === 'light' ? 'light' : 'dark',
@@ -37,18 +37,18 @@ watch(
   (isOpen) => {
     if (!isOpen) {
       activeSetting.value = null
-      settingsTransition.value = 'slide-in-rtl-out-in'
+      settingsTransition.value = 'slide-in-rtl'
     }
   },
 )
 
 function openSetting(setting: Exclude<SettingView, null>) {
-  settingsTransition.value = 'slide-in-rtl-out-in'
+  settingsTransition.value = 'slide-in-rtl'
   activeSetting.value = setting
 }
 
 function closeSetting() {
-  settingsTransition.value = 'slide-in-ltr-out-in'
+  settingsTransition.value = 'slide-in-ltr'
   activeSetting.value = null
 }
 

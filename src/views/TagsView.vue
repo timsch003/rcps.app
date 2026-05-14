@@ -9,7 +9,7 @@ const transitionName = useRoute().meta.transition as string
 </script>
 
 <template>
-  <Transition :name="transitionName" appear>
+  <Transition :name="transitionName" class="slide-in-appear" appear>
     <div>
       <h2 class="heading--root">{{ t('Tags') }}</h2>
       <CardsGrid :tags="tagsStore.cached" />

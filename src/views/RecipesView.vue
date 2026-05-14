@@ -48,10 +48,10 @@ onMounted(async () => {
 
 <template>
   <div v-if="!error && !loading && recipes.length" class="isolate-stacking-context">
-    <Transition :name="viewType === 'tag' ? 'slide-in-rtl' : ''" appear>
+    <Transition :name="viewType === 'tag' ? 'slide-in-rtl' : ''" class="slide-in-appear" appear>
       <NavBreadcrumbs :viewType />
     </Transition>
-    <Transition :name="viewType === 'tag' ? 'slide-in-rtl' : ''" appear>
+    <Transition :name="viewType === 'tag' ? 'slide-in-rtl' : ''" class="slide-in-appear" appear>
       <CardsGrid :recipes="recipes" />
     </Transition>
   </div>

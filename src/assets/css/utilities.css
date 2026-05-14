@@ -82,27 +82,25 @@ div.centered {
 .slide-in-ltr-leave-active,
 .slide-in-rtl-enter-active,
 .slide-in-rtl-leave-active {
-  transition: all var(--transition-duration-long);
-}
-.slide-in-ltr-out-in-enter-active,
-.slide-in-ltr-out-in-leave-active,
-.slide-in-rtl-out-in-enter-active,
-.slide-in-rtl-out-in-leave-active {
-  transition: all var(--transition-duration-long);
+  transition:
+    opacity var(--transition-duration),
+    transform var(--transition-duration);
 }
 .slide-in-ltr-enter-from,
-.slide-in-rtl-leave-to,
-.slide-in-rtl-out-in-enter-from,
-.slide-in-ltr-out-in-leave-to {
+.slide-in-rtl-leave-to {
   opacity: 0;
   transform: translateX(-25%);
 }
 .slide-in-rtl-enter-from,
-.slide-in-ltr-leave-to,
-.slide-in-rtl-out-in-enter-from,
-.slide-in-ltr-out-in-leave-to {
+.slide-in-ltr-leave-to {
   opacity: 0;
   transform: translateX(25%);
+}
+/* Double the duration when using the appear attribute on Transition */
+.slide-in-appear {
+  transition:
+    opacity calc(var(--transition-duration) * 2),
+    transform calc(var(--transition-duration) * 2);
 }
 
 /* Vertical out-of-view slides for hiding UI elements */
