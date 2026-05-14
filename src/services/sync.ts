@@ -189,10 +189,7 @@ async function pushLocalChanges(): Promise<{
         deletedRecipeIngredientIds: [],
         deleted: false,
       })
-
-      syncStore.setStatus('synced')
     } catch (e) {
-      syncStore.setStatus('error')
       errors.push(String(e))
     }
   }
@@ -222,16 +219,22 @@ async function pullRemoteData(): Promise<{
   const userId = authStore.user?.id
   let deletedRecipesCount = 0
 
-  const result = checkRequirements(undefined, userId)
-  if (!result.success) return { success: false, error: result.errors }
-
   syncStore.setStatus('pulling')
 
   try {
     // Always pull user settings regardless of whether there are recipes to pull
     if (userId) {
       const remoteSettings = await fetchUserSettings(userId)
-      if (remoteSettings) useSettingsStore().hydrate(remoteSettings)
+      if (remoteSettings) {
+        const changes = useSettingsStore().hydrate(remoteSettings)
+        if (changes)
+          console.log(
+            'Sync: remote user settings ',
+            changes.before,
+            ' merged into local',
+            changes.after,
+          )
+      }
     }
 
     // Fetch user's recipes (PocketBase rules auto-filter by userId)

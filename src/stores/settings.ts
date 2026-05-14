@@ -69,11 +69,13 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   // Called after a remote pull. Remote fills gaps, local values take precedence
-  function hydrate(remote: UserSettings) {
+  function hydrate(remote: UserSettings): { before: UserSettings; after: UserSettings } {
+    const localBefore = { ...settings.value }
     const merged = withDefaults({ ...remote, ...settings.value })
     settings.value = merged
     localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
     applyVisualSettings(merged)
+    return { before: localBefore, after: merged }
   }
 
   function markSettingsSynced() {
