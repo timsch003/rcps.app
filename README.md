@@ -113,15 +113,21 @@ The app registers a service worker (`public/sw.js`) and caches the app shell as 
 
 ### Backend
 
-Pivot tables are employed to share data which is likely to be duplicated a lot between users (ingredients, units and tags).
+Pivot tables are employed to share data which is likely to be duplicated a lot between users (ingredients, units and tags). The schema of the pocketbase sync server is reflected on the client via an IndexedDB handled by Dexie.
 
 ### IDs
 
-For all types that have an ID UUIDv7 is used which offers integrated time stamps. Those can be used e.g. for sorting purposes or syncing conflict handling. IDs are only created on the client.
+For all types that have an ID a UUIDv7 is created on the client. UUIDv7 has integrated time stamps which can be used for tasks like sorting or syncing conflict resolution.
 
 ### Services
 
-Services (`/src/services`) are used to keep responsibility for mutating data as decoupled as possible.
+## Managers
+
+Used to keep data flow responsibilities decoupled from the local caching mechanisms (Pinia stores and IndexedDB).
+
+## Sync
+
+All locally edited data is pushed to the pocketbase sync server on app startup, when coming back online and on data mutating user interactions. Afterwards a pull is performed to integrate missing data into the local caches or initially populate them.
 
 ## Planned features
 
@@ -154,31 +160,27 @@ Services (`/src/services`) are used to keep responsibility for mutating data as 
 
 ### Bugs
 
-- Menu -> submenu transition is delayed
-- When after editing a recipe a tag has no recipes associated to it anymore:
-  - users get a non-breaking error when navigating back
-  - the tag stays cached and being displayed in the tags view
-
 ### MVP Roadmap
 
+- Move lastViewed from settings to separate key on user and streamline all syncing logic to last write wins
 - Sort items by name in favorites and tags views
 - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
 - Adjust ingredient quantities based on portions
 - Improve OCR results, especially regarding empty lines between ingredients
   - Optimize images for Tesseract (https://tesseract-ocr.github.io/tessdoc/ImproveQuality.html)
   - If not sufficient research if NLP could help
+- Refactor upsertRecord function to also check sync server for existing names and return existing IDs so duplicates between users are handled and passed to local stores
 - Basic search functionality
-- Trigger sync on menu close only when changes were made
 - Recipe images (up to 5 per recipe, low resolution version for offline storage)
-- Menu functionality
-  - Language selection
-  - Reset password
-  - Change email
 
 ### Functionality
 
 - Link tags in recipe view to tag views
 - Add option to set changed portions count and adjusted ingredient quantities permanently (= edit recipe from RecipeView?)
+- Menu
+  - Language selection
+  - Reset password
+  - Change email
 
 ### UI/UX
 
@@ -196,10 +198,6 @@ Services (`/src/services`) are used to keep responsibility for mutating data as 
 
 - Check tab-index for NavBottom create sub-menu
 
-### Testing
-
-- Check how pivot tables entries shared between users are handeled when created offline and already present under different ID when synced
-
 ### Optimization
 
 - Implement using ingredientsManager.sortOrderMultiplier to avoid syncing unchanged recipes
@@ -207,7 +205,7 @@ Services (`/src/services`) are used to keep responsibility for mutating data as 
 ### Refactoring
 
 - Sync logic
-  - Handle connection loss while syncing / active pb request (outbox, state machine / transition map patterns)
+  - Handle connection loss while syncing / on active pb request (outbox and state machine or transition map patterns)
   - Partial recipe updates
 - Auth
   - Removal of storage data when using different accounts on one browser/device
