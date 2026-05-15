@@ -214,18 +214,20 @@ All locally edited data is pushed to the pocketbase sync server on app startup, 
   - Check retraceability and user feedback
   - Automated emails when errors occur?
 - CSS
-  - Rename spacing CSS vars uniformly to --spacing-xs etc.
+  - Rename spacing vars to --spacing-xs etc. for universal use without suffixes
   - Change all non-logical CSS rules to logical ones
 
 ### Internationalization
 
-- Support mixed-direction content by applying dir="auto" or <bdi> where necessary
-- Flip arrows and back button positions where appropriate
-- Add script to handle <html dir> and fonts when changing language
-- Check if there are numerals that used regexes do not account for
+- RTL languages
+  - Support mixed-direction content by applying dir="auto" or <bdi> where necessary
+  - Flip arrows and back button positions where sensible
+  - Handle <html dir> and fonts when changing language
+- Check for numerals that current regexes do not account for
 
 ### General
 
+- Add additional git origin on Hetzner server
 - Set up multilangual landing page with SEO
 - Check (international) legal implications of storing user email/password and recipe data (no other personal data)
 
