@@ -7,6 +7,7 @@ import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { useRoute, useRouter } from 'vue-router'
 import { tagsManager } from '@/services/tags_manager'
+import { normalizeName } from '@/utils/normalize_name'
 import { dashes } from '@/utils/fixed_values'
 import { getCssCustomPropertyDurationMs, limitDecimals } from '@/utils/conversion'
 import { t } from '@/lang/i18n'
@@ -161,7 +162,7 @@ function normalizeTags() {
     ? data.tags
     : data.tags
         .split(',')
-        .map((tag) => tag.trim())
+        .map((tag) => normalizeName(tag))
         .filter((tag) => tag !== '')
 }
 

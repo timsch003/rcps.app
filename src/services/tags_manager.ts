@@ -1,18 +1,20 @@
 import { db } from '@/adapters/dexie'
 import { useTagsStore } from '@/stores/tags'
+import { normalizeName } from '@/utils/normalize_name'
 import { v7 as uuidv7 } from 'uuid'
 import type { Tag, UUID } from '@/types'
 
 async function addOrGetExisting(tagName: Tag['name']): Promise<UUID | undefined> {
-  const existingTagInStore = useTagsStore().cached.find((t) => t.name === tagName)
+  const normalizedTagName = normalizeName(tagName)
+  const existingTagInStore = useTagsStore().cached.find((t) => t.name === normalizedTagName)
   if (existingTagInStore) return existingTagInStore.id
 
-  const existingTagInDb = await db.tags.where('name').equals(tagName).first()
+  const existingTagInDb = await db.tags.where('name').equals(normalizedTagName).first()
   if (existingTagInDb) return existingTagInDb.id
 
   const newTag: Tag = {
     id: uuidv7(),
-    name: tagName,
+    name: normalizedTagName,
   }
 
   if (newTag.name === '---untagged---') newTag.id = '00000000-0000-0000-0000-000000000000'

@@ -36,4 +36,4 @@ app.use(i18n)
 app.mount('#app')
 registerServiceWorker()
 
-if (authStore.isAuth) void sync.trigger()
+if (authStore.isAuth) void sync.trigger(true)

@@ -1,27 +1,18 @@
-import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useSettingsStore } from '@/stores/settings'
-import { MAX_LAST_VIEWED_CACHE_SIZE, MAX_TOTAL_CACHE_SIZE } from '@/constants'
+import { defineStore } from 'pinia'
+import { useLastViewedStore } from '@/stores/last_viewed'
+import { MAX_TOTAL_CACHE_SIZE } from '@/constants'
 import type { RecipeLocal } from '@/types'
 
-const KEEP_LAST_VIEWED_UNTIL_INDEX = MAX_LAST_VIEWED_CACHE_SIZE / 2 - 1
-
 export const useRecipesStore = defineStore('recipes', () => {
-  const settingsStore = useSettingsStore()
+  const lastViewedStore = useLastViewedStore()
   const favorites = ref<RecipeLocal[]>([])
   const lastViewed = ref<RecipeLocal[]>([])
   const tagged = ref<RecipeLocal[]>([])
   const cachedTagId = ref<string>('')
 
-  function updateLastViewed(recipe: RecipeLocal): void {
-    const existingIndex = lastViewed.value.findIndex((r) => r.id === recipe.id)
-    if (existingIndex !== -1) lastViewed.value.splice(existingIndex, 1)
-
-    if (lastViewed.value.length >= MAX_LAST_VIEWED_CACHE_SIZE)
-      lastViewed.value.splice(KEEP_LAST_VIEWED_UNTIL_INDEX)
-
-    lastViewed.value.unshift(recipe)
-    updateLastViewedSettings()
+  function populateLastViewedCache(recipes: RecipeLocal[]): void {
+    lastViewed.value = recipes
   }
 
   function cacheFavorites(recipes: RecipeLocal[]): void {
@@ -65,13 +56,7 @@ export const useRecipesStore = defineStore('recipes', () => {
     favorites.value = favorites.value.filter((recipe) => recipe.id !== recipeId)
     tagged.value = tagged.value.filter((recipe) => recipe.id !== recipeId)
     lastViewed.value = lastViewed.value.filter((recipe) => recipe.id !== recipeId)
-    updateLastViewedSettings()
-  }
-
-  function updateLastViewedSettings(): void {
-    settingsStore.update({
-      lastViewed: lastViewed.value.map((recipe) => recipe.id),
-    })
+    lastViewedStore.removeEntry(recipeId)
   }
 
   return {
@@ -81,9 +66,8 @@ export const useRecipesStore = defineStore('recipes', () => {
     cachedTagId,
     cacheFavorites,
     cacheTagged,
-    updateLastViewed,
+    populateLastViewedCache,
     removeCached,
-    updateLastViewedSettings,
     getRemainingCacheSize,
     sortByCreated,
     sortByName,

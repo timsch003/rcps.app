@@ -17,7 +17,9 @@ const error = ref<string | null>(null)
 const recipes = ref<RecipeLocal[]>([])
 
 onMounted(async () => {
+  scrollTo(0, 0)
   loading.value = true
+
   try {
     switch (viewType) {
       case 'tag':

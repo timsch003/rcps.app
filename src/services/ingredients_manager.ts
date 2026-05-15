@@ -3,6 +3,7 @@ import { useIngredientsStore } from '@/stores/ingredients'
 import { unitsManager } from './units_manager'
 import { dashes, unitsSet } from '@/utils/fixed_values'
 import { fractionToFloat, limitDecimals } from '@/utils/conversion'
+import { normalizeName } from '@/utils/normalize_name'
 import { t } from '@/lang/i18n'
 import { v7 as uuidv7 } from 'uuid'
 import type {
@@ -25,19 +26,37 @@ const dashesRegex = /\s?[-–—−~〜～\u2010-\u2015]\s?/
 // Enable reordering ingredients without updating all of them
 const sortOrderMultiplier = 100
 
+async function addOrGetExisting(ingredientName: Ingredient['name']): Promise<Ingredient['id']> {
+  const normalizedIngredientName = normalizeName(ingredientName)
+
+  const existingIngredientInDb = await db.ingredients
+    .where('name')
+    .equals(normalizedIngredientName)
+    .first()
+  if (existingIngredientInDb) return existingIngredientInDb.id
+
+  const newIngredient: Ingredient = {
+    id: uuidv7(),
+    name: normalizedIngredientName,
+  }
+
+  const newIngredientId = await db.ingredients.add(newIngredient)
+  useIngredientsStore().cache(newIngredient)
+  return newIngredientId
+}
+
 async function addRecipeIngredient(
   recipeId: RecipeLocal['id'],
   matchedIngredient: MatchedIngredient,
 ): Promise<RecipeIngredient['id'] | undefined> {
   let ingredientName: string
-  let ingredientId: Ingredient['id']
   let unitId: Unit['id'] | undefined = undefined
   let quantityUnitPosition: number | undefined = undefined
   let selectedQut: QuantityUnitText | undefined = undefined
   let singleQut: QuantityUnitText | undefined = undefined
 
   if (!matchedIngredient.parts) {
-    ingredientName = matchedIngredient.normalizedLine
+    ingredientName = normalizeName(matchedIngredient.normalizedLine)
   } else {
     let selectedQutIndex = matchedIngredient.parts.findIndex(
       (qut: QuantityUnitText) => qut.selected,
@@ -59,21 +78,9 @@ async function addRecipeIngredient(
     if (quantityUnitPosition === -1)
       quantityUnitString = `${quantityString}${qut.knownUnit ? qut.knownUnit : ''}`
     quantityUnitPosition = matchedIngredient.normalizedLine.indexOf(quantityUnitString)
-    ingredientName = matchedIngredient.normalizedLine.replace(quantityUnitString, '').trim()
-  }
-
-  const existingIngredient = await db.ingredients.where({ name: ingredientName }).first()
-  if (existingIngredient) {
-    ingredientId = existingIngredient.id
-    useIngredientsStore().cache(existingIngredient)
-  } else {
-    const newIngredient: Ingredient = {
-      id: uuidv7(),
-      name: ingredientName,
-    }
-    const newIngredientId = await db.ingredients.add(newIngredient)
-    ingredientId = newIngredientId
-    useIngredientsStore().cache(newIngredient)
+    ingredientName = normalizeName(
+      matchedIngredient.normalizedLine.replace(quantityUnitString, '').trim(),
+    )
   }
 
   if (selectedQut)
@@ -84,6 +91,8 @@ async function addRecipeIngredient(
     unitId = singleQut?.knownUnit
       ? await unitsManager.addOrGetExisting(singleQut.knownUnit)
       : undefined
+
+  const ingredientId: Ingredient['id'] = await addOrGetExisting(ingredientName)
 
   const newRecipeIngredient: RecipeIngredient = {
     id: uuidv7(),
@@ -212,6 +221,7 @@ async function getIngStrings(ri: RecipeIngredient): Promise<string[] | undefined
 
 export const ingredientsManager = {
   sortOrderMultiplier,
+  addOrGetExisting,
   addRecipeIngredient,
   getRecipeIngredients,
   getName,

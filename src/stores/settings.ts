@@ -33,9 +33,7 @@ export const useSettingsStore = defineStore('settings', () => {
       accentDark: nextSettings.accentDark ?? DEFAULT_ACCENT_BY_THEME.dark,
       accentLight: nextSettings.accentLight ?? DEFAULT_ACCENT_BY_THEME.light,
       keepScreenOn: nextSettings.keepScreenOn ?? DEFAULT_USER_SETTINGS.keepScreenOn,
-      lastViewed: nextSettings.lastViewed
-        ? [...nextSettings.lastViewed]
-        : [...DEFAULT_USER_SETTINGS.lastViewed],
+      updatedAt: nextSettings.updatedAt,
     }
   }
 
@@ -53,7 +51,7 @@ export const useSettingsStore = defineStore('settings', () => {
       nextSettings.keepScreenOn !== DEFAULT_USER_SETTINGS.keepScreenOn
     )
       persisted.keepScreenOn = nextSettings.keepScreenOn
-    if (nextSettings.lastViewed?.length) persisted.lastViewed = [...nextSettings.lastViewed]
+    if (nextSettings.updatedAt !== undefined) persisted.updatedAt = nextSettings.updatedAt
 
     return persisted
   }
@@ -104,7 +102,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function update(patch: Partial<UserSettings>) {
-    const nextSettings = withDefaults({ ...storedSettings.value, ...patch })
+    const nextSettings = withDefaults({ ...storedSettings.value, ...patch, updatedAt: Date.now() })
     const nextStoredSettings = stripDefaults(nextSettings)
     if (isStoredSettingsEqual(nextStoredSettings, storedSettings.value)) return
 
@@ -113,12 +111,17 @@ export const useSettingsStore = defineStore('settings', () => {
     applyVisualSettings(nextSettings)
   }
 
-  // Called after a remote pull. Remote fills gaps, local values take precedence
+  // Called after a remote pull. Uses updatedAt for LWW: remote wins if it is newer.
   function hydrate(
     remote: Partial<UserSettings>,
   ): { before: StoredUserSettings; after: StoredUserSettings } | null {
     const storedBefore = { ...storedSettings.value }
-    const merged = withDefaults({ ...remote, ...storedSettings.value })
+    const remoteIsNewer = (remote.updatedAt ?? 0) > (storedSettings.value.updatedAt ?? 0)
+    const merged = withDefaults(
+      remoteIsNewer
+        ? { ...storedSettings.value, ...remote }
+        : { ...remote, ...storedSettings.value },
+    )
     persistStoredSettings(merged)
     applyVisualSettings(merged)
     const storedAfter = { ...storedSettings.value }
@@ -127,12 +130,7 @@ export const useSettingsStore = defineStore('settings', () => {
   }
 
   function getStoredSettings(): StoredUserSettings {
-    return {
-      ...storedSettings.value,
-      ...(storedSettings.value.lastViewed
-        ? { lastViewed: [...storedSettings.value.lastViewed] }
-        : {}),
-    }
+    return { ...storedSettings.value }
   }
 
   function markSettingsSynced() {

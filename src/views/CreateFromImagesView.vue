@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useFileDialog } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useCreateDraftStore } from '@/stores/create_draft'
@@ -13,6 +13,10 @@ import TrashIcon from '@/views/icons/IconTrash.vue'
 
 const router = useRouter()
 const createDraftStore = useCreateDraftStore()
+
+onMounted(() => {
+  scrollTo(0, 0)
+})
 
 interface CropRect {
   x: number

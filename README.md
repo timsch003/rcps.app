@@ -127,7 +127,15 @@ Used to keep data flow responsibilities decoupled from the local caching mechani
 
 #### Sync
 
-All locally edited data is pushed to the pocketbase sync server on app startup, when coming back online and on data mutating user interactions. Afterwards a pull is performed to integrate missing data into the local caches or initially populate them.
+Locally stored data is pushed to the pocketbase sync server when
+
+- the user triggers a sync manually (`nav.top .sync-indicator`)
+- data is mutated on user interaction (editing/viewing recipes, changing settings etc.)
+- coming back online
+
+Remote data is pulled on every sync to integrate missing data into the local caches or initially populate them.
+
+Both directions always follow the last write wins rule (including deletes). During a single sync data is always pushed first, then pulled.
 
 ## Planned features
 
@@ -162,7 +170,6 @@ All locally edited data is pushed to the pocketbase sync server on app startup, 
 
 ### MVP Roadmap
 
-- Move lastViewed from settings to separate key on user and streamline all syncing logic to last write wins
 - Sort items by name in favorites and tags views
 - Add spinners to RecipesView, TagsView etc. (for syncing recipes on empty cache)
 - Adjust ingredient quantities based on portions
@@ -205,7 +212,7 @@ All locally edited data is pushed to the pocketbase sync server on app startup, 
 ### Refactoring
 
 - Sync logic
-  - Handle connection loss while syncing / on active pb request (outbox and state machine or transition map patterns)
+  - Robust outbox and mid-request connection-loss recovery
   - Partial recipe updates
 - Auth
   - Removal of storage data when using different accounts on one browser/device

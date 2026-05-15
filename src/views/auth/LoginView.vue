@@ -21,7 +21,7 @@ async function onSubmit() {
   const result = await loginUser(email.value, password.value)
 
   if (result.success && authStore.isAuth) {
-    void sync.trigger()
+    void sync.trigger(true)
     router.push({ name: 'tags' })
   } else {
     errorMessage.value = result.error || t('auth.login_failed')

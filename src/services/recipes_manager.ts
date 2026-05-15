@@ -1,6 +1,6 @@
 import { db } from '@/adapters/dexie'
 import { useRecipesStore } from '@/stores/recipes'
-import { useSettingsStore } from '@/stores/settings'
+import { useLastViewedStore } from '@/stores/last_viewed'
 import { ingredientsManager } from './ingredients_manager'
 import { tagsManager } from './tags_manager'
 import { v7 as uuidv7 } from 'uuid'
@@ -44,6 +44,7 @@ async function createEdit(
     recipeIngredientIds: recipeIngredientIds,
     instructions: data.instructions,
     notes: data.notes,
+    updated: Date.now(),
     synced: false,
     deleted: false,
   }
@@ -90,7 +91,6 @@ async function getById(recipeId: string): Promise<RecipeLocal | undefined> {
 
   const recipe = cached ? cached : await db.recipes.get(recipeId)
   if (recipe?.deleted) return undefined
-  if (recipe) recipesStore.updateLastViewed(recipe)
   return recipe
 }
 
@@ -104,26 +104,25 @@ async function getFavorites(): Promise<RecipeLocal[]> {
   return favorites
 }
 
-async function updateLastViewed(): Promise<void> {
+async function updateLastViewedCache(): Promise<void> {
   const recipesStore = useRecipesStore()
-  const settingsStore = useSettingsStore()
-  const recipeIds = settingsStore.settings.lastViewed
+  const lastViewedStore = useLastViewedStore()
+  const recipeIds = lastViewedStore.orderedIds
 
   if (!recipeIds.length) {
-    recipesStore.lastViewed = []
+    recipesStore.populateLastViewedCache([])
     return
   }
 
   const recipes = await Promise.all(
     recipeIds.map(async (recipeId) => await db.recipes.get(recipeId)),
   )
-  recipesStore.lastViewed = recipes.filter(
-    (recipe): recipe is RecipeLocal => !!recipe && !recipe.deleted,
-  )
+  const filtered = recipes.filter((recipe): recipe is RecipeLocal => !!recipe && !recipe.deleted)
+  recipesStore.populateLastViewedCache(filtered)
 }
 
 async function getLastViewed(): Promise<RecipeLocal[]> {
-  await updateLastViewed()
+  await updateLastViewedCache()
   return useRecipesStore().lastViewed
 }
 
@@ -195,7 +194,7 @@ export const recipesManager = {
   getById,
   getFavorites,
   getLastViewed,
-  updateLastViewed: updateLastViewed,
+  updateLastViewedCache,
   getTagged,
   nameExists,
   removeRecipeFromCache,

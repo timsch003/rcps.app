@@ -1,6 +1,7 @@
 import { ref } from 'vue'
 import { db } from '@/adapters/dexie'
 import { useUnitsStore } from '@/stores/units'
+import { normalizeName } from '@/utils/normalize_name'
 import { v7 as uuidv7 } from 'uuid'
 import type { Unit, UUID } from '@/types'
 
@@ -8,16 +9,17 @@ const cached = ref<Unit[]>([])
 
 async function addOrGetExisting(unitName: Unit['name']): Promise<UUID | undefined> {
   const unitsStore = useUnitsStore()
+  const normalizedUnitName = normalizeName(unitName)
 
-  const existingUnitInStore = unitsStore.cached.find((u) => u.name === unitName)
+  const existingUnitInStore = unitsStore.cached.find((u) => u.name === normalizedUnitName)
   if (existingUnitInStore) return existingUnitInStore.id
 
-  const existingUnitInDb = await db.units.where('name').equals(unitName).first()
+  const existingUnitInDb = await db.units.where('name').equals(normalizedUnitName).first()
   if (existingUnitInDb) return existingUnitInDb.id
 
   const newUnit: Unit = {
     id: uuidv7(),
-    name: unitName,
+    name: normalizedUnitName,
   }
 
   const newUnitId = await db.units.add(newUnit)

@@ -20,12 +20,15 @@ export type User = {
   settings: UserSetting[]
 }
 
+// Per-recipe last-viewed timestamps, merges via max-per-key (LWW per entry)
+export type LastViewedMap = Record<UUID, number>
+
 export type UserSettings = {
   theme?: string
   accentDark?: string
   accentLight?: string
   keepScreenOn?: boolean
-  lastViewed: UUID[]
+  updatedAt?: number
 }
 
 export type RecipeIngredient = {
@@ -67,7 +70,7 @@ export type Recipe = {
   updated?: number
 }
 
-export type RecipeLocal = Omit<Recipe, 'userId' | 'updated'> & {
+export type RecipeLocal = Omit<Recipe, 'userId'> & {
   deletedRecipeIngredientIds?: UUID[]
   synced: boolean
   deleted: boolean

@@ -1,8 +1,9 @@
 import PocketBase, { LocalAuthStore, ClientResponseError } from 'pocketbase'
 import { v7 as uuidv7 } from 'uuid'
 import translateError from '@/utils/pb_error_translation'
-import { PB_AUTH_STORAGE_KEY } from '@/constants'
-import type { IdAndName, Recipe, RecipeIngredient, UserSettings } from '@/types'
+import { PB_AUTH_STORAGE_KEY, SHARED_NAME_COLLECTIONS } from '@/constants'
+import { normalizeName } from '@/utils/normalize_name'
+import type { IdAndName, LastViewedMap, Recipe, RecipeIngredient, UserSettings } from '@/types'
 
 const pb = new PocketBase(import.meta.env.VITE_PB_URL, new LocalAuthStore(PB_AUTH_STORAGE_KEY))
 
@@ -76,13 +77,59 @@ export async function fetchUserSettings(userId: string): Promise<Partial<UserSet
   }
 }
 
+export async function updateLastViewed(userId: string, map: LastViewedMap): Promise<void> {
+  if (!userId) return
+
+  try {
+    await pb.collection('users').update(userId, { lastViewed: { ...map } })
+  } catch (e) {
+    if (e) throw e
+  }
+}
+
+export async function fetchLastViewed(userId: string): Promise<LastViewedMap | null> {
+  if (!userId) return null
+
+  try {
+    const userData = await pb.collection('users').getOne(userId)
+    return (userData.lastViewed ?? {}) as LastViewedMap
+  } catch (e) {
+    if (e) throw e
+    return null
+  }
+}
+
 export async function upsertRecord(
   collection: string,
   data: IdAndName | Recipe | RecipeIngredient,
-): Promise<void> {
+): Promise<string | undefined> {
+  // getList() is the only PocketBase records method that doesn't throw
+  // on a missing record, so it seems like the best way to check existence
+
+  if (SHARED_NAME_COLLECTIONS.has(collection)) {
+    const namedData = data as IdAndName
+    const normalizedName = normalizeName(namedData.name)
+    const payload = { ...namedData, name: normalizedName }
+
+    const existingByName = await pb.collection(collection).getList(1, 1, {
+      filter: `name = ${JSON.stringify(normalizedName)}`,
+    })
+    if (existingByName.items[0]) return existingByName.items[0].id
+
+    try {
+      const createdRecord = await pb.collection(collection).create(payload)
+      return createdRecord.id
+    } catch (e) {
+      const retry = await pb.collection(collection).getList(1, 1, {
+        filter: `name = ${JSON.stringify(normalizedName)}`,
+      })
+      if (retry.items[0]) return retry.items[0].id
+      if (e) throw e
+      return undefined
+    }
+  }
+
   try {
-    // Only PocketBase records method that doesn't throw an error
-    // on missing record, so it seems like the best way to check existence:
     const existingRecord = await pb.collection(collection).getList(1, 1, {
       filter: `id = "${data.id}"`,
     })
@@ -96,6 +143,7 @@ export async function upsertRecord(
     } else {
       await pb.collection(collection).create(data)
     }
+    return data.id
   } catch (e) {
     if (e) throw e
   }

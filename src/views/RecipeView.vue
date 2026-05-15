@@ -6,6 +6,7 @@ import { recipesManager } from '@/services/recipes_manager'
 import { ingredientsManager } from '@/services/ingredients_manager'
 import { tagsManager } from '@/services/tags_manager'
 import { useSettingsStore } from '@/stores/settings'
+import { useLastViewedStore } from '@/stores/last_viewed'
 import ButtonMulti from './components/ButtonMulti.vue'
 import FavoritesIcon from '@/views/icons/IconFavorites.vue'
 import IconInline from './components/IconInline.vue'
@@ -24,6 +25,7 @@ const settings = useSettingsStore().settings
 const wakeLock = useWakeLock()
 
 onMounted(async () => {
+  scrollTo(0, 0)
   loading.value = true
   try {
     recipe.value = await recipesManager.getById(route.params.id as string)
@@ -47,6 +49,9 @@ onMounted(async () => {
     error = (err as Error).message
   } finally {
     loading.value = false
+    if (recipe.value) {
+      useLastViewedStore().recordView(recipe.value.id)
+    }
   }
 })
 
