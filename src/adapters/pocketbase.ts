@@ -111,17 +111,17 @@ export async function upsertRecord(
     const normalizedName = normalizeName(namedData.name)
     const payload = { ...namedData, name: normalizedName }
 
-    const existingByName = await pb.collection(collection).getList(1, 1, {
-      filter: `name = ${JSON.stringify(normalizedName)}`,
-    })
-    if (existingByName.items[0]) return existingByName.items[0].id
-
     try {
+      const existingByName = await pb.collection(collection).getList(1, 1, {
+        filter: `name=${JSON.stringify(normalizedName)}`,
+      })
+      if (existingByName.items[0]) return existingByName.items[0].id
+
       const createdRecord = await pb.collection(collection).create(payload)
       return createdRecord.id
     } catch (e) {
       const retry = await pb.collection(collection).getList(1, 1, {
-        filter: `name = ${JSON.stringify(normalizedName)}`,
+        filter: `name=${JSON.stringify(normalizedName)}`,
       })
       if (retry.items[0]) return retry.items[0].id
       if (e) throw e
@@ -131,7 +131,7 @@ export async function upsertRecord(
 
   try {
     const existingRecord = await pb.collection(collection).getList(1, 1, {
-      filter: `id = "${data.id}"`,
+      filter: `id=${JSON.stringify(data.id)}`,
     })
 
     if (existingRecord.items.length) {
@@ -140,10 +140,11 @@ export async function upsertRecord(
       const dataWithoutId: Partial<IdAndName | Recipe | RecipeIngredient> = { ...data }
       delete dataWithoutId.id
       await pb.collection(collection).update(data.id, dataWithoutId)
+      return existingRecord.items[0]?.id ?? data.id
     } else {
-      await pb.collection(collection).create(data)
+      const createdRecord = await pb.collection(collection).create(data)
+      return createdRecord.id
     }
-    return data.id
   } catch (e) {
     if (e) throw e
   }

@@ -5,7 +5,7 @@ import { unitsSet } from '@/utils/fixed_values'
 import type { MatchedIngredient, RecipeRaw } from '@/types'
 
 const SEED_STORAGE_KEY = 'seeded'
-const SEEDED_RECIPE_COUNT = 72
+const SEEDED_RECIPE_COUNT = 10
 
 const ingredientNames = [
   'all-purpose flour',

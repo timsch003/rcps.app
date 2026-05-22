@@ -18,6 +18,12 @@ async function createEdit(
   editingRecipeId?: UUID,
 ): Promise<RecipeLocal['id'] | undefined> {
   const newRecipeId = editingRecipeId || uuidv7()
+  const existingRecipe = editingRecipeId ? await db.recipes.get(editingRecipeId) : undefined
+  const previousRecipeIngredientIds = existingRecipe?.recipeIngredientIds ?? []
+
+  if (editingRecipeId && previousRecipeIngredientIds.length) {
+    await db.recipe_ingredients.bulkDelete(previousRecipeIngredientIds)
+  }
 
   let tagIds: UUID[] = []
   if (Array.isArray(data.tags)) {
@@ -45,6 +51,14 @@ async function createEdit(
     instructions: data.instructions,
     notes: data.notes,
     updated: Date.now(),
+    deletedRecipeIngredientIds: editingRecipeId
+      ? Array.from(
+          new Set([
+            ...(existingRecipe?.deletedRecipeIngredientIds ?? []),
+            ...previousRecipeIngredientIds,
+          ]),
+        )
+      : [],
     synced: false,
     deleted: false,
   }

@@ -78,11 +78,11 @@ async function pushLocalChanges(): Promise<{
   const authStore = useAuthStore()
   const userId = authStore.user?.id
   const unsyncedRecipes = await db.recipes.filter((r) => !r.synced).toArray()
-  let deletedRecipesCount = 0
   const remoteTagIdByLocalId = new Map<string, string>()
   const remoteIngredientIdByLocalId = new Map<string, string>()
   const remoteUnitIdByLocalId = new Map<string, string>()
 
+  let deletedRecipesCount = 0
   const errors: string[] = []
 
   try {
@@ -118,107 +118,123 @@ async function pushLocalChanges(): Promise<{
     syncStore.setStatus('pushing')
 
     for (const recipe of unsyncedRecipes) {
-      try {
-        if (recipe.deleted) {
-          if (recipe.recipeIngredientIds?.length) {
-            for (const recipeIngredientId of recipe.recipeIngredientIds) {
-              await deleteRecord('recipe_ingredients', recipeIngredientId)
-            }
-          }
-
-          await deleteRecord('recipes', recipe.id)
-          await db.recipes.delete(recipe.id)
-          recipesManager.removeRecipeFromCache(recipe.id)
-          deletedRecipesCount++
-          continue
-        }
-
-        // Push tags referenced by this recipe
-        const remoteTagIds: string[] = []
-        if (recipe.tagIds?.length) {
-          const tags = await db.tags.where('id').anyOf(recipe.tagIds).toArray()
-          for (const tag of tags) {
-            const remoteTagId =
-              remoteTagIdByLocalId.get(tag.id) ?? (await upsertRecord('tags', tag)) ?? tag.id
-            remoteTagIdByLocalId.set(tag.id, remoteTagId)
-            remoteTagIds.push(remoteTagId)
-          }
-        }
-
-        // Push ingredients and units referenced by recipe ingredients
-        let recipeIngredientsForPush: RecipeIngredient[] = []
+      if (recipe.deleted) {
         if (recipe.recipeIngredientIds?.length) {
-          const ris = await db.recipe_ingredients
-            .where('id')
-            .anyOf(recipe.recipeIngredientIds)
-            .toArray()
-          recipeIngredientsForPush = ris
-
-          const ingredientIds = [...new Set(ris.map((ri) => ri.ingredientId))]
-          const ingredients = await db.ingredients.where('id').anyOf(ingredientIds).toArray()
-          for (const ing of ingredients) {
-            const remoteIngredientId =
-              remoteIngredientIdByLocalId.get(ing.id) ??
-              (await upsertRecord('ingredients', ing)) ??
-              ing.id
-            remoteIngredientIdByLocalId.set(ing.id, remoteIngredientId)
-          }
-
-          const unitIds = [...new Set(ris.filter((ri) => ri.unitId).map((ri) => ri.unitId!))]
-          if (unitIds.length) {
-            const units = await db.units.where('id').anyOf(unitIds).toArray()
-            for (const unit of units) {
-              const remoteUnitId =
-                remoteUnitIdByLocalId.get(unit.id) ?? (await upsertRecord('units', unit)) ?? unit.id
-              remoteUnitIdByLocalId.set(unit.id, remoteUnitId)
-            }
+          for (const recipeIngredientId of recipe.recipeIngredientIds) {
+            await deleteRecord('recipe_ingredients', recipeIngredientId)
           }
         }
-        // Push the recipe (before recipe_ingredients so the relation resolves)
-        const r: Recipe = {
-          id: recipe.id,
-          userId: userId!,
-          name: recipe.name,
-          servings: recipe.servings,
-          tagIds: remoteTagIds,
-          favorite: recipe.favorite,
-          instructions: recipe.instructions || undefined,
-          notes: recipe.notes || undefined,
-          updated: Date.now(),
-        }
-        await upsertRecord('recipes', r)
 
-        // Push recipe ingredients (after recipe so recipeId relation resolves)
-        if (recipeIngredientsForPush.length) {
-          for (const ri of recipeIngredientsForPush) {
-            await upsertRecord('recipe_ingredients', {
+        await deleteRecord('recipes', recipe.id)
+        await db.recipes.delete(recipe.id)
+        recipesManager.removeRecipeFromCache(recipe.id)
+        deletedRecipesCount++
+        continue
+      }
+
+      console.log('Sync: pushing recipe', recipe)
+
+      // Push tags referenced by this recipe
+      const remoteTagIds: string[] = []
+      if (recipe.tagIds?.length) {
+        const tags = await db.tags.where('id').anyOf(recipe.tagIds).toArray()
+        for (const tag of tags) {
+          const remoteTagId =
+            remoteTagIdByLocalId.get(tag.id) ?? (await upsertRecord('tags', tag)) ?? tag.id
+          remoteTagIdByLocalId.set(tag.id, remoteTagId)
+          remoteTagIds.push(remoteTagId)
+        }
+      }
+
+      // Push ingredients and units referenced by recipe ingredients
+      let recipeIngredientsForPush: RecipeIngredient[] = []
+      if (recipe.recipeIngredientIds?.length) {
+        const ris = await db.recipe_ingredients
+          .where('id')
+          .anyOf(recipe.recipeIngredientIds)
+          .toArray()
+        recipeIngredientsForPush = ris
+
+        const ingredientIds = [...new Set(ris.map((ri) => ri.ingredientId))]
+        const ingredients = await db.ingredients.where('id').anyOf(ingredientIds).toArray()
+        for (const ing of ingredients) {
+          const remoteIngredientId =
+            remoteIngredientIdByLocalId.get(ing.id) ??
+            (await upsertRecord('ingredients', ing)) ??
+            ing.id
+          remoteIngredientIdByLocalId.set(ing.id, remoteIngredientId)
+        }
+
+        const unitIds = [...new Set(ris.filter((ri) => ri.unitId).map((ri) => ri.unitId!))]
+        if (unitIds.length) {
+          const units = await db.units.where('id').anyOf(unitIds).toArray()
+          for (const unit of units) {
+            const remoteUnitId =
+              remoteUnitIdByLocalId.get(unit.id) ?? (await upsertRecord('units', unit)) ?? unit.id
+            remoteUnitIdByLocalId.set(unit.id, remoteUnitId)
+          }
+        }
+      }
+      // Push the recipe (before recipe_ingredients so the relation resolves)
+      const pushedAt = Date.now()
+      const r: Recipe = {
+        id: recipe.id,
+        userId: userId!,
+        name: recipe.name,
+        servings: recipe.servings,
+        tagIds: remoteTagIds,
+        favorite: recipe.favorite,
+        instructions: recipe.instructions || undefined,
+        notes: recipe.notes || undefined,
+        updated: pushedAt,
+      }
+      const remoteRecipeId = (await upsertRecord('recipes', r)) ?? recipe.id
+
+      // Push recipe ingredients (after recipe so recipeId relation resolves)
+      const reconciledRecipeIngredientIds: string[] = []
+      if (recipeIngredientsForPush.length) {
+        for (const ri of recipeIngredientsForPush) {
+          const pushedId =
+            (await upsertRecord('recipe_ingredients', {
               id: ri.id,
-              recipeId: ri.recipeId,
+              recipeId: remoteRecipeId,
               ingredientId: remoteIngredientIdByLocalId.get(ri.ingredientId) ?? ri.ingredientId,
               quantity: ri.quantity ?? undefined,
               quantityUpper: ri.quantityUpper ?? undefined,
               unitId: ri.unitId ? (remoteUnitIdByLocalId.get(ri.unitId) ?? ri.unitId) : undefined,
               quantityUnitPosition: ri.quantityUnitPosition ?? undefined,
               sortOrder: ri.sortOrder,
+            })) ?? ri.id
+
+          reconciledRecipeIngredientIds.push(pushedId)
+
+          if (pushedId !== ri.id) {
+            await db.recipe_ingredients.delete(ri.id)
+            await db.recipe_ingredients.put({
+              ...ri,
+              id: pushedId,
             })
           }
         }
-
-        if (recipe.deletedRecipeIngredientIds?.length) {
-          for (const deletedId of recipe.deletedRecipeIngredientIds) {
-            await deleteRecord('recipe_ingredients', deletedId)
-          }
-        }
-
-        // Mark as synced locally
-        await db.recipes.update(recipe.id, {
-          synced: true,
-          deletedRecipeIngredientIds: [],
-          deleted: false,
-        })
-      } catch (e) {
-        errors.push(String(e))
       }
+
+      if (recipe.deletedRecipeIngredientIds?.length) {
+        for (const deletedId of recipe.deletedRecipeIngredientIds) {
+          await deleteRecord('recipe_ingredients', deletedId)
+        }
+      }
+
+      // Mark as synced locally
+      await db.recipes.update(recipe.id, {
+        recipeIngredientIds:
+          reconciledRecipeIngredientIds.length > 0
+            ? reconciledRecipeIngredientIds
+            : recipe.recipeIngredientIds,
+        updated: pushedAt,
+        synced: true,
+        deletedRecipeIngredientIds: [],
+        deleted: false,
+      })
     }
   } catch (e) {
     errors.push(String(e))
@@ -260,7 +276,7 @@ async function pullRemoteData(): Promise<{
         const changes = useSettingsStore().hydrate(remoteSettings)
         if (changes) {
           console.log(
-            'Sync: remote user settings merged into local.\nBefore: ',
+            'Sync: remote user settings merged into local\nBefore: ',
             changes.before,
             '\nAfter: ',
             changes.after,
@@ -346,7 +362,10 @@ async function pullRemoteData(): Promise<{
       skipTotal: true,
     })
 
-    // Store ingredients and units from expanded data, then recipeIngredients
+    const recipeIngredientsByRecipeId = new Map<string, RecipeIngredient[]>()
+
+    // Build local recipe_ingredients payloads grouped by recipe.
+    // They are written after stale local entries are deleted for updates.
     for (const ri of recipeIngredients) {
       if (ri.expand?.ingredientId) {
         const ing = ri.expand.ingredientId as Ingredient
@@ -359,7 +378,7 @@ async function pullRemoteData(): Promise<{
         remoteUnitIdToLocalId.set(unit.id, localUnitId)
       }
 
-      await db.recipe_ingredients.put({
+      const localRecipeIngredient: RecipeIngredient = {
         id: ri.id,
         recipeId: ri.recipeId,
         ingredientId: remoteIngredientIdToLocalId.get(ri.ingredientId) ?? ri.ingredientId,
@@ -368,14 +387,19 @@ async function pullRemoteData(): Promise<{
         unitId: ri.unitId ? (remoteUnitIdToLocalId.get(ri.unitId) ?? ri.unitId) : undefined,
         quantityUnitPosition: ri.quantityUnitPosition,
         sortOrder: ri.sortOrder,
-      })
+      }
+
+      const existing = recipeIngredientsByRecipeId.get(ri.recipeId)
+      if (existing) existing.push(localRecipeIngredient)
+      else recipeIngredientsByRecipeId.set(ri.recipeId, [localRecipeIngredient])
     }
 
     // Store recipes in local db
     for (const recipe of recipesToProcess) {
       const isUpdate = localIds.has(recipe.id)
+      const localRecipeIngredients = recipeIngredientsByRecipeId.get(recipe.id) ?? []
       const riIds =
-        recipeIngredients.filter((ri) => ri.recipeId === recipe.id).map((ri) => ri.id) || undefined
+        localRecipeIngredients.length > 0 ? localRecipeIngredients.map((ri) => ri.id) : undefined
 
       // For updated recipes, remove stale recipe_ingredients first
       if (isUpdate) {
@@ -383,6 +407,10 @@ async function pullRemoteData(): Promise<{
         if (oldLocal.recipeIngredientIds?.length) {
           await db.recipe_ingredients.bulkDelete(oldLocal.recipeIngredientIds)
         }
+      }
+
+      if (localRecipeIngredients.length) {
+        await db.recipe_ingredients.bulkPut(localRecipeIngredients)
       }
 
       const localRecipe: RecipeLocal = {
@@ -400,6 +428,7 @@ async function pullRemoteData(): Promise<{
         deleted: false,
       }
       await db.recipes.put(localRecipe)
+      recipesManager.updateCaches(localRecipe)
     }
 
     // Refresh caches
