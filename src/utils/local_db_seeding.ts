@@ -6,6 +6,7 @@ import type { MatchedIngredient, RecipeRaw } from '@/types'
 
 const SEED_STORAGE_KEY = 'seeded'
 const SEEDED_RECIPE_COUNT = 10
+const MAX_SEED_ATTEMPT_MULTIPLIER = 5
 
 const ingredientNames = [
   'all-purpose flour',
@@ -485,18 +486,37 @@ const buildRandomRecipe = (index: number): RecipeRaw => {
 
 export const seedLocalDB = async () => {
   const existingRecipesCount = await db.recipes.count()
-  if (existingRecipesCount > 0) {
+  if (existingRecipesCount >= SEEDED_RECIPE_COUNT) {
     localStorage.setItem(SEED_STORAGE_KEY, 'true')
     return
   }
 
-  const recipesToSeed = Array.from({ length: SEEDED_RECIPE_COUNT }, (_, index) =>
-    normalizeLikeCreateForm(buildRandomRecipe(index)),
-  )
+  const recipesNeeded = SEEDED_RECIPE_COUNT - existingRecipesCount
+  const maxSeedAttempts = recipesNeeded * MAX_SEED_ATTEMPT_MULTIPLIER
+  let seededCount = 0
+  let attempt = 0
+  let recipeIndex = existingRecipesCount
 
-  for (const recipe of recipesToSeed) {
-    await recipesManager.createEdit(recipe)
+  while (seededCount < recipesNeeded && attempt < maxSeedAttempts) {
+    attempt += 1
+    const recipe = normalizeLikeCreateForm(buildRandomRecipe(recipeIndex))
+    recipeIndex += 1
+
+    try {
+      await recipesManager.createEdit(recipe)
+      seededCount += 1
+    } catch (error) {
+      console.warn('Local DB seeding: failed to create recipe, retrying with a new one.', error)
+    }
   }
 
-  localStorage.setItem(SEED_STORAGE_KEY, 'true')
+  const finalRecipesCount = await db.recipes.count()
+  if (finalRecipesCount >= SEEDED_RECIPE_COUNT) {
+    localStorage.setItem(SEED_STORAGE_KEY, 'true')
+  } else {
+    localStorage.removeItem(SEED_STORAGE_KEY)
+    console.error(
+      `Local DB seeding: expected at least ${SEEDED_RECIPE_COUNT} recipes, found ${finalRecipesCount}.`,
+    )
+  }
 }
