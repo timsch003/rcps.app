@@ -36,17 +36,37 @@ TypeScript cannot handle type information for `.vue` imports by default, so we r
 
 ### Available commands 
 
-- `npm install`: install dependencies
-- `./pocketbase serve`: start the PocketBase server
-- `npm run dev`: compile and hot-reload for development
-- `npm run lint`: lint with [ESLint](https://eslint.org/)
-- `npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/)
-- `npm run test:e2e:dev`: run end-to-end tests with [Cypress](https://www.cypress.io/)
-- `npm run build`: type-check, compile and minify for production
-- `test:e2e`: test the production build before deploying
-- `./pocketbase update`: update the PocketBase binary (_Note that 'pocketbase' in package.json refers to the JS SDK._ Current binary version: **0.37.3**)
-- `npm run deploy:frontend`: deploy the locally built JS app bundle (_currently just by overwriting files on the server_)
-- `npm run deploy:backend`: deploy the locally updated pocketbase binary, pocketbase hooks and migrations (_currently just by overwriting files on the server_)
+`npm install`  
+Install dependencies.  
+
+`./pocketbase serve`  
+Start the PocketBase server.  
+
+`npm run dev`  
+Compile and hot-reload for development.  
+
+`npm run lint`  
+Lint with [ESLint](https://eslint.org/)
+- `npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/).  
+
+`npm run test:e2e:dev`  
+Run end-to-end tests with [Cypress](https://www.cypress.io/).  
+
+`npm run build`  
+Type-check, compile and minify for production.  
+
+`test:e2e`  
+Test the production build before deploying.  
+
+`./pocketbase update`  
+Update the PocketBase binary (_Note that 'pocketbase' in package.json refers to the JS SDK._).  
+Current binary version: **0.37.3**.  
+
+`npm run deploy:frontend`  
+Deploy the locally built JS app bundle (_currently just by overwriting files on the server_).  
+
+`npm run deploy:backend`   
+Deploy the locally updated pocketbase binary, pocketbase hooks and migrations (_currently just by overwriting files on the server_).  
 
 ### Access dev servers via local network (no https)
 
