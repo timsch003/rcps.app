@@ -244,7 +244,7 @@ Both directions always follow the last write wins rule (including deletes). Duri
 - Set up multilangual landing page with SEO
 - Check (international) legal implications of storing user email/password and recipe data (no other personal data)
 
-## Deployment checklist
+## Backend deployment checklist
 
 - Email translations import endpoint deleted from pb_hooks?
 - All API Rules safe?
