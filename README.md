@@ -48,7 +48,8 @@ Compile and hot-reload for development.
 `npm run lint`  
 Lint with [ESLint](https://eslint.org/).  
 
-`npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/).  
+`npm run test:unit`  
+Run unit tests with [Vitest](https://vitest.dev/).  
 
 `npm run test:e2e:dev`  
 Run end-to-end tests with [Cypress](https://www.cypress.io/).  
@@ -60,8 +61,8 @@ Type-check, compile and minify for production.
 Test the production build before deploying.  
 
 `./pocketbase update`  
-Update the PocketBase binary (_Note that 'pocketbase' in package.json refers to the JS SDK._).  
-Current binary version: **0.37.3**.  
+Update the PocketBase binary (_Note that 'pocketbase' in package.json refers to the JS SDK, not the binary_).  
+Currently used binary version: **0.37.3**  
 
 `npm run deploy:frontend`  
 Deploy the locally built JS app bundle (_currently just by overwriting files on the server_).  
