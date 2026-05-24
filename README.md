@@ -34,82 +34,31 @@
 
 TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
 
-### Customize configuration
+### Available commands 
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- `npm install`: install dependencies
+- `./pocketbase serve`: start the PocketBase server
+- `npm run dev`: compile and hot-reload for development
+- `npm run lint`: lint with [ESLint](https://eslint.org/)
+- `npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/)
+- `npm run test:e2e:dev`: run end-to-end tests with [Cypress](https://www.cypress.io/)
+- `npm run build`: type-check, compile and minify for production
+- `test:e2e`: test the production build before deploying
+- `./pocketbase update`: update the PocketBase binary (_Note that 'pocketbase' in package.json refers to the JS SDK._ Current binary version: **0.37.3**)
+- `npm run deploy:frontend`: deploy the locally built JS app bundle (_currently just by overwriting files on the server_)
+- `npm run deploy:backend`: deploy the locally updated pocketbase binary, pocketbase hooks and migrations (_currently just by overwriting files on the server_)
 
-### Project Setup
-
-```sh
-npm install
-```
-
-#### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-#### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-#### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-#### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
-
-```sh
-npm run test:e2e:dev
-```
-
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
-
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
-
-```sh
-npm run build
-npm run test:e2e
-```
-
-#### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
-
-#### Start the PocketBase server
-
-```sh
-./pocketbase serve
-```
-
-#### Update the PocketBase binary
-
-_Note that 'pocketbase' in package.json refers to the JS SDK._  
-Current binary version: **0.37.3**
-
-```sh
-./pocketbase update
-```
-
-#### Access dev servers via local network (no https) (no https)
+### Access dev servers via local network (no https)
 
 1. Set the local IP of the device you want to use in _.env.development_
 2. Start PocketBase using `npm run pb:lan`
 3. Start Vite using `npm run dev:lan`
 
-#### Local caching
+## Architecture
+
+### Local caching
 
 The app registers a service worker (`public/sw.js`) and caches the app shell as well as the bundled app assets.
-
-## Architecture
 
 ### Backend
 
