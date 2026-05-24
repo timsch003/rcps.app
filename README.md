@@ -195,11 +195,17 @@ Both directions always follow the last write wins rule (including deletes). Duri
   - Add sync info section to menu (icons legend, advice user to let offline changes sync before editing on other device/browser)
 - Navs
   - Add transition / animation to nav bottom active indicator (:before)
+- Top-level views
+  - Add respective nav.bottom icon before each h2 as an indirect button label
 - Create/View/Edit
+  - Tags and servings order
+    - RecipeView: move tags below name and add inline icon instead of heading--muted
+    - CreateEditView: move servings to before ingredients, center discard and create/save buttons
   - Add spaces after commas when populating tags edit input
   - Show tag suggestions on input focus (last) and when typing (autocomplete)
 - Settings
   - Add breadcrumbs component to sub-views
+  - User interface: change layout to heading--muted for interface setting sub-category and non-wrapping flex rows of label and checkbox
 
 ### Accessibility
 
