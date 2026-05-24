@@ -40,14 +40,15 @@ TypeScript cannot handle type information for `.vue` imports by default, so we r
 Install dependencies.  
 
 `./pocketbase serve`  
-Start the PocketBase server.  
+Start the local PocketBase server for development.  
 
 `npm run dev`  
 Compile and hot-reload for development.  
 
 `npm run lint`  
-Lint with [ESLint](https://eslint.org/)
-- `npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/).  
+Lint with [ESLint](https://eslint.org/).  
+
+`npm run test:unit`: run unit tests with [Vitest](https://vitest.dev/).  
 
 `npm run test:e2e:dev`  
 Run end-to-end tests with [Cypress](https://www.cypress.io/).  
