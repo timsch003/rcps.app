@@ -29,5 +29,10 @@
   main {
     border-inline: var(--nav-border-width) solid var(--bg-lighter);
   }
+
+  main,
+  .menu {
+    overflow: hidden;
+  }
 }
 </style>
