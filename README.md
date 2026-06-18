@@ -177,6 +177,7 @@ Both directions always follow the last write wins rule (including deletes). Duri
 - Settings
   - Add breadcrumbs component to sub-views
   - User interface: change layout to heading--muted for interface setting sub-category and non-wrapping flex rows of label and checkbox
+  - Prevent regular back navigation on open menu and close menu instead
 
 ### Accessibility
 
