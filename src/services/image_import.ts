@@ -1,4 +1,4 @@
-import { createWorker } from 'tesseract.js'
+import { createWorker, PSM } from 'tesseract.js'
 import { i18n } from '@/lang/i18n'
 import type { ImportedRecipeDraft } from '@/types'
 
@@ -7,62 +7,79 @@ const OCR_LANG_BY_LOCALE: Record<string, string> = {
   en: 'eng',
 }
 
-function normalizeOcrText(text: string): string {
-  return text
-    .replace(/\r\n?/g, '\n')
+function normalizeText(
+  text: string,
+  options: {
+    collapseSingleNewlines?: boolean
+    collapseAllWhitespace?: boolean
+    removeEmptyLines?: boolean
+  } = {},
+): string {
+  let normalized = text
+    .replace(/\r\n?/g, '\n') // Normalize line endings to LF
     .split('\n')
     .map((l) => l.trimEnd())
     .join('\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-}
 
-function normalizeText(
-  text: string,
-  options: { collapseSingleNewlines?: boolean; collapseAllWhitespace?: boolean } = {},
-): string {
-  const normalized = normalizeOcrText(text)
+  if (options.removeEmptyLines)
+    normalized = normalized
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .join('\n')
 
-  if (options.collapseAllWhitespace) {
-    return normalized.replace(/\s+/g, ' ').trim()
-  }
+  if (options.collapseAllWhitespace) normalized = normalized.replace(/\s+/g, ' ').trim()
 
-  if (options.collapseSingleNewlines) {
-    return normalized.replace(/(?<!\n)\n(?!\n)/g, ' ')
-  }
+  if (options.collapseSingleNewlines) normalized = normalized.replace(/(?<!\n)\n(?!\n)/g, ' ')
 
   return normalized
-}
-
-function normalizeInstructionsText(text: string): string {
-  return normalizeText(text, { collapseSingleNewlines: true })
 }
 
 function normalizeTitleText(text: string): string {
   return normalizeText(text, { collapseAllWhitespace: true })
 }
 
+function normalizeIngredientsText(text: string): string {
+  return normalizeText(text, { removeEmptyLines: true })
+}
+
+function normalizeInstructionsText(text: string): string {
+  return normalizeText(text, { collapseSingleNewlines: true })
+}
+
+function normalizeNotesText(text: string): string {
+  return normalizeText(text, { collapseSingleNewlines: true })
+}
+
 function getCurrentOcrLanguage(): string {
   const locale = String(i18n.global.locale.value || 'en')
   const baseLocale = locale.toLowerCase().split('-')[0] || 'en'
-  return OCR_LANG_BY_LOCALE[baseLocale] || 'eng'
+  const language = OCR_LANG_BY_LOCALE[baseLocale] || 'eng'
+  return language
 }
 
 async function runOcr(
   worker: Awaited<ReturnType<typeof createWorker>>,
   file: File,
+  psm: PSM = PSM.AUTO,
 ): Promise<string> {
-  const { data } = await worker.recognize(file)
+  const preprocessedImage = file
+  await worker.setParameters({
+    tessedit_pageseg_mode: psm,
+  })
+  const { data } = await worker.recognize(preprocessedImage)
   return data.text
 }
 
 async function importFromImages(
   titleImage: File | null,
   ingredientsImage: File | null,
-  directionsImage: File | null,
+  instructionsImage: File | null,
   notesImage: File | null,
 ): Promise<ImportedRecipeDraft> {
-  if (!titleImage && !ingredientsImage && !directionsImage && !notesImage) {
+  if (!titleImage && !ingredientsImage && !instructionsImage && !notesImage) {
     throw new Error('No screenshot selected for OCR import.')
   }
 
@@ -73,11 +90,19 @@ async function importFromImages(
   let notes = ''
 
   try {
-    if (titleImage) name = normalizeTitleText(await runOcr(worker, titleImage))
-    if (ingredientsImage) ingredients = await runOcr(worker, ingredientsImage)
-    if (directionsImage)
-      instructions = normalizeInstructionsText(await runOcr(worker, directionsImage))
-    if (notesImage) notes = normalizeInstructionsText(await runOcr(worker, notesImage))
+    if (titleImage) name = normalizeTitleText(await runOcr(worker, titleImage, PSM.SINGLE_LINE))
+
+    if (ingredientsImage)
+      ingredients = normalizeIngredientsText(
+        await runOcr(worker, ingredientsImage, PSM.SINGLE_BLOCK),
+      )
+
+    if (instructionsImage)
+      instructions = normalizeInstructionsText(
+        await runOcr(worker, instructionsImage, PSM.SINGLE_BLOCK),
+      )
+
+    if (notesImage) notes = normalizeNotesText(await runOcr(worker, notesImage, PSM.SINGLE_BLOCK))
   } finally {
     await worker.terminate()
   }
