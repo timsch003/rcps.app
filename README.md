@@ -139,6 +139,9 @@ Both directions always follow the last write wins rule (including deletes). Duri
 
 ### Bugs
 
+- First ingredient part doesn't get styled as selected after editing ingredients 
+- Sorting of ingredients with multiple parts can be inconsistent between editing view and recipe view
+
 ### MVP Roadmap
 
 - Sort items by name in favorites and tags views
